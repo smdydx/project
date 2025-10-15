@@ -2,7 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic } from "./vite";
 import { setupWebSocket } from "./websocket";
-import { createDataSimulator } from "./dataSimulator";
+import { createDataSimulator } from "./dataSimulator.js";
 
 const app = express();
 app.use(express.json());
