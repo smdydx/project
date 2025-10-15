@@ -1,25 +1,26 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
-  CreditCard, DollarSign, Building2, MessageSquare, TrendingUp, TrendingDown, 
+  CreditCard, DollarSign, MessageSquare, TrendingUp, 
   Users, UserPlus, Send, Activity, Zap, Eye, Edit, Trash2, AlertTriangle,
-  CheckCircle, Clock, XCircle, BarChart3, PieChart, Globe, Smartphone,
+  CheckCircle, Clock, XCircle, Smartphone, Globe,
   ChevronLeft, ChevronRight, Play, Pause
 } from 'lucide-react';
 import AdvancedStatCard from '../common/AdvancedStatCard';
 import Card from '../common/Card';
-import AdvancedRealtimeTable from '../common/AdvancedRealtimeTable';
+import AdvancedRealtimeTable from '../common/RealtimeTable';
 import RealtimeUserRegistrations from '../common/RealtimeUserRegistrations';
-import { mockStats, chartData, liveTransactionPool, recentUsers, mockTransactions, mockComplaints } from '../../data/mockData';
+import { mockStats, chartData, liveTransactionPool, mockTransactions, mockComplaints } from '../../data/mockData';
 import { LiveTransaction } from '../../types';
 
 export default function Dashboard() {
   const [currentTransactions, setCurrentTransactions] = useState<LiveTransaction[]>([]);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [activeServiceSegment, setActiveServiceSegment] = useState<number | null>(null);
+  const [activeDailySegment, setActiveDailySegment] = useState<number | null>(null);
 
-  // All stat cards data with unique colors
   const allStatCards = [
     {
       title: "Total Users",
@@ -87,29 +88,31 @@ export default function Dashboard() {
     }
   ];
 
-  const cardsPerView = 5;
-  const totalSlides = Math.ceil(allStatCards.length / cardsPerView);
-
-  // Simulate loading
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1500);
     return () => clearTimeout(timer);
   }, []);
 
-  // Auto-slide functionality
   useEffect(() => {
     if (!isAutoPlaying) return;
 
     const interval = setInterval(() => {
-      setCurrentCardIndex((prevIndex) => 
-        prevIndex >= totalSlides - 1 ? 0 : prevIndex + 1
-      );
-    }, 6000); // Change slides every 6 seconds (slower)
+      const container = document.getElementById('stats-scroll-container');
+      if (container) {
+        const maxScroll = container.scrollWidth - container.clientWidth;
+        const currentScroll = container.scrollLeft;
+        
+        if (currentScroll >= maxScroll - 10) {
+          container.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          container.scrollBy({ left: 400, behavior: 'smooth' });
+        }
+      }
+    }, 4000);
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying, totalSlides]);
+  }, [isAutoPlaying]);
 
-  // Simulate live transactions with more dynamic updates
   useEffect(() => {
     const updateTransactions = () => {
       const shuffled = [...liveTransactionPool].sort(() => 0.5 - Math.random());
@@ -126,7 +129,6 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  // Enhanced data generators for real-time tables
   const generateRealtimeTransactions = () => {
     const statuses = ['Successful', 'Failed', 'Pending'];
     const services = ['Electricity Bill', 'Gas Bill', 'Mobile Recharge', 'DTH Recharge', 'Water Bill', 'Broadband Bill'];
@@ -311,16 +313,8 @@ export default function Dashboard() {
     }
   };
 
-  const goToSlide = (index: number) => {
-    const container = document.getElementById('stats-scroll-container');
-    if (container) {
-      container.scrollTo({ left: index * 400, behavior: 'smooth' });
-    }
-  };
-
   return (
     <div className="space-y-6 lg:space-y-8 animate-fade-in-scale">
-      {/* Enhanced Action Bar */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
         <div>
           <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
@@ -343,7 +337,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Enhanced Live Transaction Ticker */}
       <Card className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white overflow-hidden relative" padding={false}>
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10 px-4 lg:px-6 py-4">
@@ -371,9 +364,7 @@ export default function Dashboard() {
         </div>
       </Card>
 
-      {/* Enhanced Sliding Stats Cards Carousel */}
       <div className="relative">
-        {/* Carousel Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">Key Metrics</h2>
@@ -392,7 +383,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Navigation Controls */}
           <div className="flex items-center space-x-2">
             <button
               onClick={prevSlide}
@@ -409,7 +399,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Cards Container - Horizontal Scroll with 4 Cards Visible */}
         <div 
           id="stats-scroll-container" 
           className="overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-gray-200 dark:scrollbar-track-gray-700"
@@ -436,7 +425,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Scroll Indicator */}
         <div className="flex items-center justify-center space-x-1 mt-4">
           {allStatCards.map((_, index) => (
             <div
@@ -451,16 +439,38 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Enhanced Charts Section - Responsive Pie Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
-        {/* Daily Transaction Volume Pie Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Enhanced Daily Transaction Volume Pie Chart */}
         <Card title="Daily Transaction Volume" className="hover-lift">
-          <div className="relative w-full aspect-square max-w-sm mx-auto">
-            <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
+          <div className="relative w-full aspect-square max-w-md mx-auto">
+            <svg viewBox="0 0 240 240" className="w-full h-full transform -rotate-90">
+              <defs>
+                {chartData.dailyVolume.map((_, index) => {
+                  const gradientId = `dailyGradient${index}`;
+                  const colors = [
+                    ['#3B82F6', '#2563EB'],
+                    ['#6366F1', '#4F46E5'],
+                    ['#8B5CF6', '#7C3AED'],
+                    ['#A855F7', '#9333EA'],
+                    ['#C026D3', '#A21CAF'],
+                    ['#DB2777', '#BE185D'],
+                    ['#F43F5E', '#E11D48']
+                  ];
+                  return (
+                    <linearGradient key={gradientId} id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style={{ stopColor: colors[index % colors.length][0] }} />
+                      <stop offset="100%" style={{ stopColor: colors[index % colors.length][1] }} />
+                    </linearGradient>
+                  );
+                })}
+                <filter id="shadow">
+                  <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.3"/>
+                </filter>
+              </defs>
+              
               {(() => {
                 const total = chartData.dailyVolume.reduce((sum, day) => sum + day.transactions, 0);
                 let currentAngle = 0;
-                const colors = ['#3B82F6', '#6366F1', '#8B5CF6', '#A855F7', '#C026D3', '#DB2777', '#F43F5E'];
                 
                 return chartData.dailyVolume.map((day, index) => {
                   const percentage = (day.transactions / total) * 100;
@@ -468,49 +478,86 @@ export default function Dashboard() {
                   const startAngle = currentAngle;
                   const endAngle = currentAngle + angle;
                   
-                  const startX = 100 + 80 * Math.cos((startAngle * Math.PI) / 180);
-                  const startY = 100 + 80 * Math.sin((startAngle * Math.PI) / 180);
-                  const endX = 100 + 80 * Math.cos((endAngle * Math.PI) / 180);
-                  const endY = 100 + 80 * Math.sin((endAngle * Math.PI) / 180);
+                  const outerRadius = activeDailySegment === index ? 95 : 85;
+                  const innerRadius = 50;
+                  
+                  const startOuterX = 120 + outerRadius * Math.cos((startAngle * Math.PI) / 180);
+                  const startOuterY = 120 + outerRadius * Math.sin((startAngle * Math.PI) / 180);
+                  const endOuterX = 120 + outerRadius * Math.cos((endAngle * Math.PI) / 180);
+                  const endOuterY = 120 + outerRadius * Math.sin((endAngle * Math.PI) / 180);
+                  
+                  const startInnerX = 120 + innerRadius * Math.cos((endAngle * Math.PI) / 180);
+                  const startInnerY = 120 + innerRadius * Math.sin((endAngle * Math.PI) / 180);
+                  const endInnerX = 120 + innerRadius * Math.cos((startAngle * Math.PI) / 180);
+                  const endInnerY = 120 + innerRadius * Math.sin((startAngle * Math.PI) / 180);
                   
                   const largeArc = angle > 180 ? 1 : 0;
-                  const path = `M 100 100 L ${startX} ${startY} A 80 80 0 ${largeArc} 1 ${endX} ${endY} Z`;
+                  const path = `M ${startOuterX} ${startOuterY} A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${endOuterX} ${endOuterY} L ${startInnerX} ${startInnerY} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${endInnerX} ${endInnerY} Z`;
                   
                   currentAngle = endAngle;
                   
                   return (
-                    <g key={index} className="group cursor-pointer transition-all duration-300 hover:opacity-80">
+                    <g key={index} className="transition-all duration-300">
                       <path
                         d={path}
-                        fill={colors[index % colors.length]}
-                        className="transition-all duration-300"
+                        fill={`url(#dailyGradient${index})`}
+                        className="cursor-pointer transition-all duration-300"
+                        style={{ 
+                          filter: activeDailySegment === index ? 'url(#shadow)' : 'none',
+                          animation: `fadeInScale 0.6s ease-out ${index * 0.1}s both`
+                        }}
+                        onMouseEnter={() => setActiveDailySegment(index)}
+                        onMouseLeave={() => setActiveDailySegment(null)}
                       />
                     </g>
                   );
                 });
               })()}
             </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="text-center">
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">
                   {chartData.dailyVolume.reduce((sum, day) => sum + day.transactions, 0).toLocaleString()}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Total Transactions</p>
               </div>
             </div>
           </div>
-          <div className="mt-6 space-y-2">
+          <div className="mt-8 space-y-3">
             {chartData.dailyVolume.map((day, index) => {
-              const colors = ['#3B82F6', '#6366F1', '#8B5CF6', '#A855F7', '#C026D3', '#DB2777', '#F43F5E'];
+              const gradients = [
+                'from-blue-500 to-blue-600',
+                'from-indigo-500 to-indigo-600',
+                'from-purple-500 to-purple-600',
+                'from-fuchsia-500 to-fuchsia-600',
+                'from-pink-500 to-pink-600',
+                'from-rose-500 to-rose-600',
+                'from-red-500 to-red-600'
+              ];
               return (
-                <div key={index} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: colors[index % colors.length] }}></div>
-                    <span className="text-gray-700 dark:text-gray-300">{day.name}</span>
+                <div 
+                  key={index} 
+                  className={`flex items-center justify-between p-3 rounded-xl transition-all duration-300 cursor-pointer ${
+                    activeDailySegment === index 
+                      ? 'bg-gradient-to-r ' + gradients[index % gradients.length] + ' text-white shadow-lg scale-105' 
+                      : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                  }`}
+                  onMouseEnter={() => setActiveDailySegment(index)}
+                  onMouseLeave={() => setActiveDailySegment(null)}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-4 h-4 rounded-full bg-gradient-to-br ${gradients[index % gradients.length]} shadow-md`}></div>
+                    <span className={`font-medium ${activeDailySegment === index ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                      {day.name}
+                    </span>
                   </div>
                   <div className="text-right">
-                    <span className="font-bold text-gray-900 dark:text-white">{day.transactions.toLocaleString()}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">₹{(day.amount / 1000).toFixed(0)}K</span>
+                    <span className={`font-bold ${activeDailySegment === index ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                      {day.transactions.toLocaleString()}
+                    </span>
+                    <span className={`text-sm ml-2 ${activeDailySegment === index ? 'text-white/90' : 'text-gray-500 dark:text-gray-400'}`}>
+                      ₹{(day.amount / 1000).toFixed(0)}K
+                    </span>
                   </div>
                 </div>
               );
@@ -518,12 +565,37 @@ export default function Dashboard() {
           </div>
         </Card>
 
-        {/* Service Distribution Pie Chart */}
+        {/* Enhanced Service Distribution Pie Chart */}
         <Card title="Service Distribution" className="hover-lift">
-          <div className="relative w-full aspect-square max-w-sm mx-auto">
-            <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
+          <div className="relative w-full aspect-square max-w-md mx-auto">
+            <svg viewBox="0 0 240 240" className="w-full h-full transform -rotate-90">
+              <defs>
+                {chartData.serviceDistribution.map((service, index) => {
+                  const gradientId = `serviceGradient${index}`;
+                  const colorPairs = [
+                    ['#3B82F6', '#1E40AF'],
+                    ['#10B981', '#047857'],
+                    ['#F59E0B', '#D97706'],
+                    ['#EF4444', '#B91C1C'],
+                    ['#8B5CF6', '#6D28D9']
+                  ];
+                  return (
+                    <linearGradient key={gradientId} id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style={{ stopColor: colorPairs[index % colorPairs.length][0] }} />
+                      <stop offset="100%" style={{ stopColor: colorPairs[index % colorPairs.length][1] }} />
+                    </linearGradient>
+                  );
+                })}
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                  <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+              
               {(() => {
-                const total = chartData.serviceDistribution.reduce((sum, service) => sum + service.value, 0);
                 let currentAngle = 0;
                 
                 return chartData.serviceDistribution.map((service, index) => {
@@ -532,64 +604,82 @@ export default function Dashboard() {
                   const startAngle = currentAngle;
                   const endAngle = currentAngle + angle;
                   
-                  const startX = 100 + 80 * Math.cos((startAngle * Math.PI) / 180);
-                  const startY = 100 + 80 * Math.sin((startAngle * Math.PI) / 180);
-                  const endX = 100 + 80 * Math.cos((endAngle * Math.PI) / 180);
-                  const endY = 100 + 80 * Math.sin((endAngle * Math.PI) / 180);
+                  const outerRadius = activeServiceSegment === index ? 95 : 85;
+                  const innerRadius = 50;
+                  
+                  const startOuterX = 120 + outerRadius * Math.cos((startAngle * Math.PI) / 180);
+                  const startOuterY = 120 + outerRadius * Math.sin((startAngle * Math.PI) / 180);
+                  const endOuterX = 120 + outerRadius * Math.cos((endAngle * Math.PI) / 180);
+                  const endOuterY = 120 + outerRadius * Math.sin((endAngle * Math.PI) / 180);
+                  
+                  const startInnerX = 120 + innerRadius * Math.cos((endAngle * Math.PI) / 180);
+                  const startInnerY = 120 + innerRadius * Math.sin((endAngle * Math.PI) / 180);
+                  const endInnerX = 120 + innerRadius * Math.cos((startAngle * Math.PI) / 180);
+                  const endInnerY = 120 + innerRadius * Math.sin((startAngle * Math.PI) / 180);
                   
                   const largeArc = angle > 180 ? 1 : 0;
-                  const path = `M 100 100 L ${startX} ${startY} A 80 80 0 ${largeArc} 1 ${endX} ${endY} Z`;
+                  const path = `M ${startOuterX} ${startOuterY} A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${endOuterX} ${endOuterY} L ${startInnerX} ${startInnerY} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${endInnerX} ${endInnerY} Z`;
                   
                   currentAngle = endAngle;
                   
                   return (
-                    <g key={index} className="group cursor-pointer transition-all duration-300 hover:opacity-80">
+                    <g key={index} className="transition-all duration-300">
                       <path
                         d={path}
-                        fill={service.color}
-                        className="transition-all duration-300"
+                        fill={`url(#serviceGradient${index})`}
+                        className="cursor-pointer transition-all duration-300"
+                        style={{ 
+                          filter: activeServiceSegment === index ? 'url(#glow)' : 'none',
+                          animation: `fadeInScale 0.6s ease-out ${index * 0.1}s both`
+                        }}
+                        onMouseEnter={() => setActiveServiceSegment(index)}
+                        onMouseLeave={() => setActiveServiceSegment(null)}
                       />
                     </g>
                   );
                 });
               })()}
             </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="text-center">
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">100%</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Services</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">100%</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Services</p>
               </div>
             </div>
           </div>
-          <div className="mt-6 space-y-2">
-            {chartData.serviceDistribution.map((service, index) => (
-              <div key={index} className="flex items-center justify-between text-sm">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: service.color }}></div>
-                  <span className="text-gray-700 dark:text-gray-300">{service.name}</span>
-                </div>
-                <span className="font-bold text-gray-900 dark:text-white">{service.value}%</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Enhanced Hourly Activity Heatmap */}
-        <Card title="Hourly Activity Heatmap" className="hover-lift">
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-4 xl:grid-cols-6 gap-2">
-            {chartData.hourlyActivity.map((hour, index) => {
-              const intensity = hour.transactions / Math.max(...chartData.hourlyActivity.map(h => h.transactions));
+          <div className="mt-8 space-y-3">
+            {chartData.serviceDistribution.map((service, index) => {
+              const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+              const gradients = [
+                'from-blue-500 to-blue-700',
+                'from-green-500 to-green-700',
+                'from-yellow-500 to-yellow-700',
+                'from-red-500 to-red-700',
+                'from-purple-500 to-purple-700'
+              ];
               return (
-                <div
-                  key={index}
-                  className="p-2 lg:p-3 rounded-lg text-center text-xs font-medium transition-all duration-300 hover:scale-105 cursor-pointer"
-                  style={{
-                    background: `linear-gradient(135deg, rgba(59, 130, 246, ${intensity}), rgba(99, 102, 241, ${intensity * 0.8}))`,
-                    color: intensity > 0.5 ? 'white' : 'black'
-                  }}
+                <div 
+                  key={index} 
+                  className={`flex items-center justify-between p-3 rounded-xl transition-all duration-300 cursor-pointer ${
+                    activeServiceSegment === index 
+                      ? 'bg-gradient-to-r ' + gradients[index % gradients.length] + ' text-white shadow-lg scale-105' 
+                      : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                  }`}
+                  onMouseEnter={() => setActiveServiceSegment(index)}
+                  onMouseLeave={() => setActiveServiceSegment(null)}
                 >
-                  <div className="font-bold">{hour.hour}</div>
-                  <div className="text-xs mt-1">{hour.transactions}</div>
+                  <div className="flex items-center space-x-3">
+                    <div 
+                      className="w-4 h-4 rounded-full shadow-md" 
+                      style={{ background: `linear-gradient(135deg, ${colors[index % colors.length]}, ${colors[index % colors.length]}dd)` }}
+                    ></div>
+                    <span className={`font-medium ${activeServiceSegment === index ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                      {service.name}
+                    </span>
+                  </div>
+                  <span className={`font-bold text-lg ${activeServiceSegment === index ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                    {service.value}%
+                  </span>
                 </div>
               );
             })}
@@ -597,9 +687,8 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Enhanced Real-time Tables and User Registrations */}
-      <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6">
-        <div className="xl:col-span-2 space-y-4 lg:space-y-6 order-2 xl:order-1">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2 space-y-6">
           <AdvancedRealtimeTable
             title="Live Transactions"
             columns={transactionColumns}
@@ -623,13 +712,11 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Real-time User Registrations */}
-        <div className="xl:col-span-1 order-1 xl:order-2">
+        <div className="xl:col-span-1">
           <RealtimeUserRegistrations />
         </div>
       </div>
 
-      {/* Enhanced Notification Modal */}
       {showNotificationModal && (
         <div className="fixed inset-0 modal-backdrop flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 lg:p-8 w-full max-w-md shadow-2xl animate-fade-in-scale border border-gray-200 dark:border-gray-700">
