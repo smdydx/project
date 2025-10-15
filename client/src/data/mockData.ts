@@ -17,7 +17,9 @@ export const mockUsers: User[] = [
     mobile: '+91 9876543210',
     status: 'Active',
     role: 'Retailer',
-    joinedOn: '2024-01-15'
+    joinedOn: '2024-01-15',
+    userType: 'Prime',
+    kycStatus: 'Verified'
   },
   {
     id: 'USR002',
@@ -26,7 +28,9 @@ export const mockUsers: User[] = [
     mobile: '+91 9876543211',
     status: 'Active',
     role: 'Distributor',
-    joinedOn: '2024-01-20'
+    joinedOn: '2024-01-20',
+    userType: 'Normal',
+    kycStatus: 'Verified'
   },
   {
     id: 'USR003',
@@ -35,7 +39,9 @@ export const mockUsers: User[] = [
     mobile: '+91 9876543212',
     status: 'Blocked',
     role: 'Retailer',
-    joinedOn: '2024-02-01'
+    joinedOn: '2024-02-01',
+    userType: 'Normal',
+    kycStatus: 'Pending'
   },
   {
     id: 'USR004',
@@ -44,16 +50,20 @@ export const mockUsers: User[] = [
     mobile: '+91 9876543213',
     status: 'Active',
     role: 'Distributor',
-    joinedOn: '2024-02-10'
+    joinedOn: '2024-02-10',
+    userType: 'Prime',
+    kycStatus: 'Verified'
   },
   {
     id: 'USR005',
     name: 'Arjun Singh',
     email: 'arjun.singh@example.com',
     mobile: '+91 9876543214',
-    status: 'Active',
+    status: 'Deactivated',
     role: 'Retailer',
-    joinedOn: '2024-02-15'
+    joinedOn: '2024-02-15',
+    userType: 'Normal',
+    kycStatus: 'Reject'
   },
   {
     id: 'USR006',
@@ -62,7 +72,9 @@ export const mockUsers: User[] = [
     mobile: '+91 9876543215',
     status: 'Active',
     role: 'Retailer',
-    joinedOn: '2024-02-20'
+    joinedOn: '2024-02-20',
+    userType: 'Prime',
+    kycStatus: 'Pending'
   },
   {
     id: 'USR007',
@@ -71,16 +83,20 @@ export const mockUsers: User[] = [
     mobile: '+91 9876543216',
     status: 'Active',
     role: 'Distributor',
-    joinedOn: '2024-02-20'
+    joinedOn: '2024-02-20',
+    userType: 'Normal',
+    kycStatus: 'Verified'
   },
   {
     id: 'USR008',
     name: 'Anita Desai',
     email: 'anita.desai@example.com',
     mobile: '+91 9876543217',
-    status: 'Active',
+    status: 'Deactivated',
     role: 'Retailer',
-    joinedOn: '2024-02-20'
+    joinedOn: '2024-02-20',
+    userType: 'Prime',
+    kycStatus: 'Reject'
   }
 ];
 

@@ -9,20 +9,35 @@ import Card from '../common/Card';
 import { mockUsers } from '../../data/mockData';
 
 const roleOptions = ['All', 'Retailer', 'Distributor', 'Admin'];
-const statusOptions = ['All', 'Active', 'Blocked'];
+const userTypeOptions = ['All', 'Normal', 'Prime'];
+const kycStatusOptions = ['All', 'Verified', 'Pending', 'Reject'];
 
 export default function UserManagement() {
+  const [activeTab, setActiveTab] = useState<'all' | 'deactivated' | 'kyc'>('all');
   const [roleFilter, setRoleFilter] = useState('All');
-  const [statusFilter, setStatusFilter] = useState('All');
+  const [userTypeFilter, setUserTypeFilter] = useState('All');
+  const [kycFilter, setKycFilter] = useState('All');
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [showContactModal, setShowContactModal] = useState(false);
   const [contactType, setContactType] = useState<'sms' | 'email'>('sms');
   const [showBulkActions, setShowBulkActions] = useState(false);
 
   const filteredUsers = mockUsers.filter(user => {
+    // Tab-based filtering
+    if (activeTab === 'deactivated') {
+      if (user.status !== 'Deactivated') return false;
+    } else if (activeTab === 'kyc') {
+      // KYC tab - filter by kycStatus
+      if (kycFilter !== 'All' && user.kycStatus !== kycFilter) return false;
+    } else {
+      // All Users tab
+      if (user.status === 'Deactivated') return false;
+      if (userTypeFilter !== 'All' && user.userType !== userTypeFilter) return false;
+    }
+    
+    // Common filters
     const roleMatch = roleFilter === 'All' || user.role === roleFilter;
-    const statusMatch = statusFilter === 'All' || user.status === statusFilter;
-    return roleMatch && statusMatch;
+    return roleMatch;
   });
 
   const generateRealtimeUsers = () => {
@@ -58,8 +73,58 @@ export default function UserManagement() {
             <span>Blocked</span>
           </span>
         );
+      case 'Deactivated':
+        return (
+          <span className={`${baseClasses} bg-gradient-to-r from-gray-500 to-gray-600 text-white`}>
+            <AlertTriangle className="w-3 h-3" />
+            <span>Deactivated</span>
+          </span>
+        );
       default:
         return <span className={`${baseClasses} bg-gray-500 text-white`}>{status}</span>;
+    }
+  };
+
+  const getUserTypeBadge = (userType?: string) => {
+    if (!userType) return null;
+    const baseClasses = "px-2 py-1 rounded-full text-xs font-bold";
+    switch (userType) {
+      case 'Prime':
+        return <span className={`${baseClasses} bg-gradient-to-r from-yellow-400 to-orange-500 text-white`}>⭐ Prime</span>;
+      case 'Normal':
+        return <span className={`${baseClasses} bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200`}>Normal</span>;
+      default:
+        return null;
+    }
+  };
+
+  const getKycBadge = (kycStatus?: string) => {
+    if (!kycStatus) return null;
+    const baseClasses = "px-2 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1";
+    switch (kycStatus) {
+      case 'Verified':
+        return (
+          <span className={`${baseClasses} bg-gradient-to-r from-green-500 to-teal-600 text-white`}>
+            <CheckCircle className="w-3 h-3" />
+            <span>Verified</span>
+          </span>
+        );
+      case 'Pending':
+        return (
+          <span className={`${baseClasses} bg-gradient-to-r from-yellow-500 to-orange-500 text-white`}>
+            <Clock className="w-3 h-3" />
+            <span>Pending</span>
+          </span>
+        );
+      case 'Reject':
+        return (
+          <span className={`${baseClasses} bg-gradient-to-r from-red-500 to-pink-600 text-white`}>
+            <Ban className="w-3 h-3" />
+            <span>Rejected</span>
+          </span>
+        );
+      default:
+        return null;
     }
   };
 
@@ -149,6 +214,18 @@ export default function UserManagement() {
       title: 'Role',
       sortable: true,
       render: (value: string) => getAdvancedRoleBadge(value)
+    },
+    {
+      key: 'userType',
+      title: 'User Type',
+      sortable: true,
+      render: (value: string) => getUserTypeBadge(value)
+    },
+    {
+      key: 'kycStatus',
+      title: 'KYC Status',
+      sortable: true,
+      render: (value: string) => getKycBadge(value)
     },
     { 
       key: 'joinedOn', 
@@ -270,41 +347,100 @@ export default function UserManagement() {
         </div>
       </div>
 
-      {/* Enhanced Filters */}
-      <Card className="hover-lift">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Role Filter</label>
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-            >
-              {roleOptions.map(role => (
-                <option key={role} value={role}>{role}</option>
-              ))}
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Status Filter</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-            >
-              {statusOptions.map(status => (
-                <option key={status} value={status}>{status}</option>
-              ))}
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Registration Date</label>
-            <input
-              type="date"
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-            />
+      {/* Tabs */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="flex border-b border-gray-200 dark:border-gray-700">
+          <button
+            onClick={() => setActiveTab('all')}
+            className={`flex-1 px-6 py-4 text-sm font-bold transition-all duration-200 ${
+              activeTab === 'all'
+                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
+            data-testid="tab-all-users"
+          >
+            All Users
+          </button>
+          <button
+            onClick={() => setActiveTab('deactivated')}
+            className={`flex-1 px-6 py-4 text-sm font-bold transition-all duration-200 ${
+              activeTab === 'deactivated'
+                ? 'bg-gradient-to-r from-gray-500 to-gray-600 text-white'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
+            data-testid="tab-deactivated"
+          >
+            Deactivated
+          </button>
+          <button
+            onClick={() => setActiveTab('kyc')}
+            className={`flex-1 px-6 py-4 text-sm font-bold transition-all duration-200 ${
+              activeTab === 'kyc'
+                ? 'bg-gradient-to-r from-green-500 to-teal-600 text-white'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
+            data-testid="tab-kyc-verify"
+          >
+            KYC Verify
+          </button>
+        </div>
+
+        {/* Filters Section */}
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Role Filter</label>
+              <select
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                data-testid="filter-role"
+              >
+                {roleOptions.map(role => (
+                  <option key={role} value={role}>{role}</option>
+                ))}
+              </select>
+            </div>
+
+            {activeTab === 'all' && (
+              <div>
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">User Type</label>
+                <select
+                  value={userTypeFilter}
+                  onChange={(e) => setUserTypeFilter(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                  data-testid="filter-user-type"
+                >
+                  {userTypeOptions.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {activeTab === 'kyc' && (
+              <div>
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">KYC Status</label>
+                <select
+                  value={kycFilter}
+                  onChange={(e) => setKycFilter(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                  data-testid="filter-kyc-status"
+                >
+                  {kycStatusOptions.map(status => (
+                    <option key={status} value={status}>{status}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            
+            <div>
+              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Registration Date</label>
+              <input
+                type="date"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                data-testid="filter-date"
+              />
           </div>
 
           <div>
@@ -319,7 +455,7 @@ export default function UserManagement() {
             </div>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Bulk Actions Panel */}
       {showBulkActions && (

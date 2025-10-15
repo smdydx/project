@@ -3,9 +3,11 @@ export interface User {
   name: string;
   email: string;
   mobile: string;
-  status: 'Active' | 'Blocked';
+  status: 'Active' | 'Blocked' | 'Deactivated';
   role: 'Retailer' | 'Distributor' | 'Admin';
   joinedOn: string;
+  userType?: 'Normal' | 'Prime';
+  kycStatus?: 'Verified' | 'Pending' | 'Reject';
 }
 
 export interface Biller {
