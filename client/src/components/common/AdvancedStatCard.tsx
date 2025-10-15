@@ -115,7 +115,7 @@ export default function AdvancedStatCard({
 
   return (
     <div 
-      className={`group relative rounded-2xl p-4 sm:p-5 lg:p-5 border hover-lift transition-all duration-300 overflow-hidden min-h-[180px] sm:min-h-[140px] lg:min-h-[140px] ${
+      className={`group relative rounded-2xl p-4 sm:p-5 lg:p-6 border hover-lift transition-all duration-300 overflow-hidden h-[180px] sm:h-[140px] lg:h-[160px] w-full ${
         onClick ? 'cursor-pointer' : ''
       } ${colorClasses[color].cardBg} ${colorClasses[color].border}`}
       onClick={onClick}
