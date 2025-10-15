@@ -38,7 +38,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd backend && python run.py"
+args = "python -m backend.run"
 
 [[ports]]
 localPort = 5000
