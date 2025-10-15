@@ -152,7 +152,8 @@ export default function Dashboard() {
   ];
 
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    // Autoplay only on desktop/laptop (lg breakpoint and above)
+    if (!isAutoPlaying || window.innerWidth < 1024) return;
 
     const interval = setInterval(() => {
       const container = document.getElementById('stats-scroll-container');
@@ -321,7 +322,8 @@ export default function Dashboard() {
 
       {/* Stats Cards - Scrollable Carousel */}
       <div className="relative" data-testid="stats-carousel">
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
+        {/* Desktop/Laptop Controls - Hidden on Mobile */}
+        <div className="hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 z-10">
           <button
             onClick={() => scrollStats('left')}
             className="bg-white dark:bg-gray-800 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
@@ -331,7 +333,7 @@ export default function Dashboard() {
           </button>
         </div>
         
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10">
+        <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 z-10">
           <button
             onClick={() => scrollStats('right')}
             className="bg-white dark:bg-gray-800 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
@@ -341,7 +343,7 @@ export default function Dashboard() {
           </button>
         </div>
 
-        <div className="absolute right-16 top-1/2 -translate-y-1/2 z-10">
+        <div className="hidden lg:block absolute right-16 top-1/2 -translate-y-1/2 z-10">
           <button
             onClick={() => setIsAutoPlaying(!isAutoPlaying)}
             className="bg-white dark:bg-gray-800 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
@@ -355,15 +357,16 @@ export default function Dashboard() {
           </button>
         </div>
 
+        {/* Swipe-enabled Container - Responsive */}
         <div
           id="stats-scroll-container"
-          className="overflow-x-auto scrollbar-hide scroll-smooth px-12"
+          className="overflow-x-auto scrollbar-hide scroll-smooth px-2 sm:px-4 lg:px-12 touch-pan-x"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           data-testid="stats-container"
         >
-          <div className="flex space-x-6 pb-4">
+          <div className="flex space-x-3 sm:space-x-4 lg:space-x-6 pb-4">
             {allStatCards.map((card, index) => (
-              <div key={index} className="flex-shrink-0 w-80" data-testid={`stat-card-${index}`}>
+              <div key={index} className="flex-shrink-0 w-[85vw] sm:w-[45vw] md:w-[30vw] lg:w-80" data-testid={`stat-card-${index}`}>
                 <AdvancedStatCard
                   title={card.title}
                   subtitle={card.subtitle}

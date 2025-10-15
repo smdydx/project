@@ -245,10 +245,19 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
     cursor: grab;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
   }
 
   #stats-scroll-container:active {
     cursor: grabbing;
+  }
+
+  /* Smooth scroll snap for cards on mobile */
+  @media (max-width: 1023px) {
+    #stats-scroll-container > div > div {
+      scroll-snap-align: center;
+    }
   }
 
 
