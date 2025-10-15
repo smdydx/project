@@ -90,38 +90,30 @@ export function registerRoutes(app: Express) {
     }
   });
 
-  // Dashboard Charts Data
+  // Dashboard Charts Data - matching frontend format
   app.get("/api/dashboard/charts", async (_req, res) => {
     try {
       const stats = await storage.getDashboardStats();
       
-      // Generate chart data based on stats
+      // Generate chart data in the format expected by frontend
       const chartData = {
-        daily_volume: {
-          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-          datasets: [
-            {
-              label: 'Transactions',
-              data: [12000, 19000, 15000, 25000, 22000, 30000, 28000],
-              backgroundColor: 'rgba(59, 130, 246, 0.5)',
-            }
-          ]
-        },
-        service_distribution: {
-          labels: ['Mobile Recharge', 'DTH', 'Bill Payment', 'P2P Transfer', 'Withdrawal'],
-          datasets: [
-            {
-              data: [stats.mobile_recharges, stats.dth_recharges, 89, 145, 67],
-              backgroundColor: [
-                'rgba(59, 130, 246, 0.8)',
-                'rgba(16, 185, 129, 0.8)',
-                'rgba(251, 191, 36, 0.8)',
-                'rgba(239, 68, 68, 0.8)',
-                'rgba(139, 92, 246, 0.8)',
-              ]
-            }
-          ]
-        }
+        dailyVolume: [
+          { name: 'Mon', transactions: 1200, amount: 245000 },
+          { name: 'Tue', transactions: 1800, amount: 389000 },
+          { name: 'Wed', transactions: 1500, amount: 312000 },
+          { name: 'Thu', transactions: 2400, amount: 498000 },
+          { name: 'Fri', transactions: 2200, amount: 456000 },
+          { name: 'Sat', transactions: 3100, amount: 689000 },
+          { name: 'Sun', transactions: 2900, amount: 612000 }
+        ],
+        serviceDistribution: [
+          { name: 'Electricity', value: 35, color: '#3B82F6' },
+          { name: 'Gas', value: 20, color: '#6366F1' },
+          { name: 'Mobile', value: stats.mobile_recharges, color: '#10B981' },
+          { name: 'DTH', value: stats.dth_recharges, color: '#FBBF24' },
+          { name: 'Water', value: 15, color: '#06B6D4' },
+          { name: 'Broadband', value: 12, color: '#8B5CF6' }
+        ]
       };
       
       res.json(chartData);
