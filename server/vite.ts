@@ -49,7 +49,7 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(distPath));
 
-  app.use((_req: Request, res: Response) => {
+  app.get('*', (_req: Request, res: Response) => {
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
