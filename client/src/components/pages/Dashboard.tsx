@@ -424,19 +424,6 @@ export default function Dashboard() {
             ))}
           </div>
         </div>
-
-        <div className="flex items-center justify-center space-x-1 mt-4">
-          {allStatCards.map((_, index) => (
-            <div
-              key={index}
-              className={`h-1 rounded-full transition-all duration-300 ${
-                index < 4
-                  ? 'w-8 bg-gradient-to-r from-blue-500 to-indigo-600'
-                  : 'w-2 bg-gray-300 dark:bg-gray-600'
-              }`}
-            />
-          ))}
-        </div>
       </div>
 
       {/* First Row: Charts (4/5) and User Registrations (1/5) */}
