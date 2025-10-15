@@ -31,6 +31,15 @@ task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
 
+[[workflows.workflow]]
+name = "Start Backend API"
+author = 48675141
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && python run.py"
+
 [[ports]]
 localPort = 5000
 externalPort = 80
