@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { 
-  CreditCard, DollarSign, MessageSquare, TrendingUp, 
-  Users, UserPlus, Send, Activity, Zap, Eye, Edit, Trash2, AlertTriangle,
+  DollarSign, Users, UserPlus, Activity, Zap, AlertTriangle,
   CheckCircle, Clock, XCircle, Smartphone, Globe,
   ChevronLeft, ChevronRight, Play, Pause
 } from 'lucide-react';
@@ -387,14 +386,13 @@ export default function Dashboard() {
             <AdvancedRealtimeTable
               columns={transactionColumns}
               data={generateRealtimeTransactions()}
-              maxHeight="500px"
             />
           </Card>
         </div>
 
         {/* Live User Registrations - Takes 1 column */}
         <div className="lg:col-span-1" data-testid="registrations-section">
-          <RealtimeUserRegistrations users={users.slice(0, 4)} />
+          <RealtimeUserRegistrations />
         </div>
       </div>
 

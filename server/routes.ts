@@ -1,6 +1,5 @@
 import { type Express } from "express";
 import { MemStorage } from "./storage";
-import { createProxyMiddleware } from 'http-proxy-middleware';
 
 export function registerRoutes(app: Express) {
   const storage = new MemStorage();
@@ -124,16 +123,4 @@ export function registerRoutes(app: Express) {
     }
   });
 
-  // Proxy API requests to Python backend with real database
-  app.use('/api/v1', createProxyMiddleware({
-    target: 'http://localhost:8000',
-    changeOrigin: true,
-    onProxyReq: (proxyReq, req, res) => {
-      console.log(`Proxying to real DB: ${req.method} ${req.path}`);
-    },
-    onError: (err, req, res) => {
-      console.error('Backend API error:', err);
-      res.status(500).json({ error: 'Database connection failed. Please check backend server.' });
-    }
-  }));
 }
