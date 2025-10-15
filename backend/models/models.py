@@ -273,6 +273,25 @@ class OfflineKYC(Base):
     status = Column(String(50), default="pending", nullable=False)
     user_id = Column(Integer, ForeignKey("users.UserID"), nullable=False)
 
+
+class RechargeTransactions(Base):
+    __tablename__ = "recharge_transactions"
+
+    id = Column(Integer, primary_key=True)
+    member_id = Column(String(255), ForeignKey("users.member_id"), nullable=False)
+    reference_id = Column(String(255))
+    amount = Column(DECIMAL(10, 5))
+    operator_id = Column(String(255))
+    recharge_for_number = Column(String(255))
+    remarks = Column(String(255))
+    transaction_date = Column(DateTime(timezone=True), default=get_ist_time)
+    status = Column(String(255))
+    service_type = Column(String(255))  # 'mobile' or 'dth'
+
+    recharge_user = relationship("User", primaryjoin="User.member_id==RechargeTransactions.member_id", foreign_keys=[member_id], viewonly=True)
+
+
+
     user = relationship("User", back_populates="offlineKYC")
     pan_offline_kyc = relationship("PanOfflineKYC", back_populates="offline_kyc", uselist=False)
 

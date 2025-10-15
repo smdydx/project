@@ -5,8 +5,8 @@ from decimal import Decimal
 from typing import List, Dict
 from backend.models.models import (
     User, Wallet, DirectIncome, LevelIncome,
-    PrimeActivations, RechargeIncentivesIncomeDistribution,
-    BillTransactions, Transactions, LcrMoney, RechargeTransactions, P2PTransaction
+    PrimeActivations, BillTransactions, Transactions, 
+    LcrMoney, P2PTransaction, RechargeTransactions
 )
 from backend.models.payment_gateway import Payment_Gateway
 from backend.schemas.dashboard import (
