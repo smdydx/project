@@ -1,17 +1,17 @@
 
 /**
  * API Service for Backend Connection
- * Connects React frontend to FastAPI backend
+ * Connects React frontend to Express backend
  */
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = '/api';
 
 class ApiService {
   /**
    * Fetch dashboard statistics
    */
   async getDashboardStats() {
-    const response = await fetch(`${API_BASE_URL}/dashboard/mock/stats`);
+    const response = await fetch(`${API_BASE_URL}/dashboard/stats`);
     if (!response.ok) {
       throw new Error('Failed to fetch dashboard stats');
     }
@@ -22,7 +22,7 @@ class ApiService {
    * Fetch live transactions
    */
   async getLiveTransactions() {
-    const response = await fetch(`${API_BASE_URL}/dashboard/mock/transactions`);
+    const response = await fetch(`${API_BASE_URL}/transactions`);
     if (!response.ok) {
       throw new Error('Failed to fetch live transactions');
     }
@@ -33,7 +33,7 @@ class ApiService {
    * Fetch recent users
    */
   async getRecentUsers() {
-    const response = await fetch(`${API_BASE_URL}/dashboard/mock/users`);
+    const response = await fetch(`${API_BASE_URL}/users/recent`);
     if (!response.ok) {
       throw new Error('Failed to fetch recent users');
     }
@@ -44,7 +44,7 @@ class ApiService {
    * Fetch chart data
    */
   async getChartData() {
-    const response = await fetch(`${API_BASE_URL}/dashboard/mock/charts`);
+    const response = await fetch(`${API_BASE_URL}/dashboard/charts`);
     if (!response.ok) {
       throw new Error('Failed to fetch chart data');
     }
