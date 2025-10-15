@@ -115,7 +115,7 @@ export default function AdvancedStatCard({
 
   return (
     <div 
-      className={`group relative rounded-2xl p-5 sm:p-6 lg:p-7 border hover-lift transition-all duration-300 overflow-hidden min-h-[180px] sm:min-h-[200px] lg:min-h-[220px] ${
+      className={`group relative rounded-2xl p-4 sm:p-5 lg:p-5 border hover-lift transition-all duration-300 overflow-hidden min-h-[180px] sm:min-h-[140px] lg:min-h-[140px] ${
         onClick ? 'cursor-pointer' : ''
       } ${colorClasses[color].cardBg} ${colorClasses[color].border}`}
       onClick={onClick}
@@ -125,13 +125,13 @@ export default function AdvancedStatCard({
 
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col justify-between">
-        <div className="flex items-start justify-between mb-4 sm:mb-5">
+        <div className="flex items-start justify-between mb-2 sm:mb-3">
           <div className="flex-1 min-w-0 pr-3">
-            <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2 truncate">{subtitle}</p>
-            <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 leading-tight">{title}</h3>
+            <p className="text-xs sm:text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 truncate">{subtitle}</p>
+            <h3 className="text-sm sm:text-sm lg:text-base font-bold text-gray-900 dark:text-white mb-1 line-clamp-2 leading-tight">{title}</h3>
           </div>
-          <div className={`w-14 h-14 sm:w-16 sm:h-16 ${colorClasses[color].icon} rounded-xl flex items-center justify-center flex-shrink-0 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
-            <Icon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+          <div className={`w-12 h-12 sm:w-14 sm:h-14 ${colorClasses[color].icon} rounded-xl flex items-center justify-center flex-shrink-0 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
+            <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
           </div>
         </div>
 
@@ -144,25 +144,25 @@ export default function AdvancedStatCard({
             </div>
           ) : (
             <>
-              <div className="mb-3 sm:mb-4">
-                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white break-words">
+              <div className="mb-2 sm:mb-2">
+                <p className="text-2xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white break-words">
                   {formatValue(value)}
                 </p>
               </div>
 
               {trend && (
-                <div className={`inline-flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full ${colorClasses[color].light}`}>
+                <div className={`inline-flex items-center space-x-1.5 sm:space-x-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full ${colorClasses[color].light}`}>
                   <div className={`flex items-center space-x-1 ${trend.isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                     {trend.isPositive ? (
-                      <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
                     ) : (
-                      <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4" />
                     )}
-                    <span className="text-sm sm:text-base font-bold">
+                    <span className="text-xs sm:text-sm font-bold">
                       {trend.isPositive ? '+' : ''}{trend.value}%
                     </span>
                   </div>
-                  <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:inline">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">
                     {trend.period}
                   </span>
                 </div>
