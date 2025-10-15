@@ -198,6 +198,27 @@
   animation: shimmer 2s infinite;
 }
 
+
+/* Custom Scrollbar for Horizontal Carousel */
+#stats-scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+#stats-scroll-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+#stats-scroll-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  border-radius: 10px;
+}
+
+#stats-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #2563eb, #4f46e5);
+}
+
+
 /* Advanced Hover Effects */
 .hover-lift {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

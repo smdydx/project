@@ -131,7 +131,7 @@ export default function Dashboard() {
     const statuses = ['Successful', 'Failed', 'Pending'];
     const services = ['Electricity Bill', 'Gas Bill', 'Mobile Recharge', 'DTH Recharge', 'Water Bill', 'Broadband Bill'];
     const users = ['Rajesh Kumar', 'Priya Sharma', 'Amit Patel', 'Sneha Reddy', 'Arjun Singh', 'Kavya Nair'];
-    
+
     return Array.from({ length: 12 }, (_, i) => ({
       id: `TXN${Math.floor(Math.random() * 100000)}`,
       user: users[Math.floor(Math.random() * users.length)],
@@ -147,7 +147,7 @@ export default function Dashboard() {
     const statuses = ['Open', 'Resolved', 'Escalated'];
     const issueTypes = ['Payment Failed', 'Wrong Amount', 'Refund Request', 'Account Issue'];
     const users = ['Rajesh Kumar', 'Priya Sharma', 'Amit Patel', 'Sneha Reddy'];
-    
+
     return Array.from({ length: 8 }, (_, i) => ({
       id: `CMP${Math.floor(Math.random() * 10000)}`,
       user: users[Math.floor(Math.random() * users.length)],
@@ -298,24 +298,24 @@ export default function Dashboard() {
   ];
 
   const nextSlide = () => {
-    setCurrentCardIndex((prevIndex) => 
-      prevIndex >= totalSlides - 1 ? 0 : prevIndex + 1
-    );
+    const container = document.getElementById('stats-scroll-container');
+    if (container) {
+      container.scrollBy({ left: 400, behavior: 'smooth' });
+    }
   };
 
   const prevSlide = () => {
-    setCurrentCardIndex((prevIndex) => 
-      prevIndex <= 0 ? totalSlides - 1 : prevIndex - 1
-    );
+    const container = document.getElementById('stats-scroll-container');
+    if (container) {
+      container.scrollBy({ left: -400, behavior: 'smooth' });
+    }
   };
 
   const goToSlide = (index: number) => {
-    setCurrentCardIndex(index);
-  };
-
-  const getCurrentCards = () => {
-    const startIndex = currentCardIndex * cardsPerView;
-    return allStatCards.slice(startIndex, startIndex + cardsPerView);
+    const container = document.getElementById('stats-scroll-container');
+    if (container) {
+      container.scrollTo({ left: index * 400, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -394,55 +394,50 @@ export default function Dashboard() {
               </span>
             </div>
           </div>
-          
+
           {/* Navigation Controls */}
           <div className="flex items-center space-x-2">
             <button
               onClick={prevSlide}
-              className="p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 shadow-sm hover:shadow-md"
+              className="p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-110 shadow-md"
             >
-              <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               onClick={nextSlide}
-              className="p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 shadow-sm hover:shadow-md"
+              className="p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-110 shadow-md"
             >
-              <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         </div>
 
         {/* Cards Container */}
-        <div className="overflow-hidden">
-          <div 
-            className="flex transition-transform duration-1000 ease-in-out"
-            style={{ transform: `translateX(-${currentCardIndex * 100}%)` }}
-          >
-            {Array.from({ length: totalSlides }, (_, slideIndex) => (
-              <div key={slideIndex} className="w-full flex-shrink-0">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5 px-1">
-                  {allStatCards
-                    .slice(slideIndex * cardsPerView, (slideIndex + 1) * cardsPerView)
-                    .map((card, cardIndex) => (
-                      <div 
-                        key={`${slideIndex}-${cardIndex}`}
-                        className="animate-slide-in-up w-full"
-                        style={{ animationDelay: `${cardIndex * 100}ms` }}
-                      >
-                        <AdvancedStatCard
-                          title={card.title}
-                          subtitle={card.subtitle}
-                          value={card.value}
-                          icon={card.icon}
-                          trend={card.trend}
-                          color={card.color}
-                          isLoading={isLoading}
-                        />
-                      </div>
-                    ))}
+        <div 
+          id="stats-scroll-container" 
+          className="overflow-x-auto scrollbar-hide flex transition-transform duration-1000 ease-in-out no-scrollbar"
+          style={{ scrollBehavior: 'smooth' }}
+        >
+          <div className="flex w-full flex-shrink-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5 px-1 py-1">
+              {allStatCards.map((card, cardIndex) => (
+                <div 
+                  key={cardIndex}
+                  className="animate-slide-in-up w-full flex-shrink-0"
+                  style={{ animationDelay: `${cardIndex * 100}ms`, minWidth: '300px' }} 
+                >
+                  <AdvancedStatCard
+                    title={card.title}
+                    subtitle={card.subtitle}
+                    value={card.value}
+                    icon={card.icon}
+                    trend={card.trend}
+                    color={card.color}
+                    isLoading={isLoading}
+                  />
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
@@ -594,7 +589,7 @@ export default function Dashboard() {
                 <p className="text-sm text-gray-500 dark:text-gray-400">Broadcast message to users</p>
               </div>
             </div>
-            
+
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Recipient Type</label>
@@ -605,7 +600,7 @@ export default function Dashboard() {
                   <option>Specific User</option>
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Message Title</label>
                 <input
@@ -614,7 +609,7 @@ export default function Dashboard() {
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Message</label>
                 <textarea
@@ -623,13 +618,13 @@ export default function Dashboard() {
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm resize-none"
                 ></textarea>
               </div>
-              
+
               <div className="flex items-center space-x-3">
                 <input type="checkbox" id="urgent" className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" />
                 <label htmlFor="urgent" className="text-sm font-medium text-gray-700 dark:text-gray-300">Mark as urgent notification</label>
               </div>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-3 sm:space-y-0 sm:space-x-4 mt-8">
               <button
                 onClick={() => setShowNotificationModal(false)}
