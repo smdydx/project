@@ -424,6 +424,9 @@ class P2PTransaction(Base):
     receiver = relationship("User", back_populates="received_transactions", foreign_keys=[transaction_to])
 
 
+# ============================= RECHARGE TRANSACTIONS =============================
+# NOTE: This table is NOT in original models_1760553210687.py
+# But dashboard service needs it for mobile/DTH recharge tracking
 class RechargeTransactions(Base):
     __tablename__ = "recharge_transactions"
 
@@ -436,7 +439,7 @@ class RechargeTransactions(Base):
     remarks = Column(String(255))
     transaction_date = Column(DateTime(timezone=True), default=get_ist_time)
     status = Column(String(255))
-    recharge_type = Column(String(255))
+    service_type = Column(String(255))  # 'mobile' or 'dth' - CORRECTED column name
 
     recharge_user = relationship("User", primaryjoin="User.member_id==RechargeTransactions.member_id", foreign_keys=[member_id], viewonly=True)
 

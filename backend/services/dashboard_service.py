@@ -65,14 +65,15 @@ class DashboardService:
 
 
         # Mobile recharge count (from RechargeTransactions)
+        # Using service_type column as per original model
         mobile_recharge_count = db.query(func.count(RechargeTransactions.id)).filter(
-            RechargeTransactions.service_type.like('%mobile%'),
+            RechargeTransactions.service_type.ilike('%mobile%'),
             RechargeTransactions.status == 'SUCCESS'
         ).scalar() or 0
 
         # DTH recharge count (from RechargeTransactions)
         dth_recharge_count = db.query(func.count(RechargeTransactions.id)).filter(
-            RechargeTransactions.service_type.like('%dth%'),
+            RechargeTransactions.service_type.ilike('%dth%'),
             RechargeTransactions.status == 'SUCCESS'
         ).scalar() or 0
 
