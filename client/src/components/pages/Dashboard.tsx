@@ -420,13 +420,13 @@ export default function Dashboard() {
           >
             {Array.from({ length: totalSlides }, (_, slideIndex) => (
               <div key={slideIndex} className="w-full flex-shrink-0">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 px-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5 px-1">
                   {allStatCards
                     .slice(slideIndex * cardsPerView, (slideIndex + 1) * cardsPerView)
                     .map((card, cardIndex) => (
                       <div 
                         key={`${slideIndex}-${cardIndex}`}
-                        className="animate-slide-in-up"
+                        className="animate-slide-in-up w-full"
                         style={{ animationDelay: `${cardIndex * 100}ms` }}
                       >
                         <AdvancedStatCard
