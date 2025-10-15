@@ -413,7 +413,7 @@ export default function Dashboard() {
         </div>
 
         {/* Cards Container */}
-        <div className="overflow-hidden rounded-2xl">
+        <div className="overflow-hidden">
           <div 
             className="flex transition-transform duration-1000 ease-in-out"
             style={{ transform: `translateX(-${currentCardIndex * 100}%)` }}

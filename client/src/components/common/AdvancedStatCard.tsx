@@ -20,44 +20,58 @@ const colorClasses = {
   blue: {
     gradient: 'from-blue-600 to-cyan-600',
     light: 'bg-blue-50 dark:bg-blue-900/30',
+    cardBg: 'bg-gradient-to-br from-blue-500/20 to-cyan-500/20 dark:from-blue-600/30 dark:to-cyan-600/30',
     icon: 'bg-gradient-to-br from-blue-600 to-cyan-600 shadow-xl shadow-blue-500/60',
-    text: 'text-blue-600 dark:text-blue-400'
+    text: 'text-blue-600 dark:text-blue-400',
+    border: 'border-blue-200 dark:border-blue-700'
   },
   green: {
     gradient: 'from-green-600 to-teal-600',
     light: 'bg-green-50 dark:bg-green-900/30',
+    cardBg: 'bg-gradient-to-br from-green-500/20 to-teal-500/20 dark:from-green-600/30 dark:to-teal-600/30',
     icon: 'bg-gradient-to-br from-green-600 to-teal-600 shadow-xl shadow-green-500/60',
-    text: 'text-green-600 dark:text-green-400'
+    text: 'text-green-600 dark:text-green-400',
+    border: 'border-green-200 dark:border-green-700'
   },
   purple: {
     gradient: 'from-purple-600 to-indigo-600',
     light: 'bg-purple-50 dark:bg-purple-900/30',
+    cardBg: 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 dark:from-purple-600/30 dark:to-indigo-600/30',
     icon: 'bg-gradient-to-br from-purple-600 to-indigo-600 shadow-xl shadow-purple-500/60',
-    text: 'text-purple-600 dark:text-purple-400'
+    text: 'text-purple-600 dark:text-purple-400',
+    border: 'border-purple-200 dark:border-purple-700'
   },
   yellow: {
     gradient: 'from-amber-500 to-orange-600',
     light: 'bg-amber-50 dark:bg-amber-900/30',
+    cardBg: 'bg-gradient-to-br from-amber-400/20 to-orange-500/20 dark:from-amber-500/30 dark:to-orange-600/30',
     icon: 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-xl shadow-amber-500/60',
-    text: 'text-amber-600 dark:text-amber-400'
+    text: 'text-amber-600 dark:text-amber-400',
+    border: 'border-amber-200 dark:border-amber-700'
   },
   red: {
     gradient: 'from-rose-600 to-red-600',
     light: 'bg-rose-50 dark:bg-rose-900/30',
+    cardBg: 'bg-gradient-to-br from-rose-500/20 to-red-500/20 dark:from-rose-600/30 dark:to-red-600/30',
     icon: 'bg-gradient-to-br from-rose-600 to-red-600 shadow-xl shadow-rose-500/60',
-    text: 'text-rose-600 dark:text-rose-400'
+    text: 'text-rose-600 dark:text-rose-400',
+    border: 'border-rose-200 dark:border-rose-700'
   },
   indigo: {
     gradient: 'from-indigo-600 to-violet-600',
     light: 'bg-indigo-50 dark:bg-indigo-900/30',
+    cardBg: 'bg-gradient-to-br from-indigo-500/20 to-violet-500/20 dark:from-indigo-600/30 dark:to-violet-600/30',
     icon: 'bg-gradient-to-br from-indigo-600 to-violet-600 shadow-xl shadow-indigo-500/60',
-    text: 'text-indigo-600 dark:text-indigo-400'
+    text: 'text-indigo-600 dark:text-indigo-400',
+    border: 'border-indigo-200 dark:border-indigo-700'
   },
   pink: {
     gradient: 'from-pink-600 to-fuchsia-600',
     light: 'bg-pink-50 dark:bg-pink-900/30',
+    cardBg: 'bg-gradient-to-br from-pink-500/20 to-fuchsia-500/20 dark:from-pink-600/30 dark:to-fuchsia-600/30',
     icon: 'bg-gradient-to-br from-pink-600 to-fuchsia-600 shadow-xl shadow-pink-500/60',
-    text: 'text-pink-600 dark:text-pink-400'
+    text: 'text-pink-600 dark:text-pink-400',
+    border: 'border-pink-200 dark:border-pink-700'
   }
 };
 
@@ -101,13 +115,13 @@ export default function AdvancedStatCard({
 
   return (
     <div 
-      className={`group relative bg-white dark:bg-gray-800 rounded-2xl p-5 sm:p-6 lg:p-7 border border-gray-200 dark:border-gray-700 hover-lift transition-all duration-300 overflow-hidden min-h-[180px] sm:min-h-[200px] lg:min-h-[220px] ${
+      className={`group relative rounded-2xl p-5 sm:p-6 lg:p-7 border hover-lift transition-all duration-300 overflow-hidden min-h-[180px] sm:min-h-[200px] lg:min-h-[220px] ${
         onClick ? 'cursor-pointer' : ''
-      } ${colorClasses[color].light}`}
+      } ${colorClasses[color].cardBg} ${colorClasses[color].border}`}
       onClick={onClick}
     >
       {/* Animated Background Gradient */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${colorClasses[color].gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
+      <div className={`absolute inset-0 bg-gradient-to-br ${colorClasses[color].gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
 
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col justify-between">
