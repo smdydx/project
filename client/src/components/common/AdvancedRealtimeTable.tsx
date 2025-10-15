@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronUp, ChevronDown, Search, Filter, RefreshCw, TrendingUp, TrendingDown, Activity, Zap } from 'lucide-react';
+import { useWebSocket } from '../../hooks/useWebSocket';
 
 interface Column {
   key: string;
@@ -19,6 +20,8 @@ interface AdvancedRealtimeTableProps {
   title?: string;
   showStats?: boolean;
   enableAnimations?: boolean;
+  wsChannel?: string; // WebSocket channel name
+  useWebSocket?: boolean; // Enable WebSocket updates
 }
 
 export default function AdvancedRealtimeTable({ 
@@ -30,9 +33,14 @@ export default function AdvancedRealtimeTable({
   onDataUpdate,
   title,
   showStats = true,
-  enableAnimations = true
+  enableAnimations = true,
+  wsChannel,
+  useWebSocket: useWS = false
 }: AdvancedRealtimeTableProps) {
   const [data, setData] = useState(initialData);
+  
+  // WebSocket integration
+  const { data: wsData, isConnected: wsConnected } = useWebSocket(wsChannel || '');
   const [sortColumn, setSortColumn] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [searchTerm, setSearchTerm] = useState('');
@@ -52,6 +60,34 @@ export default function AdvancedRealtimeTable({
     prevDataRef.current = initialData;
     setStats({ total: initialData.length, added: 0, updated: 0, deleted: 0 });
   }, [initialData]);
+
+  // Handle WebSocket updates
+  useEffect(() => {
+    if (useWS && wsData && wsChannel) {
+      setData(prevData => {
+        const newData = [wsData, ...prevData].slice(0, 100); // Keep last 100 items
+        
+        // Track changes for animations
+        const newRowIds = new Set<string>();
+        newRowIds.add(wsData.id);
+        
+        setNewRows(newRowIds);
+        setStats(prev => ({
+          ...prev,
+          total: newData.length,
+          added: prev.added + 1
+        }));
+        
+        setTimeout(() => {
+          setNewRows(new Set());
+        }, 2000);
+        
+        prevDataRef.current = newData;
+        return newData;
+      });
+      setLastUpdate(new Date());
+    }
+  }, [wsData, useWS, wsChannel]);
 
   // Real-time data updates with animations
   useEffect(() => {

@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic } from "./vite";
+import { setupWebSocket } from "./websocket";
 
 const app = express();
 app.use(express.json());
@@ -40,6 +41,30 @@ app.use((req, res, next) => {
   const server = app.listen(5000, "0.0.0.0", () => {
     console.log(`Server running on port 5000`);
   });
+
+  // Setup WebSocket
+  const { broadcast } = setupWebSocket(server);
+
+  // Example: Broadcast to channels periodically (you can call this from your routes)
+  setInterval(() => {
+    // Simulate real-time user registrations
+    const newUser = {
+      id: `USR${Math.floor(Math.random() * 100000)}`,
+      name: 'John Doe',
+      email: 'user@example.com',
+      timestamp: new Date().toISOString()
+    };
+    broadcast('user-registrations', newUser);
+
+    // Simulate real-time transactions
+    const newTransaction = {
+      id: `TXN${Math.floor(Math.random() * 100000)}`,
+      amount: Math.floor(Math.random() * 10000),
+      status: 'Success',
+      timestamp: new Date().toISOString()
+    };
+    broadcast('transactions', newTransaction);
+  }, 5000);
 
   registerRoutes(app);
 
