@@ -19,7 +19,7 @@ export default function Dashboard() {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-  // All stat cards data
+  // All stat cards data with unique colors
   const allStatCards = [
     {
       title: "Total Users",
@@ -27,7 +27,7 @@ export default function Dashboard() {
       value: mockStats.totalRegisteredUsers,
       icon: Users,
       trend: { value: 5.7, isPositive: true, period: 'vs last month' },
-      color: "indigo" as const
+      color: "blue" as const
     },
     {
       title: "Total New SignUp",
@@ -35,7 +35,7 @@ export default function Dashboard() {
       value: mockStats.newUsersToday,
       icon: UserPlus,
       trend: { value: 23.4, isPositive: true, period: 'vs yesterday' },
-      color: "pink" as const
+      color: "green" as const
     },
     {
       title: "Total KYC Verified User",
@@ -43,15 +43,15 @@ export default function Dashboard() {
       value: "94.2%",
       icon: CheckCircle,
       trend: { value: 2.1, isPositive: true, period: 'vs yesterday' },
-      color: "green" as const
+      color: "purple" as const
     },
     {
       title: "Total Prime User",
       subtitle: "Premium members",
       value: 2847,
-      icon: BarChart3,
+      icon: Zap,
       trend: { value: 5.8, isPositive: true, period: 'vs yesterday' },
-      color: "purple" as const
+      color: "yellow" as const
     },
     {
       title: "Total Distributor LCR Money",
@@ -67,7 +67,7 @@ export default function Dashboard() {
       value: 1247,
       icon: Activity,
       trend: { value: 18.3, isPositive: true, period: 'vs yesterday' },
-      color: "yellow" as const
+      color: "red" as const
     },
     {
       title: "Total Mobile Recharge",
@@ -75,15 +75,15 @@ export default function Dashboard() {
       value: mockStats.totalTransactionsToday,
       icon: Smartphone,
       trend: { value: 12.5, isPositive: true, period: 'vs yesterday' },
-      color: "blue" as const
+      color: "indigo" as const
     },
     {
       title: "Total DTH Recharge",
       subtitle: "DTH services",
       value: "67.8%",
-      icon: CreditCard,
+      icon: Globe,
       trend: { value: 12.4, isPositive: true, period: 'vs last week' },
-      color: "indigo" as const
+      color: "pink" as const
     }
   ];
 
@@ -104,7 +104,7 @@ export default function Dashboard() {
       setCurrentCardIndex((prevIndex) => 
         prevIndex >= totalSlides - 1 ? 0 : prevIndex + 1
       );
-    }, 4000); // Change slides every 4 seconds
+    }, 6000); // Change slides every 6 seconds (slower)
 
     return () => clearInterval(interval);
   }, [isAutoPlaying, totalSlides]);
@@ -415,12 +415,12 @@ export default function Dashboard() {
         {/* Cards Container */}
         <div className="overflow-hidden rounded-2xl">
           <div 
-            className="flex transition-transform duration-500 ease-in-out"
+            className="flex transition-transform duration-1000 ease-in-out"
             style={{ transform: `translateX(-${currentCardIndex * 100}%)` }}
           >
             {Array.from({ length: totalSlides }, (_, slideIndex) => (
               <div key={slideIndex} className="w-full flex-shrink-0">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 lg:gap-6 px-1">
+                <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6 px-1">
                   {allStatCards
                     .slice(slideIndex * cardsPerView, (slideIndex + 1) * cardsPerView)
                     .map((card, cardIndex) => (
@@ -471,7 +471,7 @@ export default function Dashboard() {
       </div>
 
       {/* Enhanced Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
         {/* Enhanced Daily Volume Chart */}
         <Card title="Daily Transaction Volume" className="hover-lift">
           <div className="space-y-4">
@@ -528,7 +528,7 @@ export default function Dashboard() {
 
         {/* Enhanced Hourly Activity Heatmap */}
         <Card title="Hourly Activity Heatmap" className="hover-lift">
-          <div className="grid grid-cols-3 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-4 xl:grid-cols-6 gap-2">
             {chartData.hourlyActivity.map((hour, index) => {
               const intensity = hour.transactions / Math.max(...chartData.hourlyActivity.map(h => h.transactions));
               return (
@@ -550,8 +550,8 @@ export default function Dashboard() {
       </div>
 
       {/* Enhanced Real-time Tables and User Registrations */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6">
-        <div className="xl:col-span-2 space-y-4 lg:space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6">
+        <div className="xl:col-span-2 space-y-4 lg:space-y-6 order-2 xl:order-1">
           <AdvancedRealtimeTable
             title="Live Transactions"
             columns={transactionColumns}
@@ -576,7 +576,7 @@ export default function Dashboard() {
         </div>
 
         {/* Real-time User Registrations */}
-        <div className="xl:col-span-1">
+        <div className="xl:col-span-1 order-1 xl:order-2">
           <RealtimeUserRegistrations />
         </div>
       </div>
