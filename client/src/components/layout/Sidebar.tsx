@@ -45,7 +45,8 @@ const menuItems: MenuItem[] = [
     icon: Users,
     subMenu: [
       { path: '/users/all', label: 'All Users', icon: UserCheck },
-      { path: '/users/new', label: 'New Registrations', icon: UserPlus }
+      { path: '/users/new-signup', label: 'New Sign Up', icon: UserPlus },
+      { path: '/users/kyc', label: 'KYC Verification', icon: Shield }
     ]
   },
   { 

@@ -6,6 +6,9 @@ import Header from './components/layout/Header';
 import Dashboard from './components/pages/Dashboard';
 import BillersManagement from './components/pages/BillersManagement';
 import UserManagement from './components/pages/UserManagement';
+import AllUsers from './components/pages/AllUsers';
+import NewSignUp from './components/pages/NewSignUp';
+import KYCVerification from './components/pages/KYCVerification';
 import Transactions from './components/pages/Transactions';
 import Complaints from './components/pages/Complaints';
 import Reports from './components/pages/Reports';
@@ -30,15 +33,18 @@ function AppContent() {
         onMobileMenuToggle={() => setIsMobileSidebarOpen(true)}
         isCollapsed={isSidebarCollapsed}
       />
-      
+
       <main className={`pt-20 p-4 lg:p-6 transition-all duration-300 ${
         isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'
       }`}>
         <div className="max-w-7xl mx-auto">
           <Switch>
             <Route path="/" component={Dashboard} />
-            <Route path="/billers" component={BillersManagement} />
             <Route path="/users" component={UserManagement} />
+            <Route path="/users/all" component={AllUsers} />
+            <Route path="/users/new-signup" component={NewSignUp} />
+            <Route path="/users/kyc" component={KYCVerification} />
+            <Route path="/billers" component={BillersManagement} />
             <Route path="/transactions" component={Transactions} />
             <Route path="/complaints" component={Complaints} />
             <Route path="/reports" component={Reports} />
