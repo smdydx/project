@@ -357,10 +357,10 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* Swipe-enabled Container - Responsive */}
+        {/* Swipe-enabled Container - All Devices */}
         <div
           id="stats-scroll-container"
-          className="overflow-x-auto scrollbar-hide scroll-smooth px-2 sm:px-4 lg:px-12 touch-pan-x"
+          className="overflow-x-auto scrollbar-hide scroll-smooth px-2 sm:px-4 lg:px-12 touch-pan-x cursor-grab active:cursor-grabbing"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           data-testid="stats-container"
         >

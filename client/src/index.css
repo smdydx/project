@@ -253,11 +253,9 @@
     cursor: grabbing;
   }
 
-  /* Smooth scroll snap for cards on mobile */
-  @media (max-width: 1023px) {
-    #stats-scroll-container > div > div {
-      scroll-snap-align: center;
-    }
+  /* Smooth scroll snap for cards on ALL devices */
+  #stats-scroll-container > div > div {
+    scroll-snap-align: center;
   }
 
 

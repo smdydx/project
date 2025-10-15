@@ -106,31 +106,6 @@ export default function Transactions() {
                 ))}
               </select>
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Amount Range</label>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="number"
-                  placeholder="Min"
-                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <span>-</span>
-                <input
-                  type="number"
-                  placeholder="Max"
-                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
-              <input
-                type="date"
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
           </div>
         </div>
       </Card>
