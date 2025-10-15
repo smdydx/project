@@ -22,38 +22,6 @@ export default function Dashboard() {
   // All stat cards data
   const allStatCards = [
     {
-      title: "Total Transactions",
-      subtitle: "Today's volume",
-      value: mockStats.totalTransactionsToday,
-      icon: CreditCard,
-      trend: { value: 12.5, isPositive: true, period: 'vs yesterday' },
-      color: "blue" as const
-    },
-    {
-      title: "Revenue Processed",
-      subtitle: "Total amount",
-      value: mockStats.totalAmountProcessed,
-      icon: DollarSign,
-      trend: { value: 8.2, isPositive: true, period: 'vs yesterday' },
-      color: "green" as const
-    },
-    {
-      title: "Active Billers",
-      subtitle: "Service providers",
-      value: mockStats.activeBillers,
-      icon: Building2,
-      trend: { value: -2.1, isPositive: false, period: 'vs last week' },
-      color: "purple" as const
-    },
-    {
-      title: "Pending Issues",
-      subtitle: "Complaints queue",
-      value: mockStats.pendingComplaints,
-      icon: MessageSquare,
-      trend: { value: -15.3, isPositive: true, period: 'vs yesterday' },
-      color: "red" as const
-    },
-    {
       title: "Total Users",
       subtitle: "Registered base",
       value: mockStats.totalRegisteredUsers,
@@ -62,7 +30,7 @@ export default function Dashboard() {
       color: "indigo" as const
     },
     {
-      title: "New Signups",
+      title: "Total New SignUp",
       subtitle: "Today's growth",
       value: mockStats.newUsersToday,
       icon: UserPlus,
@@ -70,36 +38,52 @@ export default function Dashboard() {
       color: "pink" as const
     },
     {
-      title: "Success Rate",
-      subtitle: "Transaction success",
+      title: "Total KYC Verified User",
+      subtitle: "Verified accounts",
       value: "94.2%",
       icon: CheckCircle,
       trend: { value: 2.1, isPositive: true, period: 'vs yesterday' },
       color: "green" as const
     },
     {
-      title: "Average Amount",
-      subtitle: "Per transaction",
+      title: "Total Prime User",
+      subtitle: "Premium members",
       value: 2847,
       icon: BarChart3,
       trend: { value: 5.8, isPositive: true, period: 'vs yesterday' },
-      color: "blue" as const
+      color: "purple" as const
     },
     {
-      title: "Peak Hour Volume",
-      subtitle: "2:00 PM - 3:00 PM",
+      title: "Total Distributor LCR Money",
+      subtitle: "LCR balance",
+      value: mockStats.totalAmountProcessed,
+      icon: DollarSign,
+      trend: { value: 8.2, isPositive: true, period: 'vs yesterday' },
+      color: "green" as const
+    },
+    {
+      title: "Total Distributor Prime Reward",
+      subtitle: "Rewards earned",
       value: 1247,
       icon: Activity,
       trend: { value: 18.3, isPositive: true, period: 'vs yesterday' },
       color: "yellow" as const
     },
     {
-      title: "Mobile Users",
-      subtitle: "App transactions",
-      value: "67.8%",
+      title: "Total Mobile Recharge",
+      subtitle: "Recharge volume",
+      value: mockStats.totalTransactionsToday,
       icon: Smartphone,
+      trend: { value: 12.5, isPositive: true, period: 'vs yesterday' },
+      color: "blue" as const
+    },
+    {
+      title: "Total DTH Recharge",
+      subtitle: "DTH services",
+      value: "67.8%",
+      icon: CreditCard,
       trend: { value: 12.4, isPositive: true, period: 'vs last week' },
-      color: "purple" as const
+      color: "indigo" as const
     }
   ];
 
