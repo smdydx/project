@@ -114,7 +114,7 @@ export default function RealtimeUserRegistrations() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover-lift">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover-lift h-full flex flex-col">
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
         <div className="flex items-center justify-between">
@@ -133,7 +133,7 @@ export default function RealtimeUserRegistrations() {
       </div>
 
       {/* User List */}
-      <div className="max-h-96 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto">
         <div className="space-y-1 p-4">
           {newUsers.map((user, index) => (
             <div

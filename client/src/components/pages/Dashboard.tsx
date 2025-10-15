@@ -399,8 +399,8 @@ export default function Dashboard() {
       {/* First Row: Charts (3/5) and User Registrations (2/5) */}
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
         {/* Charts Container - 3/5 width */}
-        <div className="xl:col-span-3">
-          <Card title="Daily Transaction Volume & Service Distribution" className="hover-lift relative overflow-hidden">
+        <div className="xl:col-span-3 flex">
+          <Card title="Daily Transaction Volume & Service Distribution" className="hover-lift relative overflow-hidden h-full w-full">
             {/* Indian Root/Leaf Design Background */}
             <div className="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none">
               <svg className="w-full h-full" viewBox="0 0 400 400" fill="none">
@@ -665,8 +665,10 @@ export default function Dashboard() {
         </div>
 
         {/* Live User Registrations - 2/5 width */}
-        <div className="xl:col-span-2">
-          <RealtimeUserRegistrations />
+        <div className="xl:col-span-2 flex">
+          <div className="w-full h-full">
+            <RealtimeUserRegistrations />
+          </div>
         </div>
       </div>
 
