@@ -417,125 +417,126 @@ export default function Dashboard() {
               <div>
                 <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4">Daily Transaction Volume</h4>
                 <div className="relative w-full aspect-square max-w-[200px] mx-auto">
-                <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
-                  <defs>
-                    {chartData.dailyVolume.map((_, index) => {
-                      const gradientId = `dailyGradient${index}`;
-                      const colors = [
-                        ['#3B82F6', '#2563EB'],
-                        ['#6366F1', '#4F46E5'],
-                        ['#8B5CF6', '#7C3AED'],
-                        ['#A855F7', '#9333EA'],
-                        ['#C026D3', '#A21CAF'],
-                        ['#DB2777', '#BE185D'],
-                        ['#F43F5E', '#E11D48']
-                      ];
-                      return (
-                        <linearGradient key={gradientId} id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" style={{ stopColor: colors[index % colors.length][0] }} />
-                          <stop offset="100%" style={{ stopColor: colors[index % colors.length][1] }} />
-                        </linearGradient>
-                      );
-                    })}
-                    <filter id="shadow">
-                      <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.3"/>
-                    </filter>
-                  </defs>
-                  
-                  {(() => {
-                    const total = chartData.dailyVolume.reduce((sum, day) => sum + day.transactions, 0);
-                    let currentAngle = 0;
+                  <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
+                    <defs>
+                      {chartData.dailyVolume.map((_, index) => {
+                        const gradientId = `dailyGradient${index}`;
+                        const colors = [
+                          ['#3B82F6', '#2563EB'],
+                          ['#6366F1', '#4F46E5'],
+                          ['#8B5CF6', '#7C3AED'],
+                          ['#A855F7', '#9333EA'],
+                          ['#C026D3', '#A21CAF'],
+                          ['#DB2777', '#BE185D'],
+                          ['#F43F5E', '#E11D48']
+                        ];
+                        return (
+                          <linearGradient key={gradientId} id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style={{ stopColor: colors[index % colors.length][0] }} />
+                            <stop offset="100%" style={{ stopColor: colors[index % colors.length][1] }} />
+                          </linearGradient>
+                        );
+                      })}
+                      <filter id="shadow">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.3"/>
+                      </filter>
+                    </defs>
                     
-                    return chartData.dailyVolume.map((day, index) => {
-                      const percentage = (day.transactions / total) * 100;
-                      const angle = (percentage / 100) * 360;
-                      const startAngle = currentAngle;
-                      const endAngle = currentAngle + angle;
+                    {(() => {
+                      const total = chartData.dailyVolume.reduce((sum, day) => sum + day.transactions, 0);
+                      let currentAngle = 0;
                       
-                      const outerRadius = activeDailySegment === index ? 85 : 75;
-                      const innerRadius = 45;
-                      
-                      const startOuterX = 100 + outerRadius * Math.cos((startAngle * Math.PI) / 180);
-                      const startOuterY = 100 + outerRadius * Math.sin((startAngle * Math.PI) / 180);
-                      const endOuterX = 100 + outerRadius * Math.cos((endAngle * Math.PI) / 180);
-                      const endOuterY = 100 + outerRadius * Math.sin((endAngle * Math.PI) / 180);
-                      
-                      const startInnerX = 100 + innerRadius * Math.cos((endAngle * Math.PI) / 180);
-                      const startInnerY = 100 + innerRadius * Math.sin((endAngle * Math.PI) / 180);
-                      const endInnerX = 100 + innerRadius * Math.cos((startAngle * Math.PI) / 180);
-                      const endInnerY = 100 + innerRadius * Math.sin((startAngle * Math.PI) / 180);
-                      
-                      const largeArc = angle > 180 ? 1 : 0;
-                      const path = `M ${startOuterX} ${startOuterY} A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${endOuterX} ${endOuterY} L ${startInnerX} ${startInnerY} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${endInnerX} ${endInnerY} Z`;
-                      
-                      currentAngle = endAngle;
-                      
-                      return (
-                        <g key={index} className="transition-all duration-300">
-                          <path
-                            d={path}
-                            fill={`url(#dailyGradient${index})`}
-                            className="cursor-pointer transition-all duration-300"
-                            style={{ 
-                              filter: activeDailySegment === index ? 'url(#shadow)' : 'none',
-                              animation: `fadeInScale 0.6s ease-out ${index * 0.1}s both`
-                            }}
-                            onMouseEnter={() => setActiveDailySegment(index)}
-                            onMouseLeave={() => setActiveDailySegment(null)}
-                          />
-                        </g>
-                      );
-                    });
-                  })()}
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {chartData.dailyVolume.reduce((sum, day) => sum + day.transactions, 0).toLocaleString()}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Total</p>
+                      return chartData.dailyVolume.map((day, index) => {
+                        const percentage = (day.transactions / total) * 100;
+                        const angle = (percentage / 100) * 360;
+                        const startAngle = currentAngle;
+                        const endAngle = currentAngle + angle;
+                        
+                        const outerRadius = activeDailySegment === index ? 85 : 75;
+                        const innerRadius = 45;
+                        
+                        const startOuterX = 100 + outerRadius * Math.cos((startAngle * Math.PI) / 180);
+                        const startOuterY = 100 + outerRadius * Math.sin((startAngle * Math.PI) / 180);
+                        const endOuterX = 100 + outerRadius * Math.cos((endAngle * Math.PI) / 180);
+                        const endOuterY = 100 + outerRadius * Math.sin((endAngle * Math.PI) / 180);
+                        
+                        const startInnerX = 100 + innerRadius * Math.cos((endAngle * Math.PI) / 180);
+                        const startInnerY = 100 + innerRadius * Math.sin((endAngle * Math.PI) / 180);
+                        const endInnerX = 100 + innerRadius * Math.cos((startAngle * Math.PI) / 180);
+                        const endInnerY = 100 + innerRadius * Math.sin((startAngle * Math.PI) / 180);
+                        
+                        const largeArc = angle > 180 ? 1 : 0;
+                        const path = `M ${startOuterX} ${startOuterY} A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${endOuterX} ${endOuterY} L ${startInnerX} ${startInnerY} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${endInnerX} ${endInnerY} Z`;
+                        
+                        currentAngle = endAngle;
+                        
+                        return (
+                          <g key={index} className="transition-all duration-300">
+                            <path
+                              d={path}
+                              fill={`url(#dailyGradient${index})`}
+                              className="cursor-pointer transition-all duration-300"
+                              style={{ 
+                                filter: activeDailySegment === index ? 'url(#shadow)' : 'none',
+                                animation: `fadeInScale 0.6s ease-out ${index * 0.1}s both`
+                              }}
+                              onMouseEnter={() => setActiveDailySegment(index)}
+                              onMouseLeave={() => setActiveDailySegment(null)}
+                            />
+                          </g>
+                        );
+                      });
+                    })()}
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {chartData.dailyVolume.reduce((sum, day) => sum + day.transactions, 0).toLocaleString()}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Total</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="mt-4 space-y-2">
-                {chartData.dailyVolume.map((day, index) => {
-                  const gradients = [
-                    'from-blue-500 to-blue-600',
-                    'from-indigo-500 to-indigo-600',
-                    'from-purple-500 to-purple-600',
-                    'from-fuchsia-500 to-fuchsia-600',
-                    'from-pink-500 to-pink-600',
-                    'from-rose-500 to-rose-600',
-                    'from-red-500 to-red-600'
-                  ];
-                  return (
-                    <div 
-                      key={index} 
-                      className={`flex items-center justify-between p-2 rounded-lg transition-all duration-300 cursor-pointer ${
-                        activeDailySegment === index 
-                          ? 'bg-gradient-to-r ' + gradients[index % gradients.length] + ' text-white shadow-lg scale-105' 
-                          : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                      }`}
-                      onMouseEnter={() => setActiveDailySegment(index)}
-                      onMouseLeave={() => setActiveDailySegment(null)}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <div className={`w-3 h-3 rounded-full bg-gradient-to-br ${gradients[index % gradients.length]} shadow-md`}></div>
-                        <span className={`text-sm font-medium ${activeDailySegment === index ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}>
-                          {day.name}
-                        </span>
+                <div className="mt-4 space-y-2">
+                  {chartData.dailyVolume.map((day, index) => {
+                    const gradients = [
+                      'from-blue-500 to-blue-600',
+                      'from-indigo-500 to-indigo-600',
+                      'from-purple-500 to-purple-600',
+                      'from-fuchsia-500 to-fuchsia-600',
+                      'from-pink-500 to-pink-600',
+                      'from-rose-500 to-rose-600',
+                      'from-red-500 to-red-600'
+                    ];
+                    return (
+                      <div 
+                        key={index} 
+                        className={`flex items-center justify-between p-2 rounded-lg transition-all duration-300 cursor-pointer ${
+                          activeDailySegment === index 
+                            ? 'bg-gradient-to-r ' + gradients[index % gradients.length] + ' text-white shadow-lg scale-105' 
+                            : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                        }`}
+                        onMouseEnter={() => setActiveDailySegment(index)}
+                        onMouseLeave={() => setActiveDailySegment(null)}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <div className={`w-3 h-3 rounded-full bg-gradient-to-br ${gradients[index % gradients.length]} shadow-md`}></div>
+                          <span className={`text-sm font-medium ${activeDailySegment === index ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                            {day.name}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <span className={`text-sm font-bold ${activeDailySegment === index ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                            {day.transactions.toLocaleString()}
+                          </span>
+                          <span className={`text-xs ml-2 ${activeDailySegment === index ? 'text-white/90' : 'text-gray-500 dark:text-gray-400'}`}>
+                            ₹{(day.amount / 1000).toFixed(0)}K
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <span className={`text-sm font-bold ${activeDailySegment === index ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
-                          {day.transactions.toLocaleString()}
-                        </span>
-                        <span className={`text-xs ml-2 ${activeDailySegment === index ? 'text-white/90' : 'text-gray-500 dark:text-gray-400'}`}>
-                          ₹{(day.amount / 1000).toFixed(0)}K
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Service Distribution Pie Chart */}
