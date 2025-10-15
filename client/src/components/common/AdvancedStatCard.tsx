@@ -116,10 +116,11 @@ export default function AdvancedStatCard({
 
   return (
     <div 
-      className={`group relative rounded-2xl p-4 sm:p-5 lg:p-6 border hover-lift transition-all duration-300 overflow-hidden min-h-[140px] w-full flex flex-col ${
+      className={`group relative rounded-2xl p-4 sm:p-5 lg:p-6 border hover-lift transition-all duration-300 overflow-hidden h-[160px] w-full flex flex-col ${
         onClick ? 'cursor-pointer' : ''
       } ${colorClasses[color].cardBg} ${colorClasses[color].border}`}
       onClick={onClick}
+      style={{ minHeight: '160px', maxHeight: '160px' }}
     >
       {/* Animated Background Gradient */}
       <div className={`absolute inset-0 bg-gradient-to-br ${colorClasses[color].gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>

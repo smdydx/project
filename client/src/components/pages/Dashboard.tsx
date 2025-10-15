@@ -366,7 +366,7 @@ export default function Dashboard() {
         >
           <div className="flex space-x-3 sm:space-x-4 lg:space-x-6 pb-4">
             {allStatCards.map((card, index) => (
-              <div key={index} className="flex-shrink-0 w-[85vw] sm:w-[45vw] md:w-[30vw] lg:w-80" data-testid={`stat-card-${index}`}>
+              <div key={index} className="flex-shrink-0 w-[85vw] sm:w-[45vw] md:w-[350px] lg:w-[350px]" data-testid={`stat-card-${index}`}>
                 <AdvancedStatCard
                   title={card.title}
                   subtitle={card.subtitle}
