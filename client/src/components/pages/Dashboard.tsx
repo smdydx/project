@@ -366,37 +366,7 @@ export default function Dashboard() {
 
       <div className="relative">
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Key Metrics</h2>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-                className={`p-2 rounded-lg transition-all duration-200 ${
-                  isAutoPlaying 
-                    ? 'bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400' 
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-                }`}
-                title={isAutoPlaying ? 'Pause Auto-slide' : 'Resume Auto-slide'}
-              >
-                {isAutoPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={prevSlide}
-              className="p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-110 shadow-md"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={nextSlide}
-              className="p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-110 shadow-md"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Key Metrics</h2>
         </div>
 
         <div 
@@ -426,15 +396,28 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* First Row: Charts (4/5) and User Registrations (1/5) */}
+      {/* First Row: Charts (3/5) and User Registrations (2/5) */}
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-        {/* Charts Container - 4/5 width */}
-        <div className="xl:col-span-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Daily Transaction Volume Pie Chart */}
-            <Card title="Daily Transaction Volume" className="hover-lift">
-              <div className="relative w-full aspect-square max-w-md mx-auto">
-                <svg viewBox="0 0 240 240" className="w-full h-full transform -rotate-90">
+        {/* Charts Container - 3/5 width */}
+        <div className="xl:col-span-3">
+          <Card title="Daily Transaction Volume & Service Distribution" className="hover-lift relative overflow-hidden">
+            {/* Indian Root/Leaf Design Background */}
+            <div className="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none">
+              <svg className="w-full h-full" viewBox="0 0 400 400" fill="none">
+                <path d="M200 50 Q250 100 200 150 Q150 100 200 50" fill="currentColor" className="text-orange-500"/>
+                <path d="M200 150 Q250 200 200 250 Q150 200 200 150" fill="currentColor" className="text-green-600"/>
+                <path d="M200 250 Q250 300 200 350 Q150 300 200 250" fill="currentColor" className="text-orange-500"/>
+                <path d="M100 150 Q80 180 100 210 Q120 180 100 150" fill="currentColor" className="text-green-600"/>
+                <path d="M300 150 Q320 180 300 210 Q280 180 300 150" fill="currentColor" className="text-orange-500"/>
+              </svg>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative z-10">
+              {/* Daily Transaction Volume Pie Chart */}
+              <div>
+                <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4">Daily Transaction Volume</h4>
+                <div className="relative w-full aspect-square max-w-[200px] mx-auto">
+                <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
                   <defs>
                     {chartData.dailyVolume.map((_, index) => {
                       const gradientId = `dailyGradient${index}`;
@@ -469,18 +452,18 @@ export default function Dashboard() {
                       const startAngle = currentAngle;
                       const endAngle = currentAngle + angle;
                       
-                      const outerRadius = activeDailySegment === index ? 95 : 85;
-                      const innerRadius = 50;
+                      const outerRadius = activeDailySegment === index ? 85 : 75;
+                      const innerRadius = 45;
                       
-                      const startOuterX = 120 + outerRadius * Math.cos((startAngle * Math.PI) / 180);
-                      const startOuterY = 120 + outerRadius * Math.sin((startAngle * Math.PI) / 180);
-                      const endOuterX = 120 + outerRadius * Math.cos((endAngle * Math.PI) / 180);
-                      const endOuterY = 120 + outerRadius * Math.sin((endAngle * Math.PI) / 180);
+                      const startOuterX = 100 + outerRadius * Math.cos((startAngle * Math.PI) / 180);
+                      const startOuterY = 100 + outerRadius * Math.sin((startAngle * Math.PI) / 180);
+                      const endOuterX = 100 + outerRadius * Math.cos((endAngle * Math.PI) / 180);
+                      const endOuterY = 100 + outerRadius * Math.sin((endAngle * Math.PI) / 180);
                       
-                      const startInnerX = 120 + innerRadius * Math.cos((endAngle * Math.PI) / 180);
-                      const startInnerY = 120 + innerRadius * Math.sin((endAngle * Math.PI) / 180);
-                      const endInnerX = 120 + innerRadius * Math.cos((startAngle * Math.PI) / 180);
-                      const endInnerY = 120 + innerRadius * Math.sin((startAngle * Math.PI) / 180);
+                      const startInnerX = 100 + innerRadius * Math.cos((endAngle * Math.PI) / 180);
+                      const startInnerY = 100 + innerRadius * Math.sin((endAngle * Math.PI) / 180);
+                      const endInnerX = 100 + innerRadius * Math.cos((startAngle * Math.PI) / 180);
+                      const endInnerY = 100 + innerRadius * Math.sin((startAngle * Math.PI) / 180);
                       
                       const largeArc = angle > 180 ? 1 : 0;
                       const path = `M ${startOuterX} ${startOuterY} A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${endOuterX} ${endOuterY} L ${startInnerX} ${startInnerY} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${endInnerX} ${endInnerY} Z`;
@@ -507,14 +490,14 @@ export default function Dashboard() {
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="text-center">
-                    <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
                       {chartData.dailyVolume.reduce((sum, day) => sum + day.transactions, 0).toLocaleString()}
                     </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Total Transactions</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Total</p>
                   </div>
                 </div>
               </div>
-              <div className="mt-8 space-y-3">
+              <div className="mt-4 space-y-2">
                 {chartData.dailyVolume.map((day, index) => {
                   const gradients = [
                     'from-blue-500 to-blue-600',
@@ -528,7 +511,7 @@ export default function Dashboard() {
                   return (
                     <div 
                       key={index} 
-                      className={`flex items-center justify-between p-3 rounded-xl transition-all duration-300 cursor-pointer ${
+                      className={`flex items-center justify-between p-2 rounded-lg transition-all duration-300 cursor-pointer ${
                         activeDailySegment === index 
                           ? 'bg-gradient-to-r ' + gradients[index % gradients.length] + ' text-white shadow-lg scale-105' 
                           : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
@@ -536,17 +519,17 @@ export default function Dashboard() {
                       onMouseEnter={() => setActiveDailySegment(index)}
                       onMouseLeave={() => setActiveDailySegment(null)}
                     >
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-4 h-4 rounded-full bg-gradient-to-br ${gradients[index % gradients.length]} shadow-md`}></div>
-                        <span className={`font-medium ${activeDailySegment === index ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-3 h-3 rounded-full bg-gradient-to-br ${gradients[index % gradients.length]} shadow-md`}></div>
+                        <span className={`text-sm font-medium ${activeDailySegment === index ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}>
                           {day.name}
                         </span>
                       </div>
                       <div className="text-right">
-                        <span className={`font-bold ${activeDailySegment === index ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                        <span className={`text-sm font-bold ${activeDailySegment === index ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
                           {day.transactions.toLocaleString()}
                         </span>
-                        <span className={`text-sm ml-2 ${activeDailySegment === index ? 'text-white/90' : 'text-gray-500 dark:text-gray-400'}`}>
+                        <span className={`text-xs ml-2 ${activeDailySegment === index ? 'text-white/90' : 'text-gray-500 dark:text-gray-400'}`}>
                           ₹{(day.amount / 1000).toFixed(0)}K
                         </span>
                       </div>
@@ -554,12 +537,12 @@ export default function Dashboard() {
                   );
                 })}
               </div>
-            </Card>
 
-            {/* Service Distribution Pie Chart */}
-            <Card title="Service Distribution" className="hover-lift">
-              <div className="relative w-full aspect-square max-w-md mx-auto">
-                <svg viewBox="0 0 240 240" className="w-full h-full transform -rotate-90">
+              {/* Service Distribution Pie Chart */}
+              <div className="mt-6">
+                <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4">Service Distribution</h4>
+                <div className="relative w-full aspect-square max-w-[200px] mx-auto">
+                <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
                   <defs>
                     {chartData.serviceDistribution.map((service, index) => {
                       const gradientId = `serviceGradient${index}`;
@@ -595,18 +578,18 @@ export default function Dashboard() {
                       const startAngle = currentAngle;
                       const endAngle = currentAngle + angle;
                       
-                      const outerRadius = activeServiceSegment === index ? 95 : 85;
-                      const innerRadius = 50;
+                      const outerRadius = activeServiceSegment === index ? 85 : 75;
+                      const innerRadius = 45;
                       
-                      const startOuterX = 120 + outerRadius * Math.cos((startAngle * Math.PI) / 180);
-                      const startOuterY = 120 + outerRadius * Math.sin((startAngle * Math.PI) / 180);
-                      const endOuterX = 120 + outerRadius * Math.cos((endAngle * Math.PI) / 180);
-                      const endOuterY = 120 + outerRadius * Math.sin((endAngle * Math.PI) / 180);
+                      const startOuterX = 100 + outerRadius * Math.cos((startAngle * Math.PI) / 180);
+                      const startOuterY = 100 + outerRadius * Math.sin((startAngle * Math.PI) / 180);
+                      const endOuterX = 100 + outerRadius * Math.cos((endAngle * Math.PI) / 180);
+                      const endOuterY = 100 + outerRadius * Math.sin((endAngle * Math.PI) / 180);
                       
-                      const startInnerX = 120 + innerRadius * Math.cos((endAngle * Math.PI) / 180);
-                      const startInnerY = 120 + innerRadius * Math.sin((endAngle * Math.PI) / 180);
-                      const endInnerX = 120 + innerRadius * Math.cos((startAngle * Math.PI) / 180);
-                      const endInnerY = 120 + innerRadius * Math.sin((startAngle * Math.PI) / 180);
+                      const startInnerX = 100 + innerRadius * Math.cos((endAngle * Math.PI) / 180);
+                      const startInnerY = 100 + innerRadius * Math.sin((endAngle * Math.PI) / 180);
+                      const endInnerX = 100 + innerRadius * Math.cos((startAngle * Math.PI) / 180);
+                      const endInnerY = 100 + innerRadius * Math.sin((startAngle * Math.PI) / 180);
                       
                       const largeArc = angle > 180 ? 1 : 0;
                       const path = `M ${startOuterX} ${startOuterY} A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${endOuterX} ${endOuterY} L ${startInnerX} ${startInnerY} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${endInnerX} ${endInnerY} Z`;
@@ -633,12 +616,12 @@ export default function Dashboard() {
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="text-center">
-                    <p className="text-3xl font-bold text-gray-900 dark:text-white">100%</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Services</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">100%</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Services</p>
                   </div>
                 </div>
               </div>
-              <div className="mt-8 space-y-3">
+              <div className="mt-4 space-y-2">
                 {chartData.serviceDistribution.map((service, index) => {
                   const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
                   const gradients = [
@@ -651,7 +634,7 @@ export default function Dashboard() {
                   return (
                     <div 
                       key={index} 
-                      className={`flex items-center justify-between p-3 rounded-xl transition-all duration-300 cursor-pointer ${
+                      className={`flex items-center justify-between p-2 rounded-lg transition-all duration-300 cursor-pointer ${
                         activeServiceSegment === index 
                           ? 'bg-gradient-to-r ' + gradients[index % gradients.length] + ' text-white shadow-lg scale-105' 
                           : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
@@ -659,28 +642,28 @@ export default function Dashboard() {
                       onMouseEnter={() => setActiveServiceSegment(index)}
                       onMouseLeave={() => setActiveServiceSegment(null)}
                     >
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-2">
                         <div 
-                          className="w-4 h-4 rounded-full shadow-md" 
+                          className="w-3 h-3 rounded-full shadow-md" 
                           style={{ background: `linear-gradient(135deg, ${colors[index % colors.length]}, ${colors[index % colors.length]}dd)` }}
                         ></div>
-                        <span className={`font-medium ${activeServiceSegment === index ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                        <span className={`text-sm font-medium ${activeServiceSegment === index ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}>
                           {service.name}
                         </span>
                       </div>
-                      <span className={`font-bold text-lg ${activeServiceSegment === index ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                      <span className={`text-sm font-bold ${activeServiceSegment === index ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
                         {service.value}%
                       </span>
                     </div>
                   );
                 })}
               </div>
-            </Card>
-          </div>
+            </div>
+          </Card>
         </div>
 
-        {/* Live User Registrations - 1/5 width */}
-        <div className="xl:col-span-1">
+        {/* Live User Registrations - 2/5 width */}
+        <div className="xl:col-span-2">
           <RealtimeUserRegistrations />
         </div>
       </div>
