@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Route, Switch } from 'wouter';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
@@ -11,37 +12,13 @@ import Reports from './components/pages/Reports';
 import Settings from './components/pages/Settings';
 
 function AppContent() {
-  const [activeTab, setActiveTab] = useState('dashboard');
   const [dateFilter, setDateFilter] = useState('today');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return <Dashboard />;
-      case 'billers':
-        return <BillersManagement />;
-      case 'users':
-        return <UserManagement />;
-      case 'transactions':
-        return <Transactions />;
-      case 'complaints':
-        return <Complaints />;
-      case 'reports':
-        return <Reports />;
-      case 'settings':
-        return <Settings />;
-      default:
-        return <Dashboard />;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       <Sidebar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab}
         isMobileOpen={isMobileSidebarOpen}
         onMobileClose={() => setIsMobileSidebarOpen(false)}
         isCollapsed={isSidebarCollapsed}
@@ -58,7 +35,16 @@ function AppContent() {
         isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'
       }`}>
         <div className="max-w-7xl mx-auto">
-          {renderContent()}
+          <Switch>
+            <Route path="/" component={Dashboard} />
+            <Route path="/billers" component={BillersManagement} />
+            <Route path="/users" component={UserManagement} />
+            <Route path="/transactions" component={Transactions} />
+            <Route path="/complaints" component={Complaints} />
+            <Route path="/reports" component={Reports} />
+            <Route path="/settings" component={Settings} />
+            <Route component={Dashboard} />
+          </Switch>
         </div>
       </main>
     </div>

@@ -1,4 +1,3 @@
-import React from 'react';
 import { 
   LayoutDashboard, 
   Building2, 
@@ -14,10 +13,9 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
+import { Link, useLocation } from 'wouter';
 
 interface SidebarProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
   isMobileOpen?: boolean;
   onMobileClose?: () => void;
   isCollapsed?: boolean;
@@ -25,31 +23,24 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'billers', label: 'Billers Management', icon: Building2 },
-  { id: 'users', label: 'User Management', icon: Users },
-  { id: 'transactions', label: 'Transactions', icon: CreditCard },
-  { id: 'complaints', label: 'Complaints', icon: MessageSquare },
-  { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 },
-  { id: 'categories', label: 'Service Categories', icon: Grid3X3 },
-  { id: 'reconciliation', label: 'Reconciliation', icon: GitCompare },
-  { id: 'settings', label: 'Settings', icon: Settings },
+  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/billers', label: 'Billers Management', icon: Building2 },
+  { path: '/users', label: 'User Management', icon: Users },
+  { path: '/transactions', label: 'Transactions', icon: CreditCard },
+  { path: '/complaints', label: 'Complaints', icon: MessageSquare },
+  { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
+  { path: '/categories', label: 'Service Categories', icon: Grid3X3 },
+  { path: '/reconciliation', label: 'Reconciliation', icon: GitCompare },
+  { path: '/settings', label: 'Settings', icon: Settings },
 ];
 
 export default function Sidebar({ 
-  activeTab, 
-  setActiveTab, 
   isMobileOpen = false, 
   onMobileClose,
   isCollapsed = false,
   onToggleCollapse
 }: SidebarProps) {
-  const handleItemClick = (itemId: string) => {
-    setActiveTab(itemId);
-    if (onMobileClose) {
-      onMobileClose();
-    }
-  };
+  const [location] = useLocation();
 
   return (
     <>
@@ -113,25 +104,27 @@ export default function Sidebar({
         }`}>
           {menuItems.map((item) => {
             const Icon = item.icon;
+            const isActive = location === item.path;
             return (
-              <div key={item.id} className="relative group">
-                <button
-                  onClick={() => handleItemClick(item.id)}
+              <div key={item.path} className="relative group">
+                <Link
+                  href={item.path}
+                  onClick={onMobileClose}
                   className={`w-full flex items-center text-left transition-all duration-200 mb-1 rounded-lg relative overflow-hidden ${
                     isCollapsed ? 'lg:justify-center lg:px-3 lg:py-4' : 'space-x-3 px-3 py-3'
                   } ${
-                    activeTab === item.id
+                    isActive
                       ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-400 shadow-lg'
                       : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                   }`}
                 >
                   {/* Active indicator */}
-                  {activeTab === item.id && (
+                  {isActive && (
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-r-full"></div>
                   )}
                   
                   <Icon className={`flex-shrink-0 transition-all duration-200 ${
-                    activeTab === item.id ? 'w-6 h-6' : 'w-5 h-5'
+                    isActive ? 'w-6 h-6' : 'w-5 h-5'
                   }`} />
                   
                   <span className={`font-medium truncate transition-all duration-300 ${
@@ -139,7 +132,7 @@ export default function Sidebar({
                   }`}>
                     {item.label}
                   </span>
-                </button>
+                </Link>
 
                 {/* Tooltip for collapsed state */}
                 {isCollapsed && (
