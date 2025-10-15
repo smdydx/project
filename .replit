@@ -11,7 +11,7 @@ run = ["npm", "run", "start"]
 build = ["npm", "run", "build"]
 
 [workflows]
-runButton = "Project"
+runButton = "Run FastAPI Backend"
 
 [[workflows.workflow]]
 name = "Project"
@@ -40,9 +40,22 @@ mode = "sequential"
 task = "shell.exec"
 args = "python -m backend.run"
 
+[[workflows.workflow]]
+name = "Run FastAPI Backend"
+author = 48675141
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python -m backend.run"
+
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 8000
+externalPort = 8000
 
 [[ports]]
 localPort = 34693
