@@ -60,11 +60,13 @@ export function useWebSocket(channel: string) {
     connect();
 
     return () => {
-      if (wsRef.current) {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
         wsRef.current.send(JSON.stringify({
           type: 'unsubscribe',
           channel
         }));
+        wsRef.current.close();
+      } else if (wsRef.current) {
         wsRef.current.close();
       }
     };
