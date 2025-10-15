@@ -4,7 +4,6 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import Dashboard from './components/pages/Dashboard';
-import BillersManagement from './components/pages/BillersManagement';
 import UserManagement from './components/pages/UserManagement';
 import AllUsers from './components/pages/AllUsers';
 import NewSignUp from './components/pages/NewSignUp';
@@ -44,7 +43,6 @@ function AppContent() {
             <Route path="/users/all" component={AllUsers} />
             <Route path="/users/new-signup" component={NewSignUp} />
             <Route path="/users/kyc" component={KYCVerification} />
-            <Route path="/billers" component={BillersManagement} />
             <Route path="/transactions" component={Transactions} />
             <Route path="/complaints" component={Complaints} />
             <Route path="/reports" component={Reports} />

@@ -1,6 +1,5 @@
 import { 
   LayoutDashboard, 
-  Building2, 
   Users, 
   CreditCard, 
   MessageSquare, 
@@ -17,7 +16,8 @@ import {
   Smartphone,
   Tv,
   UserCheck,
-  UserPlus
+  UserPlus,
+  Shield
 } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import { useState } from 'react';
@@ -38,7 +38,6 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/billers', label: 'Billers Management', icon: Building2 },
   { 
     path: '/users', 
     label: 'User Management', 
