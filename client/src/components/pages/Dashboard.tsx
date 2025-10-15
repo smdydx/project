@@ -412,9 +412,9 @@ export default function Dashboard() {
               </svg>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative z-10">
+            <div className="flex flex-col gap-6 relative z-10 h-full">
               {/* Daily Transaction Volume Pie Chart */}
-              <div>
+              <div className="flex-1">
                 <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4">Daily Transaction Volume</h4>
                 <div className="relative w-full aspect-square max-w-[200px] mx-auto">
                   <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
@@ -540,7 +540,7 @@ export default function Dashboard() {
               </div>
 
               {/* Service Distribution Pie Chart */}
-              <div className="mt-6">
+              <div className="flex-1">
                 <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4">Service Distribution</h4>
                 <div className="relative w-full aspect-square max-w-[200px] mx-auto">
                 <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
