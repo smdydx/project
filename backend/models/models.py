@@ -116,7 +116,8 @@ class User(Base):
         back_populates="receiver",
         foreign_keys="P2PTransaction.transaction_to",
     )
-
+    
+    
     async def get_wallet_balance(self, session) -> Decimal:
         stmt = select(func.sum(Wallet.transaction_amount)) \
             .where(Wallet.transaction_by == self.UserID,
@@ -142,7 +143,8 @@ class IncomeDistribution(Base):
     reward = Column(DECIMAL(10, 5))
     package_amount = Column(DECIMAL(10, 5))
     set_date = Column(DateTime(timezone=True), default=get_ist_time)
-
+    
+    
     async def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
@@ -392,8 +394,8 @@ class OTPStore(Base):
     otp = Column(String(255), nullable=False)
     expiry_time = Column(DateTime(timezone=True))
     created_at = Column(DateTime(timezone=True), default=get_ist_time)
-
-
+    
+    
 # ============================= WALLET & P2P =============================
 class Wallet(Base):
     __tablename__ = "wallet"
