@@ -14,27 +14,6 @@ from backend.schemas.dashboard import (
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
-# Mock data endpoints (temporary in-memory data)
-@router.get("/mock/stats")
-async def get_mock_stats() -> Dict[str, Any]:
-    """Get mock dashboard statistics from in-memory data"""
-    return MockDataService.get_dashboard_stats()
-
-@router.get("/mock/transactions")
-async def get_mock_transactions() -> List[Dict[str, Any]]:
-    """Get mock live transactions from in-memory data"""
-    return MockDataService.get_live_transactions()
-
-@router.get("/mock/users")
-async def get_mock_users() -> List[Dict[str, Any]]:
-    """Get mock recent users from in-memory data"""
-    return MockDataService.get_recent_users()
-
-@router.get("/mock/charts")
-async def get_mock_charts() -> Dict[str, Any]:
-    """Get mock chart data from in-memory data"""
-    return MockDataService.get_chart_data()
-
 @router.get("/stats", response_model=DashboardStatsResponse)
 async def get_dashboard_stats(db: Session = Depends(get_db)):
     """

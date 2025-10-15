@@ -1,5 +1,6 @@
 import { type Express } from "express";
 import { MemStorage } from "./storage";
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 export function registerRoutes(app: Express) {
   const storage = new MemStorage();
@@ -78,11 +79,11 @@ export function registerRoutes(app: Express) {
     try {
       const id = parseInt(req.params.id);
       const user = await storage.getUserById(id);
-      
+
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-      
+
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -94,7 +95,7 @@ export function registerRoutes(app: Express) {
   app.get("/api/dashboard/charts", async (_req, res) => {
     try {
       const stats = await storage.getDashboardStats();
-      
+
       // Generate chart data in the format expected by frontend
       const chartData = {
         dailyVolume: [
@@ -115,11 +116,24 @@ export function registerRoutes(app: Express) {
           { name: 'Broadband', value: 12, color: '#8B5CF6' }
         ]
       };
-      
+
       res.json(chartData);
     } catch (error) {
       console.error("Error fetching chart data:", error);
       res.status(500).json({ error: "Failed to fetch chart data" });
     }
   });
+
+  // Proxy API requests to Python backend with real database
+  app.use('/api/v1', createProxyMiddleware({
+    target: 'http://localhost:8000',
+    changeOrigin: true,
+    onProxyReq: (proxyReq, req, res) => {
+      console.log(`Proxying to real DB: ${req.method} ${req.path}`);
+    },
+    onError: (err, req, res) => {
+      console.error('Backend API error:', err);
+      res.status(500).json({ error: 'Database connection failed. Please check backend server.' });
+    }
+  }));
 }

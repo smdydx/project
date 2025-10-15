@@ -20,7 +20,7 @@ class DashboardService:
 
     @staticmethod
     def get_dashboard_stats(db: Session) -> DashboardStatsResponse:
-        """Get comprehensive dashboard statistics"""
+        """Get comprehensive dashboard statistics with real-time data"""
 
         # Total registered users (not deleted)
         total_users = db.query(func.count(User.UserID)).filter(
