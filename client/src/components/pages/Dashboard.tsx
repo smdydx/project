@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   CreditCard, DollarSign, MessageSquare, TrendingUp, 
@@ -12,6 +11,7 @@ import AdvancedRealtimeTable from '../common/RealtimeTable';
 import RealtimeUserRegistrations from '../common/RealtimeUserRegistrations';
 import { mockStats, chartData, liveTransactionPool, mockTransactions, mockComplaints } from '../../data/mockData';
 import { LiveTransaction } from '../../types';
+import { apiService } from '../../services/api';
 
 export default function Dashboard() {
   const [currentTransactions, setCurrentTransactions] = useState<LiveTransaction[]>([]);
@@ -21,11 +21,53 @@ export default function Dashboard() {
   const [activeServiceSegment, setActiveServiceSegment] = useState<number | null>(null);
   const [activeDailySegment, setActiveDailySegment] = useState<number | null>(null);
 
+  // Fetch data from backend
+  const [stats, setStats] = useState<any>(null);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [statsData, transactionsData, usersData] = await Promise.all([
+          apiService.getDashboardStats(),
+          apiService.getLiveTransactions(),
+          apiService.getRecentUsers()
+        ]);
+
+        setStats(statsData);
+        setTransactions(transactionsData);
+        setUsers(usersData);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-xl">Loading dashboard...</div>
+      </div>
+    );
+  }
+
+
   const allStatCards = [
     {
       title: "Total Users",
       subtitle: "Registered base",
-      value: mockStats.totalRegisteredUsers,
+      value: stats?.total_users?.toLocaleString() || '0',
       icon: Users,
       trend: { value: 5.7, isPositive: true, period: 'vs last month' },
       color: "blue" as const
@@ -33,7 +75,7 @@ export default function Dashboard() {
     {
       title: "Total New SignUp",
       subtitle: "Today's growth",
-      value: mockStats.newUsersToday,
+      value: mockStats.newUsersToday, // This might need to be updated from backend if available
       icon: UserPlus,
       trend: { value: 23.4, isPositive: true, period: 'vs yesterday' },
       color: "green" as const
@@ -41,7 +83,7 @@ export default function Dashboard() {
     {
       title: "Total KYC Verified User",
       subtitle: "Verified accounts",
-      value: "94.2%",
+      value: "94.2%", // This might need to be updated from backend if available
       icon: CheckCircle,
       trend: { value: 2.1, isPositive: true, period: 'vs yesterday' },
       color: "purple" as const
@@ -49,7 +91,7 @@ export default function Dashboard() {
     {
       title: "Total Prime User",
       subtitle: "Premium members",
-      value: 2847,
+      value: stats?.prime_users?.toLocaleString() || '0',
       icon: Zap,
       trend: { value: 5.8, isPositive: true, period: 'vs yesterday' },
       color: "yellow" as const
@@ -57,7 +99,7 @@ export default function Dashboard() {
     {
       title: "Total Distributor LCR Money",
       subtitle: "LCR balance",
-      value: mockStats.totalAmountProcessed,
+      value: `₹${stats?.total_lcr_money?.toLocaleString() || '0'}`,
       icon: DollarSign,
       trend: { value: 8.2, isPositive: true, period: 'vs yesterday' },
       color: "green" as const
@@ -65,7 +107,7 @@ export default function Dashboard() {
     {
       title: "Total Distributor Prime Reward",
       subtitle: "Rewards earned",
-      value: 1247,
+      value: 1247, // This might need to be updated from backend if available
       icon: Activity,
       trend: { value: 18.3, isPositive: true, period: 'vs yesterday' },
       color: "red" as const
@@ -73,7 +115,7 @@ export default function Dashboard() {
     {
       title: "Total Mobile Recharge",
       subtitle: "Recharge volume",
-      value: mockStats.totalTransactionsToday,
+      value: stats?.mobile_recharges?.toLocaleString() || '0',
       icon: Smartphone,
       trend: { value: 12.5, isPositive: true, period: 'vs yesterday' },
       color: "indigo" as const
@@ -81,7 +123,7 @@ export default function Dashboard() {
     {
       title: "Total DTH Recharge",
       subtitle: "DTH services",
-      value: "67.8%",
+      value: "67.8%", // This might need to be updated from backend if available
       icon: Globe,
       trend: { value: 12.4, isPositive: true, period: 'vs last week' },
       color: "pink" as const
@@ -101,7 +143,7 @@ export default function Dashboard() {
       if (container) {
         const maxScroll = container.scrollWidth - container.clientWidth;
         const currentScroll = container.scrollLeft;
-        
+
         if (currentScroll >= maxScroll - 10) {
           container.scrollTo({ left: 0, behavior: 'smooth' });
         } else {
@@ -441,35 +483,35 @@ export default function Dashboard() {
                         <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.3"/>
                       </filter>
                     </defs>
-                    
+
                     {(() => {
                       const total = chartData.dailyVolume.reduce((sum, day) => sum + day.transactions, 0);
                       let currentAngle = 0;
-                      
+
                       return chartData.dailyVolume.map((day, index) => {
                         const percentage = (day.transactions / total) * 100;
                         const angle = (percentage / 100) * 360;
                         const startAngle = currentAngle;
                         const endAngle = currentAngle + angle;
-                        
+
                         const outerRadius = activeDailySegment === index ? 85 : 75;
                         const innerRadius = 45;
-                        
+
                         const startOuterX = 100 + outerRadius * Math.cos((startAngle * Math.PI) / 180);
                         const startOuterY = 100 + outerRadius * Math.sin((startAngle * Math.PI) / 180);
                         const endOuterX = 100 + outerRadius * Math.cos((endAngle * Math.PI) / 180);
                         const endOuterY = 100 + outerRadius * Math.sin((endAngle * Math.PI) / 180);
-                        
+
                         const startInnerX = 100 + innerRadius * Math.cos((endAngle * Math.PI) / 180);
                         const startInnerY = 100 + innerRadius * Math.sin((endAngle * Math.PI) / 180);
                         const endInnerX = 100 + innerRadius * Math.cos((startAngle * Math.PI) / 180);
                         const endInnerY = 100 + innerRadius * Math.sin((startAngle * Math.PI) / 180);
-                        
+
                         const largeArc = angle > 180 ? 1 : 0;
                         const path = `M ${startOuterX} ${startOuterY} A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${endOuterX} ${endOuterY} L ${startInnerX} ${startInnerY} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${endInnerX} ${endInnerY} Z`;
-                        
+
                         currentAngle = endAngle;
-                        
+
                         return (
                           <g key={index} className="transition-all duration-300">
                             <path
@@ -569,34 +611,34 @@ export default function Dashboard() {
                       </feMerge>
                     </filter>
                   </defs>
-                  
+
                   {(() => {
                     let currentAngle = 0;
-                    
+
                     return chartData.serviceDistribution.map((service, index) => {
                       const percentage = service.value;
                       const angle = (percentage / 100) * 360;
                       const startAngle = currentAngle;
                       const endAngle = currentAngle + angle;
-                      
+
                       const outerRadius = activeServiceSegment === index ? 85 : 75;
                       const innerRadius = 45;
-                      
+
                       const startOuterX = 100 + outerRadius * Math.cos((startAngle * Math.PI) / 180);
                       const startOuterY = 100 + outerRadius * Math.sin((startAngle * Math.PI) / 180);
                       const endOuterX = 100 + outerRadius * Math.cos((endAngle * Math.PI) / 180);
                       const endOuterY = 100 + outerRadius * Math.sin((endAngle * Math.PI) / 180);
-                      
+
                       const startInnerX = 100 + innerRadius * Math.cos((endAngle * Math.PI) / 180);
                       const startInnerY = 100 + innerRadius * Math.sin((endAngle * Math.PI) / 180);
                       const endInnerX = 100 + innerRadius * Math.cos((startAngle * Math.PI) / 180);
                       const endInnerY = 100 + innerRadius * Math.sin((startAngle * Math.PI) / 180);
-                      
+
                       const largeArc = angle > 180 ? 1 : 0;
                       const path = `M ${startOuterX} ${startOuterY} A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${endOuterX} ${endOuterY} L ${startInnerX} ${startInnerY} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${endInnerX} ${endInnerY} Z`;
-                      
+
                       currentAngle = endAngle;
-                      
+
                       return (
                         <g key={index} className="transition-all duration-300">
                           <path
@@ -677,8 +719,8 @@ export default function Dashboard() {
         <AdvancedRealtimeTable
           title="Live Transactions"
           columns={transactionColumns}
-          data={mockTransactions}
-          onDataUpdate={generateRealtimeTransactions}
+          data={transactions} // Use data from backend
+          onDataUpdate={generateRealtimeTransactions} // This might need to be replaced by a fetch from backend if transactions are real-time
           updateInterval={3000}
           searchPlaceholder="Search transactions..."
           showStats={true}
@@ -691,8 +733,8 @@ export default function Dashboard() {
         <AdvancedRealtimeTable
           title="Live Complaints"
           columns={complaintColumns}
-          data={mockComplaints}
-          onDataUpdate={generateRealtimeComplaints}
+          data={mockComplaints} // This might need to be updated from backend if complaints are real-time
+          onDataUpdate={generateRealtimeComplaints} // This might need to be replaced by a fetch from backend
           updateInterval={5000}
           searchPlaceholder="Search complaints..."
           showStats={true}
