@@ -687,34 +687,34 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 space-y-6">
-          <AdvancedRealtimeTable
-            title="Live Transactions"
-            columns={transactionColumns}
-            data={mockTransactions}
-            onDataUpdate={generateRealtimeTransactions}
-            updateInterval={3000}
-            searchPlaceholder="Search transactions..."
-            showStats={true}
-            enableAnimations={true}
-          />
+      {/* Live User Registrations - Full Width Row */}
+      <div className="w-full">
+        <RealtimeUserRegistrations />
+      </div>
 
-          <AdvancedRealtimeTable
-            title="Live Complaints"
-            columns={complaintColumns}
-            data={mockComplaints}
-            onDataUpdate={generateRealtimeComplaints}
-            updateInterval={5000}
-            searchPlaceholder="Search complaints..."
-            showStats={true}
-            enableAnimations={true}
-          />
-        </div>
+      {/* Live Transactions and Live Complaints - Two Column Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <AdvancedRealtimeTable
+          title="Live Transactions"
+          columns={transactionColumns}
+          data={mockTransactions}
+          onDataUpdate={generateRealtimeTransactions}
+          updateInterval={3000}
+          searchPlaceholder="Search transactions..."
+          showStats={true}
+          enableAnimations={true}
+        />
 
-        <div className="xl:col-span-1">
-          <RealtimeUserRegistrations />
-        </div>
+        <AdvancedRealtimeTable
+          title="Live Complaints"
+          columns={complaintColumns}
+          data={mockComplaints}
+          onDataUpdate={generateRealtimeComplaints}
+          updateInterval={5000}
+          searchPlaceholder="Search complaints..."
+          showStats={true}
+          enableAnimations={true}
+        />
       </div>
 
       {showNotificationModal && (
