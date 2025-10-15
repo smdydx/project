@@ -273,8 +273,7 @@ class OfflineKYC(Base):
     status = Column(String(50), default="pending", nullable=False)
     user_id = Column(Integer, ForeignKey("users.UserID"), nullable=False)
 
-
-user = relationship("User", back_populates="offlineKYC")
+    user = relationship("User", back_populates="offlineKYC")
     pan_offline_kyc = relationship("PanOfflineKYC", back_populates="offline_kyc", uselist=False)
 
 
