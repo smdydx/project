@@ -389,9 +389,6 @@ export default function Dashboard() {
               >
                 {isAutoPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               </button>
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                {currentCardIndex + 1} / {totalSlides}
-              </span>
             </div>
           </div>
 
@@ -412,56 +409,45 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Cards Container */}
+        {/* Cards Container - Horizontal Scroll with 4 Cards Visible */}
         <div 
           id="stats-scroll-container" 
-          className="overflow-x-auto scrollbar-hide flex transition-transform duration-1000 ease-in-out no-scrollbar"
+          className="overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-gray-200 dark:scrollbar-track-gray-700"
           style={{ scrollBehavior: 'smooth' }}
         >
-          <div className="flex w-full flex-shrink-0">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5 px-1 py-1">
-              {allStatCards.map((card, cardIndex) => (
-                <div 
-                  key={cardIndex}
-                  className="animate-slide-in-up w-full flex-shrink-0"
-                  style={{ animationDelay: `${cardIndex * 100}ms`, minWidth: '300px' }} 
-                >
-                  <AdvancedStatCard
-                    title={card.title}
-                    subtitle={card.subtitle}
-                    value={card.value}
-                    icon={card.icon}
-                    trend={card.trend}
-                    color={card.color}
-                    isLoading={isLoading}
-                  />
-                </div>
-              ))}
-            </div>
+          <div className="flex gap-4 pb-4">
+            {allStatCards.map((card, cardIndex) => (
+              <div 
+                key={cardIndex}
+                className="flex-shrink-0 w-[calc(25%-12px)] min-w-[280px]"
+                style={{ animationDelay: `${cardIndex * 100}ms` }} 
+              >
+                <AdvancedStatCard
+                  title={card.title}
+                  subtitle={card.subtitle}
+                  value={card.value}
+                  icon={card.icon}
+                  trend={card.trend}
+                  color={card.color}
+                  isLoading={isLoading}
+                />
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Slide Indicators */}
-        <div className="flex items-center justify-center space-x-2 mt-6">
-          {Array.from({ length: totalSlides }, (_, index) => (
-            <button
+        {/* Scroll Indicator */}
+        <div className="flex items-center justify-center space-x-1 mt-4">
+          {allStatCards.map((_, index) => (
+            <div
               key={index}
-              onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                index === currentCardIndex
-                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg scale-110'
-                  : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+              className={`h-1 rounded-full transition-all duration-300 ${
+                index < 4
+                  ? 'w-8 bg-gradient-to-r from-blue-500 to-indigo-600'
+                  : 'w-2 bg-gray-300 dark:bg-gray-600'
               }`}
             />
           ))}
-        </div>
-
-        {/* Progress Bar */}
-        <div className="mt-4 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 overflow-hidden">
-          <div 
-            className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500 ease-out"
-            style={{ width: `${((currentCardIndex + 1) / totalSlides) * 100}%` }}
-          />
         </div>
       </div>
 

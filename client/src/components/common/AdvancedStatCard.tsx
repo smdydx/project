@@ -99,14 +99,16 @@ export default function AdvancedStatCard({
 
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-5 lg:p-6 animate-pulse min-h-[160px]">
-        <div className="flex items-center justify-between">
-          <div className="space-y-3 flex-1">
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 hover-lift h-[140px]">
+        <div className="animate-pulse space-y-4 h-full flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+            <div className="w-16 h-6 bg-gray-200 dark:bg-gray-700 rounded"></div>
           </div>
-          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-200 dark:bg-gray-700 rounded-2xl flex-shrink-0"></div>
+          <div className="space-y-2">
+            <div className="w-24 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="w-32 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          </div>
         </div>
       </div>
     );
@@ -114,7 +116,7 @@ export default function AdvancedStatCard({
 
   return (
     <div 
-      className={`group relative rounded-2xl p-4 sm:p-5 lg:p-6 border hover-lift transition-all duration-300 overflow-hidden min-h-[160px] sm:min-h-[150px] lg:min-h-[160px] w-full flex flex-col ${
+      className={`group relative rounded-2xl p-4 sm:p-5 lg:p-6 border hover-lift transition-all duration-300 overflow-hidden min-h-[140px] w-full flex flex-col ${
         onClick ? 'cursor-pointer' : ''
       } ${colorClasses[color].cardBg} ${colorClasses[color].border}`}
       onClick={onClick}
