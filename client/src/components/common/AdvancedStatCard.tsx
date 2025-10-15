@@ -18,45 +18,45 @@ interface AdvancedStatCardProps {
 
 const colorClasses = {
   blue: {
-    gradient: 'from-blue-500 to-blue-700',
-    light: 'bg-blue-50 dark:bg-blue-900/20',
-    icon: 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-500/50',
+    gradient: 'from-blue-600 to-cyan-600',
+    light: 'bg-blue-50 dark:bg-blue-900/30',
+    icon: 'bg-gradient-to-br from-blue-600 to-cyan-600 shadow-xl shadow-blue-500/60',
     text: 'text-blue-600 dark:text-blue-400'
   },
   green: {
-    gradient: 'from-green-500 to-emerald-700',
-    light: 'bg-green-50 dark:bg-green-900/20',
-    icon: 'bg-gradient-to-br from-green-500 to-emerald-700 shadow-lg shadow-green-500/50',
+    gradient: 'from-green-600 to-teal-600',
+    light: 'bg-green-50 dark:bg-green-900/30',
+    icon: 'bg-gradient-to-br from-green-600 to-teal-600 shadow-xl shadow-green-500/60',
     text: 'text-green-600 dark:text-green-400'
   },
   purple: {
-    gradient: 'from-purple-500 to-violet-700',
-    light: 'bg-purple-50 dark:bg-purple-900/20',
-    icon: 'bg-gradient-to-br from-purple-500 to-violet-700 shadow-lg shadow-purple-500/50',
+    gradient: 'from-purple-600 to-indigo-600',
+    light: 'bg-purple-50 dark:bg-purple-900/30',
+    icon: 'bg-gradient-to-br from-purple-600 to-indigo-600 shadow-xl shadow-purple-500/60',
     text: 'text-purple-600 dark:text-purple-400'
   },
   yellow: {
-    gradient: 'from-yellow-500 to-orange-600',
-    light: 'bg-yellow-50 dark:bg-yellow-900/20',
-    icon: 'bg-gradient-to-br from-yellow-500 to-orange-600 shadow-lg shadow-yellow-500/50',
-    text: 'text-yellow-600 dark:text-yellow-400'
+    gradient: 'from-amber-500 to-orange-600',
+    light: 'bg-amber-50 dark:bg-amber-900/30',
+    icon: 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-xl shadow-amber-500/60',
+    text: 'text-amber-600 dark:text-amber-400'
   },
   red: {
-    gradient: 'from-red-500 to-pink-700',
-    light: 'bg-red-50 dark:bg-red-900/20',
-    icon: 'bg-gradient-to-br from-red-500 to-pink-700 shadow-lg shadow-red-500/50',
-    text: 'text-red-600 dark:text-red-400'
+    gradient: 'from-rose-600 to-red-600',
+    light: 'bg-rose-50 dark:bg-rose-900/30',
+    icon: 'bg-gradient-to-br from-rose-600 to-red-600 shadow-xl shadow-rose-500/60',
+    text: 'text-rose-600 dark:text-rose-400'
   },
   indigo: {
-    gradient: 'from-indigo-500 to-blue-700',
-    light: 'bg-indigo-50 dark:bg-indigo-900/20',
-    icon: 'bg-gradient-to-br from-indigo-500 to-blue-700 shadow-lg shadow-indigo-500/50',
+    gradient: 'from-indigo-600 to-violet-600',
+    light: 'bg-indigo-50 dark:bg-indigo-900/30',
+    icon: 'bg-gradient-to-br from-indigo-600 to-violet-600 shadow-xl shadow-indigo-500/60',
     text: 'text-indigo-600 dark:text-indigo-400'
   },
   pink: {
-    gradient: 'from-pink-500 to-rose-700',
-    light: 'bg-pink-50 dark:bg-pink-900/20',
-    icon: 'bg-gradient-to-br from-pink-500 to-rose-700 shadow-lg shadow-pink-500/50',
+    gradient: 'from-pink-600 to-fuchsia-600',
+    light: 'bg-pink-50 dark:bg-pink-900/30',
+    icon: 'bg-gradient-to-br from-pink-600 to-fuchsia-600 shadow-xl shadow-pink-500/60',
     text: 'text-pink-600 dark:text-pink-400'
   }
 };
@@ -101,7 +101,7 @@ export default function AdvancedStatCard({
 
   return (
     <div 
-      className={`group relative bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 lg:p-6 border border-gray-200 dark:border-gray-700 hover-lift transition-all duration-300 overflow-hidden ${
+      className={`group relative bg-white dark:bg-gray-800 rounded-2xl p-5 sm:p-6 lg:p-7 border border-gray-200 dark:border-gray-700 hover-lift transition-all duration-300 overflow-hidden min-h-[180px] sm:min-h-[200px] lg:min-h-[220px] ${
         onClick ? 'cursor-pointer' : ''
       } ${colorClasses[color].light}`}
       onClick={onClick}
@@ -110,50 +110,52 @@ export default function AdvancedStatCard({
       <div className={`absolute inset-0 bg-gradient-to-br ${colorClasses[color].gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
 
       {/* Content */}
-      <div className="relative z-10">
-        <div className="flex items-start justify-between mb-3 sm:mb-4">
+      <div className="relative z-10 h-full flex flex-col justify-between">
+        <div className="flex items-start justify-between mb-4 sm:mb-5">
           <div className="flex-1 min-w-0 pr-3">
-            <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 truncate">{subtitle}</p>
-            <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">{title}</h3>
+            <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2 truncate">{subtitle}</p>
+            <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 leading-tight">{title}</h3>
           </div>
-          <div className={`w-12 h-12 sm:w-14 sm:h-14 ${colorClasses[color].icon} rounded-xl flex items-center justify-center flex-shrink-0 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
-            <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+          <div className={`w-14 h-14 sm:w-16 sm:h-16 ${colorClasses[color].icon} rounded-xl flex items-center justify-center flex-shrink-0 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
+            <Icon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
           </div>
         </div>
 
         {/* Value and Trend */}
-        {isLoading ? (
-          <div className="space-y-2 sm:space-y-3">
-            <div className="h-8 sm:h-10 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse skeleton"></div>
-            <div className="h-5 sm:h-6 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse skeleton w-3/4"></div>
-          </div>
-        ) : (
-          <>
-            <div className="mb-3 sm:mb-4">
-              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white break-words">
-                {formatValue(value)}
-              </p>
+        <div className="mt-auto">
+          {isLoading ? (
+            <div className="space-y-2 sm:space-y-3">
+              <div className="h-8 sm:h-10 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse skeleton"></div>
+              <div className="h-5 sm:h-6 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse skeleton w-3/4"></div>
             </div>
+          ) : (
+            <>
+              <div className="mb-3 sm:mb-4">
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white break-words">
+                  {formatValue(value)}
+                </p>
+              </div>
 
-            {trend && (
-              <div className={`inline-flex items-center space-x-1.5 sm:space-x-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full ${colorClasses[color].light}`}>
-                <div className={`flex items-center space-x-1 ${trend.isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                  {trend.isPositive ? (
-                    <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
-                  ) : (
-                    <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4" />
-                  )}
-                  <span className="text-xs sm:text-sm font-bold">
-                    {trend.isPositive ? '+' : ''}{trend.value}%
+              {trend && (
+                <div className={`inline-flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full ${colorClasses[color].light}`}>
+                  <div className={`flex items-center space-x-1 ${trend.isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                    {trend.isPositive ? (
+                      <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
+                    ) : (
+                      <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5" />
+                    )}
+                    <span className="text-sm sm:text-base font-bold">
+                      {trend.isPositive ? '+' : ''}{trend.value}%
+                    </span>
+                  </div>
+                  <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:inline">
+                    {trend.period}
                   </span>
                 </div>
-                <span className="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">
-                  {trend.period}
-                </span>
-              </div>
-            )}
-          </>
-        )}
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
