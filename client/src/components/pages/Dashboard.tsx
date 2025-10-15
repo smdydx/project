@@ -451,57 +451,124 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Enhanced Charts Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-        {/* Enhanced Daily Volume Chart */}
+      {/* Enhanced Charts Section - Responsive Pie Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
+        {/* Daily Transaction Volume Pie Chart */}
         <Card title="Daily Transaction Volume" className="hover-lift">
-          <div className="space-y-4">
-            {chartData.dailyVolume.map((day, index) => (
-              <div key={index} className="group">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{day.name}</span>
+          <div className="relative w-full aspect-square max-w-sm mx-auto">
+            <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
+              {(() => {
+                const total = chartData.dailyVolume.reduce((sum, day) => sum + day.transactions, 0);
+                let currentAngle = 0;
+                const colors = ['#3B82F6', '#6366F1', '#8B5CF6', '#A855F7', '#C026D3', '#DB2777', '#F43F5E'];
+                
+                return chartData.dailyVolume.map((day, index) => {
+                  const percentage = (day.transactions / total) * 100;
+                  const angle = (percentage / 100) * 360;
+                  const startAngle = currentAngle;
+                  const endAngle = currentAngle + angle;
+                  
+                  const startX = 100 + 80 * Math.cos((startAngle * Math.PI) / 180);
+                  const startY = 100 + 80 * Math.sin((startAngle * Math.PI) / 180);
+                  const endX = 100 + 80 * Math.cos((endAngle * Math.PI) / 180);
+                  const endY = 100 + 80 * Math.sin((endAngle * Math.PI) / 180);
+                  
+                  const largeArc = angle > 180 ? 1 : 0;
+                  const path = `M 100 100 L ${startX} ${startY} A 80 80 0 ${largeArc} 1 ${endX} ${endY} Z`;
+                  
+                  currentAngle = endAngle;
+                  
+                  return (
+                    <g key={index} className="group cursor-pointer transition-all duration-300 hover:opacity-80">
+                      <path
+                        d={path}
+                        fill={colors[index % colors.length]}
+                        className="transition-all duration-300"
+                      />
+                    </g>
+                  );
+                });
+              })()}
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {chartData.dailyVolume.reduce((sum, day) => sum + day.transactions, 0).toLocaleString()}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-6 space-y-2">
+            {chartData.dailyVolume.map((day, index) => {
+              const colors = ['#3B82F6', '#6366F1', '#8B5CF6', '#A855F7', '#C026D3', '#DB2777', '#F43F5E'];
+              return (
+                <div key={index} className="flex items-center justify-between text-sm">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: colors[index % colors.length] }}></div>
+                    <span className="text-gray-700 dark:text-gray-300">{day.name}</span>
+                  </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-gray-900 dark:text-white">{day.transactions.toLocaleString()}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">₹{(day.amount / 1000).toFixed(0)}K</p>
+                    <span className="font-bold text-gray-900 dark:text-white">{day.transactions.toLocaleString()}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">₹{(day.amount / 1000).toFixed(0)}K</span>
                   </div>
                 </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
-                  <div
-                    className="chart-bar h-3 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-700 ease-out"
-                    style={{
-                      width: `${(day.transactions / Math.max(...chartData.dailyVolume.map(d => d.transactions))) * 100}%`
-                    }}
-                  ></div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Card>
 
-        {/* Enhanced Service Distribution */}
+        {/* Service Distribution Pie Chart */}
         <Card title="Service Distribution" className="hover-lift">
-          <div className="space-y-4">
+          <div className="relative w-full aspect-square max-w-sm mx-auto">
+            <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
+              {(() => {
+                const total = chartData.serviceDistribution.reduce((sum, service) => sum + service.value, 0);
+                let currentAngle = 0;
+                
+                return chartData.serviceDistribution.map((service, index) => {
+                  const percentage = service.value;
+                  const angle = (percentage / 100) * 360;
+                  const startAngle = currentAngle;
+                  const endAngle = currentAngle + angle;
+                  
+                  const startX = 100 + 80 * Math.cos((startAngle * Math.PI) / 180);
+                  const startY = 100 + 80 * Math.sin((startAngle * Math.PI) / 180);
+                  const endX = 100 + 80 * Math.cos((endAngle * Math.PI) / 180);
+                  const endY = 100 + 80 * Math.sin((endAngle * Math.PI) / 180);
+                  
+                  const largeArc = angle > 180 ? 1 : 0;
+                  const path = `M 100 100 L ${startX} ${startY} A 80 80 0 ${largeArc} 1 ${endX} ${endY} Z`;
+                  
+                  currentAngle = endAngle;
+                  
+                  return (
+                    <g key={index} className="group cursor-pointer transition-all duration-300 hover:opacity-80">
+                      <path
+                        d={path}
+                        fill={service.color}
+                        className="transition-all duration-300"
+                      />
+                    </g>
+                  );
+                });
+              })()}
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">100%</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Services</p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-6 space-y-2">
             {chartData.serviceDistribution.map((service, index) => (
-              <div key={index} className="group">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-3">
-                    <div
-                      className="w-4 h-4 rounded-full shadow-lg"
-                      style={{ backgroundColor: service.color }}
-                    ></div>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{service.name}</span>
-                  </div>
-                  <span className="text-sm font-bold text-gray-900 dark:text-white">{service.value}%</span>
+              <div key={index} className="flex items-center justify-between text-sm">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: service.color }}></div>
+                  <span className="text-gray-700 dark:text-gray-300">{service.name}</span>
                 </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div
-                    className="chart-bar h-2 rounded-full transition-all duration-700 ease-out shadow-sm"
-                    style={{
-                      width: `${service.value}%`,
-                      backgroundColor: service.color
-                    }}
-                  ></div>
-                </div>
+                <span className="font-bold text-gray-900 dark:text-white">{service.value}%</span>
               </div>
             ))}
           </div>
