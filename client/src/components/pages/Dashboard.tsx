@@ -16,7 +16,7 @@ import { apiService } from '../../services/api';
 export default function Dashboard() {
   const [currentTransactions, setCurrentTransactions] = useState<LiveTransaction[]>([]);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [activeServiceSegment, setActiveServiceSegment] = useState<number | null>(null);
   const [activeDailySegment, setActiveDailySegment] = useState<number | null>(null);
@@ -25,7 +25,6 @@ export default function Dashboard() {
   const [stats, setStats] = useState<any>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,14 +52,6 @@ export default function Dashboard() {
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, []);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-xl">Loading dashboard...</div>
-      </div>
-    );
-  }
 
 
   const allStatCards = [
@@ -129,11 +120,6 @@ export default function Dashboard() {
       color: "pink" as const
     }
   ];
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1500);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     if (!isAutoPlaying) return;
@@ -430,7 +416,7 @@ export default function Dashboard() {
                   icon={card.icon}
                   trend={card.trend}
                   color={card.color}
-                  isLoading={isLoading}
+                  isLoading={loading}
                 />
               </div>
             ))}
