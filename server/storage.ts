@@ -50,6 +50,9 @@ export interface IStorage {
   getAllTransactions(): Promise<Transaction[]>;
   getTransactionsByUserId(userId: number): Promise<Transaction[]>;
   
+  // Wallet methods
+  getAllWalletTransactions(): Promise<Wallet[]>;
+  
   // Loan methods
   getAllAutoLoans(): Promise<AutoLoan[]>;
   getAllBusinessLoans(): Promise<BusinessLoan[]>;
@@ -75,6 +78,7 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   private users: User[] = [];
   private transactions: Transaction[] = [];
+  private walletTransactions: Wallet[] = [];
   private autoLoans: AutoLoan[] = [];
   private businessLoans: BusinessLoan[] = [];
   private homeLoans: HomeLoan[] = [];
@@ -260,6 +264,10 @@ export class MemStorage implements IStorage {
 
   async getTransactionsByUserId(userId: number): Promise<Transaction[]> {
     return this.transactions.filter(t => t.UserID === userId);
+  }
+
+  async getAllWalletTransactions(): Promise<Wallet[]> {
+    return this.walletTransactions;
   }
 
   // Loan methods

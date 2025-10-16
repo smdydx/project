@@ -1,0 +1,114 @@
+Goal:
+In the backend, inside the models folder, there are multiple model files. I want you to read each model file, understand the fields, and automatically create CRUD API endpoints for each model.
+These endpoints will power the Admin Dashboard, where all data from the database should be displayed dynamically according to the model fields — such as user management, KYC, transactions (mobile recharge, D2H recharge), signup users, etc.
+
+Requirements
+
+Model Auto-Scanning
+
+Read all model files from the backend/models folder.
+
+Detect all fields, relationships (ForeignKey, OneToMany, ManyToMany), and constraints.
+
+Auto-generate API endpoints for each model.
+
+API Endpoints
+
+GET /api/<model>/ → List all records (with pagination, filter, search, sort)
+
+GET /api/<model>/:id → Retrieve a single record
+
+POST /api/<model>/ → Create a new record
+
+PUT /api/<model>/:id → Full update
+
+PATCH /api/<model>/:id → Partial update
+
+DELETE /api/<model>/:id → Delete a record
+
+Specialized Endpoints
+
+For transactions (mobile and D2H recharge):
+GET /api/transactions/?type=mobile|d2h&status=&from=&to=&user=
+
+For user management (KYC and signup users):
+GET /api/users/?kyc_status=approved|pending|rejected
+POST /api/users/:id/verify-kyc
+
+Dynamic Metadata Endpoint
+
+For each model, create a meta endpoint to return its fields dynamically for frontend rendering.
+Example:
+GET /api/<model>/meta
+
+Example response:
+
+{
+  "fields": [
+    {"name": "id", "type": "integer", "readonly": true},
+    {"name": "email", "type": "string", "required": true},
+    {"name": "kyc_status", "type": "enum", "choices": ["pending", "approved", "rejected"]}
+  ]
+}
+
+
+Response Format
+
+{
+  "status": "success",
+  "data": [...],
+  "meta": { "page": 1, "page_size": 20, "total": 200 }
+}
+
+
+On error:
+
+{
+  "status": "error",
+  "error": { "code": "VALIDATION_ERROR", "message": "Email is required" }
+}
+
+
+Filters & Sorting
+
+Enable query parameters:
+?status=active, ?created_after=2025-01-01&created_before=2025-10-16
+?ordering=-created_at,amount
+
+Pagination
+
+Default: page=1, page_size=20
+
+Allow up to page_size=200
+
+Export Support
+
+Add CSV export: GET /api/<model>/?format=csv
+
+Authentication
+
+Use JWT authentication if available.
+
+Restrict modification routes (POST, PUT, DELETE) to admin roles.
+
+Documentation
+
+Generate Swagger / OpenAPI docs automatically at /docs or /swagger/.
+
+Provide a Postman collection or curl examples.
+
+Frontend Integration Notes
+
+The admin dashboard should fetch data dynamically using these APIs.
+
+The frontend will use the /meta endpoints to render dynamic tables and forms without hardcoding fields.
+
+All database data should be visible in real time (CRUD operations reflected immediately).
+
+Testing & Acceptance
+
+✅ Able to list, filter, sort, and view data for all models.
+✅ Able to view user details, transactions, and KYC data dynamically.
+✅ Swagger docs available.
+✅ Pagination, search, and filtering work correctly.
+✅ Meta endpoints provide correct field definitions.

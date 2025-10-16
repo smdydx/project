@@ -1,0 +1,312 @@
+import type { ModelConfig, FieldMetadata } from "./crud";
+import type { IStorage } from "./storage";
+import * as schema from "@shared/schema";
+
+export const modelRegistry: Record<string, ModelConfig> = {
+  users: {
+    name: "User",
+    tableName: "users",
+    schema: schema.insertUserSchema,
+    fields: [
+      { name: "UserID", type: "integer", readonly: true },
+      { name: "fullname", type: "string" },
+      { name: "MobileNumber", type: "string", required: true, unique: true },
+      { name: "Email", type: "string" },
+      { name: "IsKYCCompleted", type: "boolean", default: false },
+      { name: "member_id", type: "string", unique: true },
+      { name: "RewardWalletBalance", type: "decimal", default: "0.00" },
+      { name: "INRWalletBalance", type: "decimal", default: "0.00" },
+      { name: "DeviceVerified", type: "boolean", default: false },
+      { name: "activation_status", type: "boolean", default: false },
+      { name: "aadhar_verification_status", type: "boolean", default: false },
+      { name: "pan_verification_status", type: "boolean", default: false },
+      { name: "prime_status", type: "boolean", default: false },
+      { name: "CreatedAt", type: "timestamp", readonly: true },
+    ] as FieldMetadata[],
+    getter: async (storage: IStorage) => await storage.getAllUsers(),
+    getById: async (storage: IStorage, id: number) => await storage.getUserById(id),
+  },
+
+  transactions: {
+    name: "Transaction",
+    tableName: "transactions",
+    schema: schema.insertTransactionSchema,
+    fields: [
+      { name: "TransactionID", type: "integer", readonly: true },
+      { name: "UserID", type: "integer", references: "users" },
+      { name: "TransactionType", type: "string", choices: ["Recharge", "P2P", "Withdrawal", "Deposit", "Bill Payment", "DTH", "Mobile"] },
+      { name: "Amount", type: "decimal" },
+      { name: "Status", type: "enum", choices: ["Completed", "Pending", "Failed", "Processing"] },
+      { name: "CreatedAt", type: "timestamp", readonly: true },
+    ] as FieldMetadata[],
+    getter: async (storage: IStorage) => await storage.getAllTransactions(),
+  },
+
+  wallet: {
+    name: "Wallet",
+    tableName: "wallet",
+    schema: schema.insertWalletSchema,
+    fields: [
+      { name: "id", type: "integer", readonly: true },
+      { name: "transaction_by", type: "integer", references: "users" },
+      { name: "reference_id", type: "string", required: true },
+      { name: "transaction_amount", type: "decimal", default: "0.00" },
+      { name: "transaction_type", type: "enum", choices: ["credit", "debit"] },
+      { name: "purpose", type: "string" },
+      { name: "status", type: "enum", choices: ["pending", "success", "failed"], default: "pending" },
+      { name: "transaction_date", type: "timestamp", readonly: true },
+    ] as FieldMetadata[],
+    getter: async (storage: IStorage) => await storage.getAllWalletTransactions?.() || [],
+  },
+
+  auto_loans: {
+    name: "Auto Loan",
+    tableName: "auto_loan_applications",
+    schema: {} as any,
+    fields: [
+      { name: "id", type: "integer", readonly: true },
+      { name: "full_name", type: "string", required: true },
+      { name: "email", type: "string", required: true },
+      { name: "phone_number", type: "string", required: true },
+      { name: "vehicle_type", type: "enum", choices: ["new", "used"], required: true },
+      { name: "vehicle_value", type: "decimal", required: true },
+      { name: "emis_paid", type: "integer" },
+      { name: "user_mobile", type: "string", required: true },
+      { name: "created_at", type: "timestamp", readonly: true },
+    ] as FieldMetadata[],
+    getter: async (storage: IStorage) => await storage.getAllAutoLoans(),
+  },
+
+  business_loans: {
+    name: "Business Loan",
+    tableName: "business_loan_applications",
+    schema: {} as any,
+    fields: [
+      { name: "id", type: "integer", readonly: true },
+      { name: "full_name", type: "string", required: true },
+      { name: "email", type: "string", required: true },
+      { name: "phone_number", type: "string", required: true },
+      { name: "business_name", type: "string", required: true },
+      { name: "business_type", type: "string", required: true },
+      { name: "annual_turnover", type: "decimal", required: true },
+      { name: "loan_amount", type: "decimal", required: true },
+      { name: "collateral_value", type: "decimal", required: true },
+      { name: "business_continuity", type: "integer", required: true },
+      { name: "user_mobile", type: "string", required: true },
+      { name: "created_at", type: "timestamp", readonly: true },
+    ] as FieldMetadata[],
+    getter: async (storage: IStorage) => await storage.getAllBusinessLoans(),
+  },
+
+  home_loans: {
+    name: "Home Loan",
+    tableName: "home_loan_applications",
+    schema: {} as any,
+    fields: [
+      { name: "id", type: "integer", readonly: true },
+      { name: "full_name", type: "string", required: true },
+      { name: "email", type: "string", required: true },
+      { name: "phone_number", type: "string", required: true },
+      { name: "loan_amount", type: "decimal", required: true },
+      { name: "property_value", type: "decimal", required: true },
+      { name: "income_continuity", type: "string", required: true },
+      { name: "employment_status", type: "string", required: true },
+      { name: "user_mobile", type: "string", required: true },
+      { name: "created_at", type: "timestamp", readonly: true },
+    ] as FieldMetadata[],
+    getter: async (storage: IStorage) => await storage.getAllHomeLoans(),
+  },
+
+  loan_against_property: {
+    name: "Loan Against Property",
+    tableName: "loan_against_property_applications",
+    schema: {} as any,
+    fields: [
+      { name: "id", type: "integer", readonly: true },
+      { name: "full_name", type: "string", required: true },
+      { name: "email", type: "string", required: true },
+      { name: "phone_number", type: "string", required: true },
+      { name: "loan_amount", type: "decimal", required: true },
+      { name: "property_value", type: "decimal", required: true },
+      { name: "income_continuity", type: "string", required: true },
+      { name: "employment_status", type: "string", required: true },
+      { name: "user_mobile", type: "string", required: true },
+      { name: "created_at", type: "timestamp", readonly: true },
+    ] as FieldMetadata[],
+    getter: async (storage: IStorage) => await storage.getAllLoanAgainstProperty(),
+  },
+
+  machine_loans: {
+    name: "Machine Loan",
+    tableName: "machine_loan_applications",
+    schema: {} as any,
+    fields: [
+      { name: "id", type: "integer", readonly: true },
+      { name: "full_name", type: "string", required: true },
+      { name: "email", type: "string", required: true },
+      { name: "phone_number", type: "string", required: true },
+      { name: "business_name", type: "string", required: true },
+      { name: "machine_type", type: "string", required: true },
+      { name: "machine_cost", type: "decimal", required: true },
+      { name: "loan_amount", type: "decimal", required: true },
+      { name: "business_continuity", type: "integer", required: true },
+      { name: "co_applicant", type: "string" },
+      { name: "user_mobile", type: "string", required: true },
+      { name: "created_at", type: "timestamp", readonly: true },
+    ] as FieldMetadata[],
+    getter: async (storage: IStorage) => await storage.getAllMachineLoans(),
+  },
+
+  personal_loans: {
+    name: "Personal Loan",
+    tableName: "personal_loan_applications",
+    schema: {} as any,
+    fields: [
+      { name: "id", type: "integer", readonly: true },
+      { name: "full_name", type: "string", required: true },
+      { name: "email", type: "string", required: true },
+      { name: "phone_number", type: "string", required: true },
+      { name: "employment_status", type: "enum", choices: ["salaried", "self-employed"], required: true },
+      { name: "company_name", type: "string" },
+      { name: "monthly_income", type: "decimal", required: true },
+      { name: "existing_emis", type: "decimal" },
+      { name: "loan_amount", type: "decimal", required: true },
+      { name: "tenure", type: "integer", required: true },
+      { name: "cibil_score", type: "integer", required: true },
+      { name: "user_mobile", type: "string", required: true },
+      { name: "created_at", type: "timestamp", readonly: true },
+    ] as FieldMetadata[],
+    getter: async (storage: IStorage) => await storage.getAllPersonalLoans(),
+  },
+
+  private_funding: {
+    name: "Private Funding",
+    tableName: "private_funding_applications",
+    schema: {} as any,
+    fields: [
+      { name: "id", type: "integer", readonly: true },
+      { name: "full_name", type: "string", required: true },
+      { name: "email", type: "string", required: true },
+      { name: "phone_number", type: "string", required: true },
+      { name: "loan_amount", type: "decimal", required: true },
+      { name: "annual_turnover", type: "decimal", required: true },
+      { name: "employment_type", type: "enum", choices: ["SEP", "SENP"], required: true },
+      { name: "funding_purpose", type: "string", required: true },
+      { name: "user_mobile", type: "string", required: true },
+      { name: "created_at", type: "timestamp", readonly: true },
+    ] as FieldMetadata[],
+    getter: async (storage: IStorage) => await storage.getAllPrivateFunding(),
+  },
+
+  banners: {
+    name: "Banner",
+    tableName: "banners",
+    schema: {} as any,
+    fields: [
+      { name: "id", type: "integer", readonly: true },
+      { name: "serial_no", type: "integer", required: true },
+      { name: "image_url", type: "string", required: true },
+      { name: "navigation_url", type: "string", required: true },
+      { name: "navigation_type", type: "string", required: true },
+      { name: "valid_till", type: "timestamp", required: true },
+    ] as FieldMetadata[],
+    getter: async (storage: IStorage) => await storage.getAllBanners(),
+  },
+
+  devices: {
+    name: "Device",
+    tableName: "device",
+    schema: {} as any,
+    fields: [
+      { name: "id", type: "integer", readonly: true },
+      { name: "user_id", type: "integer", required: true, references: "users" },
+      { name: "token", type: "string", required: true, unique: true },
+      { name: "platform", type: "enum", choices: ["android", "ios", "web"], default: "android" },
+      { name: "app_version", type: "string" },
+      { name: "is_active", type: "boolean", default: true },
+      { name: "last_seen", type: "timestamp" },
+      { name: "created_at", type: "timestamp", readonly: true },
+    ] as FieldMetadata[],
+    getter: async (storage: IStorage) => await storage.getAllDevices(),
+  },
+
+  service_registrations: {
+    name: "Service Registration",
+    tableName: "service_registration",
+    schema: {} as any,
+    fields: [
+      { name: "id", type: "integer", readonly: true },
+      { name: "mobile", type: "string", required: true },
+      { name: "service_type", type: "string", required: true },
+      { name: "registered_at", type: "timestamp", readonly: true },
+    ] as FieldMetadata[],
+    getter: async (storage: IStorage) => await storage.getAllServiceRegistrations(),
+  },
+
+  service_requests: {
+    name: "Service Request",
+    tableName: "service_request",
+    schema: {} as any,
+    fields: [
+      { name: "id", type: "integer", readonly: true },
+      { name: "user_id", type: "integer", required: true, references: "users" },
+      { name: "service_type", type: "enum", choices: ["recharge", "bbps", "prime_activation", "wallet_topup"], required: true },
+      { name: "operator_code", type: "string" },
+      { name: "mobile_number", type: "string" },
+      { name: "amount", type: "decimal", required: true },
+      { name: "reference_id", type: "string", required: true, unique: true },
+      { name: "status", type: "enum", choices: ["pending", "paid", "failed", "processing", "completed"], default: "pending" },
+      { name: "payment_txn_id", type: "string" },
+      { name: "utr_no", type: "string" },
+      { name: "created_at", type: "timestamp", readonly: true },
+    ] as FieldMetadata[],
+    getter: async (storage: IStorage) => await storage.getAllServiceRequests(),
+  },
+
+  payment_gateway: {
+    name: "Payment Gateway",
+    tableName: "payment_gateway",
+    schema: {} as any,
+    fields: [
+      { name: "id", type: "integer", readonly: true },
+      { name: "service_request_id", type: "integer", references: "service_request" },
+      { name: "payer_name", type: "string" },
+      { name: "payer_email", type: "string" },
+      { name: "payer_mobile", type: "string", required: true },
+      { name: "client_txn_id", type: "string", required: true, unique: true },
+      { name: "sabpaisa_txn_id", type: "string" },
+      { name: "amount", type: "decimal", required: true },
+      { name: "paid_amount", type: "decimal" },
+      { name: "payment_mode", type: "string" },
+      { name: "bank_name", type: "string" },
+      { name: "rrn", type: "string" },
+      { name: "purpose", type: "string" },
+      { name: "status", type: "enum", choices: ["PENDING", "SUCCESS", "FAILED"], default: "PENDING" },
+      { name: "created_at", type: "timestamp", readonly: true },
+    ] as FieldMetadata[],
+    getter: async (storage: IStorage) => await storage.getAllPaymentGateway(),
+  },
+
+  service_job_logs: {
+    name: "Service Job Log",
+    tableName: "service_job_log",
+    schema: {} as any,
+    fields: [
+      { name: "id", type: "integer", readonly: true },
+      { name: "service_request_id", type: "integer", required: true, references: "service_request" },
+      { name: "job_type", type: "enum", choices: ["recharge", "d2h", "bbps", "prime"], required: true },
+      { name: "status", type: "enum", choices: ["pending", "running", "success", "failed"], default: "pending" },
+      { name: "message", type: "string" },
+      { name: "created_at", type: "timestamp", readonly: true },
+    ] as FieldMetadata[],
+    getter: async (storage: IStorage) => await storage.getAllServiceJobLogs(),
+  },
+};
+
+export function getModelNames(): string[] {
+  return Object.keys(modelRegistry);
+}
+
+export function getModelConfig(modelName: string): ModelConfig | null {
+  return modelRegistry[modelName] || null;
+}
