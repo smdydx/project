@@ -1,11 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Download, Search, RefreshCw } from "lucide-react";
 
 interface Model {
@@ -79,145 +74,154 @@ export default function ModelBrowser() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold" data-testid="text-model-browser-title">Model Browser</h1>
-        <p className="text-muted-foreground">{models.length} models available</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white" data-testid="text-model-browser-title">Model Browser</h1>
+        <p className="text-gray-600 dark:text-gray-400">{models.length} models available</p>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Models</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {models.map((model) => (
-                <Button
-                  key={model.endpoint}
-                  variant={selectedModel?.endpoint === model.endpoint ? "default" : "outline"}
-                  className="w-full justify-start"
-                  onClick={() => {
-                    setSelectedModel(model);
-                    setPage(1);
-                    setSearch("");
-                    setFilters({});
-                  }}
-                  data-testid={`button-select-model-${model.tableName}`}
-                >
-                  {model.name}
-                </Button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="col-span-1 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Models</h2>
+          <div className="space-y-2 max-h-[600px] overflow-y-auto">
+            {models.map((model) => (
+              <button
+                key={model.endpoint}
+                className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
+                  selectedModel?.endpoint === model.endpoint 
+                    ? "bg-blue-500 text-white" 
+                    : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600"
+                }`}
+                onClick={() => {
+                  setSelectedModel(model);
+                  setPage(1);
+                  setSearch("");
+                  setFilters({});
+                }}
+                data-testid={`button-select-model-${model.tableName}`}
+              >
+                {model.name}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        <Card className="col-span-3">
-          <CardHeader>
+        <div className="col-span-1 md:col-span-3 bg-white dark:bg-gray-800 rounded-lg shadow">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-center">
-              <CardTitle>{selectedModel?.name || "Select a model"}</CardTitle>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{selectedModel?.name || "Select a model"}</h2>
               {selectedModel && (
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => refetch()} data-testid="button-refresh">
-                    <RefreshCw className="h-4 w-4 mr-2" />
+                  <button
+                    onClick={() => refetch()}
+                    className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2"
+                    data-testid="button-refresh"
+                  >
+                    <RefreshCw className="h-4 w-4" />
                     Refresh
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={handleExport} data-testid="button-export-csv">
-                    <Download className="h-4 w-4 mr-2" />
+                  </button>
+                  <button
+                    onClick={handleExport}
+                    className="px-3 py-1 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center gap-2"
+                    data-testid="button-export-csv"
+                  >
+                    <Download className="h-4 w-4" />
                     Export CSV
-                  </Button>
+                  </button>
                 </div>
               )}
             </div>
-          </CardHeader>
-          <CardContent>
+          </div>
+          
+          <div className="p-4">
             {selectedModel ? (
               <>
                 <div className="mb-4 flex gap-2">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
                       placeholder="Search..."
                       value={search}
                       onChange={(e) => {
                         setSearch(e.target.value);
                         setPage(1);
                       }}
-                      className="pl-10"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       data-testid="input-search"
                     />
                   </div>
                 </div>
 
                 {isLoading ? (
-                  <div className="text-center py-8" data-testid="text-loading">Loading...</div>
+                  <div className="text-center py-8 text-gray-600 dark:text-gray-400" data-testid="text-loading">Loading...</div>
                 ) : records.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground" data-testid="text-no-data">
+                  <div className="text-center py-8 text-gray-600 dark:text-gray-400" data-testid="text-no-data">
                     No records found
                   </div>
                 ) : (
                   <>
-                    <div className="border rounded-lg overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50 dark:bg-gray-700">
+                          <tr>
                             {fields.slice(0, 8).map((field) => (
-                              <TableHead key={field.name}>{field.name}</TableHead>
+                              <th key={field.name} className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
+                                {field.name}
+                              </th>
                             ))}
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                           {records.map((record: any, idx: number) => (
-                            <TableRow key={idx} data-testid={`row-record-${idx}`}>
+                            <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700/50" data-testid={`row-record-${idx}`}>
                               {fields.slice(0, 8).map((field) => (
-                                <TableCell key={field.name}>
+                                <td key={field.name} className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                                   {record[field.name]?.toString().substring(0, 50) || "-"}
-                                </TableCell>
+                                </td>
                               ))}
-                            </TableRow>
+                            </tr>
                           ))}
-                        </TableBody>
-                      </Table>
+                        </tbody>
+                      </table>
                     </div>
 
                     <div className="flex justify-between items-center mt-4">
-                      <div className="text-sm text-muted-foreground" data-testid="text-pagination-info">
+                      <div className="text-sm text-gray-600 dark:text-gray-400" data-testid="text-pagination-info">
                         Showing {(page - 1) * pageSize + 1} to {Math.min(page * pageSize, total)} of {total} records
                       </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
+                      <div className="flex gap-2 items-center">
+                        <button
                           onClick={() => setPage(p => Math.max(1, p - 1))}
                           disabled={page === 1}
+                          className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                           data-testid="button-prev-page"
                         >
                           Previous
-                        </Button>
-                        <div className="flex items-center px-3" data-testid="text-page-number">
+                        </button>
+                        <div className="px-3 text-sm text-gray-600 dark:text-gray-400" data-testid="text-page-number">
                           Page {page} of {totalPages}
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
+                        <button
                           onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                           disabled={page === totalPages}
+                          className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                           data-testid="button-next-page"
                         >
                           Next
-                        </Button>
+                        </button>
                       </div>
                     </div>
                   </>
                 )}
               </>
             ) : (
-              <div className="text-center py-12 text-muted-foreground">
+              <div className="text-center py-12 text-gray-600 dark:text-gray-400">
                 Select a model from the left to view its data
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
