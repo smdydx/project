@@ -30,40 +30,47 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 @router.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, db: Session = Depends(get_db)):
+async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     print(f"WebSocket client connected. Total connections: {len(manager.active_connections)}")
     
     try:
+        # Get a fresh database session for this connection
+        from core.database import SessionLocal
+        db = SessionLocal()
+        
         while True:
-            # Send dashboard stats
-            stats = DashboardService.get_dashboard_stats(db)
-            await websocket.send_json({
-                "type": "data",
-                "channel": "dashboard-stats",
-                "data": stats,
-                "timestamp": datetime.now().isoformat()
-            })
-            
-            # Send recent transaction
-            transactions = DashboardService.get_live_transactions(db, 1)
-            if transactions:
+            try:
+                # Send dashboard stats
+                stats = DashboardService.get_dashboard_stats(db)
                 await websocket.send_json({
                     "type": "data",
-                    "channel": "transactions",
-                    "data": transactions[0],
+                    "channel": "dashboard-stats",
+                    "data": stats,
                     "timestamp": datetime.now().isoformat()
                 })
-            
-            # Send recent user
-            users = DashboardService.get_recent_users(db, 1)
-            if users:
-                await websocket.send_json({
-                    "type": "data",
-                    "channel": "user-registrations",
-                    "data": users[0],
-                    "timestamp": datetime.now().isoformat()
-                })
+                
+                # Send recent transaction
+                transactions = DashboardService.get_live_transactions(db, 1)
+                if transactions:
+                    await websocket.send_json({
+                        "type": "data",
+                        "channel": "transactions",
+                        "data": transactions[0],
+                        "timestamp": datetime.now().isoformat()
+                    })
+                
+                # Send recent user
+                users = DashboardService.get_recent_users(db, 1)
+                if users:
+                    await websocket.send_json({
+                        "type": "data",
+                        "channel": "user-registrations",
+                        "data": users[0],
+                        "timestamp": datetime.now().isoformat()
+                    })
+            except Exception as e:
+                print(f"Error sending data: {e}")
             
             await asyncio.sleep(3)
     except WebSocketDisconnect:
@@ -72,3 +79,5 @@ async def websocket_endpoint(websocket: WebSocket, db: Session = Depends(get_db)
     except Exception as e:
         print(f"WebSocket error: {e}")
         manager.disconnect(websocket)
+    finally:
+        db.close()
