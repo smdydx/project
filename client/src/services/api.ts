@@ -1,4 +1,3 @@
-
 /**
  * Production API Service
  * Connects React frontend to backend APIs
@@ -63,8 +62,8 @@ class ApiService {
 
   // Specific Data Tables
   async getTableData(endpoint: string, params?: Record<string, any>) {
-    const queryString = params 
-      ? '?' + new URLSearchParams(params).toString() 
+    const queryString = params
+      ? '?' + new URLSearchParams(params).toString()
       : '';
     return this.request(`${endpoint}${queryString}`);
   }

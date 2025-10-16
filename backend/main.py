@@ -32,7 +32,7 @@ app.add_middleware(
 )
 
 # Include API routes
-from api.v1 import dashboard, users, kyc, test, transactions
+from api.v1 import dashboard, users, kyc, test, transactions, websocket
 from api.v1.auto_crud import create_auto_crud_routers, get_models_list
 
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
@@ -40,6 +40,7 @@ app.include_router(kyc.router, prefix="/api/v1/kyc", tags=["kyc"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
 app.include_router(transactions.router, prefix="/api/v1/transactions", tags=["transactions"])
 app.include_router(test.router, prefix="/api/v1/test", tags=["test"])
+app.include_router(websocket.router, tags=["websocket"])
 
 # Auto-generate CRUD endpoints for all models
 crud_routers = create_auto_crud_routers()
