@@ -7,7 +7,7 @@ interface CardProps {
   padding?: boolean;
 }
 
-export default function Card({ title, children, className = '', padding = true }: CardProps) {
+function Card({ title, children, className = '', padding = true }: CardProps) {
   return (
     <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-colors ${className}`}>
       {title && (
@@ -21,3 +21,5 @@ export default function Card({ title, children, className = '', padding = true }
     </div>
   );
 }
+
+export default Card;

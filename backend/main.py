@@ -6,7 +6,15 @@ from backend.api.v1 import dashboard
 from backend.core.database import engine
 from backend.core.base import Base
 
-# Create database tables
+# Import all models to register them with Base
+from backend.models import (
+    auto_loan, banner, business_loan, device, home_loan,
+    loan_against_property, machine_loan, models, payment_gateway,
+    personal_loan, private_funding, service_job_log,
+    service_registration, service_request, setting
+)
+
+# Create all database tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(

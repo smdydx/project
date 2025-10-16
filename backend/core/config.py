@@ -7,8 +7,8 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     API_V1_PREFIX: str = "/api"
 
-    # Database - Use environment variable or default SQLite
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./admin_dashboard.db")
+    # Database - SQLite for testing (safe and local)
+    DATABASE_URL: str = "sqlite:///./admin_dashboard.db"
 
     # CORS - Allow all origins in Replit environment
     ALLOWED_ORIGINS: List[str] = ["*"]

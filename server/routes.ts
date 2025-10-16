@@ -1,5 +1,4 @@
 import type { Express } from "express";
-import { db } from "@db";
 import {
   users, transactions, banners, devices,
   autoLoans, businessLoans, homeLoans, loanAgainstProperty,
