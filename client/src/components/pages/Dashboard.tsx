@@ -299,7 +299,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6" data-testid="dashboard-container">
+    <div className="space-y-6 mt-2" data-testid="dashboard-container">
       {/* Live Transaction Stream Banner */}
       <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white shadow-2xl animate-gradient-x relative overflow-hidden" data-testid="live-stream-banner">
         <div className="absolute inset-0 bg-black opacity-10"></div>
