@@ -320,41 +320,10 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Stats Cards - Scrollable Carousel */}
+      {/* Stats Cards - Responsive Grid */}
       <div className="relative" data-testid="stats-carousel">
-        {/* Desktop/Laptop Controls - Hidden on Mobile */}
-        <div className="hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 z-10">
-          <button
-            onClick={() => scrollStats('left')}
-            className="bg-white dark:bg-gray-800 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
-            data-testid="button-scroll-left"
-          >
-            <ChevronLeft className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-          </button>
-        </div>
-        
-        <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 z-10">
-          <button
-            onClick={() => scrollStats('right')}
-            className="bg-white dark:bg-gray-800 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
-            data-testid="button-scroll-right"
-          >
-            <ChevronRight className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-          </button>
-        </div>
 
-        <div className="hidden lg:block absolute right-16 top-1/2 -translate-y-1/2 z-10">
-          <button
-            onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-            className="bg-white dark:bg-gray-800 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
-            data-testid={isAutoPlaying ? "button-pause" : "button-play"}
-          >
-            {isAutoPlaying ? (
-              <Pause className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-            ) : (
-              <Play className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-            )}
-          </button>
+        
         </div>
 
         {/* Swipe-enabled Container - All Devices */}

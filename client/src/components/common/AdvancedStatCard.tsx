@@ -99,7 +99,7 @@ export default function AdvancedStatCard({
 
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 hover-lift h-[140px]">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 hover-lift" style={{ minHeight: '180px' }}>
         <div className="animate-pulse space-y-4 h-full flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
@@ -116,11 +116,11 @@ export default function AdvancedStatCard({
 
   return (
     <div 
-      className={`group relative rounded-2xl p-4 sm:p-5 lg:p-6 border hover-lift transition-all duration-300 overflow-hidden h-[160px] w-full flex flex-col ${
+      className={`group relative rounded-2xl p-4 sm:p-5 lg:p-6 border hover-lift transition-all duration-300 overflow-hidden w-full flex flex-col ${
         onClick ? 'cursor-pointer' : ''
       } ${colorClasses[color].cardBg} ${colorClasses[color].border}`}
       onClick={onClick}
-      style={{ minHeight: '160px', maxHeight: '160px' }}
+      style={{ minHeight: '180px', height: 'auto' }}
     >
       {/* Animated Background Gradient */}
       <div className={`absolute inset-0 bg-gradient-to-br ${colorClasses[color].gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
@@ -128,26 +128,26 @@ export default function AdvancedStatCard({
       {/* Content */}
       <div className="relative z-10 flex-1 flex flex-col">
         {/* Header Section */}
-        <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex items-start justify-between gap-2 sm:gap-3 mb-3">
           <div className="flex-1 min-w-0">
             {subtitle && (
               <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 truncate">
                 {subtitle}
               </p>
             )}
-            <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight break-words">
+            <h3 className="text-xs sm:text-sm md:text-base font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight break-words">
               {title}
             </h3>
           </div>
-          <div className={`w-12 h-12 sm:w-14 sm:h-14 ${colorClasses[color].icon} rounded-xl flex items-center justify-center flex-shrink-0 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
-            <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+          <div className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 ${colorClasses[color].icon} rounded-xl flex items-center justify-center flex-shrink-0 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
+            <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white" />
           </div>
         </div>
 
         {/* Value and Trend Section */}
         <div className="mt-auto">
           <div className="mb-2">
-            <p className="text-2xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white break-words overflow-hidden">
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white break-words overflow-hidden">
               {formatValue(value)}
             </p>
           </div>
