@@ -32,31 +32,43 @@ manager = ConnectionManager()
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, db: Session = Depends(get_db)):
     await manager.connect(websocket)
+    print(f"WebSocket client connected. Total connections: {len(manager.active_connections)}")
+    
     try:
         while True:
-            # Send dashboard stats every 3 seconds
+            # Send dashboard stats
             stats = DashboardService.get_dashboard_stats(db)
             await websocket.send_json({
-                "type": "dashboard-stats",
-                "data": stats
+                "type": "data",
+                "channel": "dashboard-stats",
+                "data": stats,
+                "timestamp": datetime.now().isoformat()
             })
             
             # Send recent transaction
             transactions = DashboardService.get_live_transactions(db, 1)
             if transactions:
                 await websocket.send_json({
-                    "type": "transactions",
-                    "data": transactions[0]
+                    "type": "data",
+                    "channel": "transactions",
+                    "data": transactions[0],
+                    "timestamp": datetime.now().isoformat()
                 })
             
             # Send recent user
             users = DashboardService.get_recent_users(db, 1)
             if users:
                 await websocket.send_json({
-                    "type": "user-registrations",
-                    "data": users[0]
+                    "type": "data",
+                    "channel": "user-registrations",
+                    "data": users[0],
+                    "timestamp": datetime.now().isoformat()
                 })
             
             await asyncio.sleep(3)
     except WebSocketDisconnect:
+        manager.disconnect(websocket)
+        print(f"WebSocket client disconnected. Total connections: {len(manager.active_connections)}")
+    except Exception as e:
+        print(f"WebSocket error: {e}")
         manager.disconnect(websocket)

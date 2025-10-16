@@ -24,18 +24,13 @@ export function useWebSocket(channel: string) {
     ws.onopen = () => {
       console.log(`WebSocket connected to ${channel}`);
       setIsConnected(true);
-
-      // Subscribe to channel
-      ws.send(JSON.stringify({
-        type: 'subscribe',
-        channel
-      }));
     };
 
     ws.onmessage = (event) => {
       try {
         const message: WSMessage = JSON.parse(event.data);
-        if (message.channel === channel) {
+        console.log('WebSocket message received:', message);
+        if (message.channel === channel && message.type === 'data') {
           setData(message.data);
         }
       } catch (error) {
@@ -64,13 +59,7 @@ export function useWebSocket(channel: string) {
     connect();
 
     return () => {
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        wsRef.current.send(JSON.stringify({
-          type: 'unsubscribe',
-          channel
-        }));
-        wsRef.current.close();
-      } else if (wsRef.current) {
+      if (wsRef.current) {
         wsRef.current.close();
       }
     };
