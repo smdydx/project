@@ -11,7 +11,7 @@ run = ["npm", "run", "start"]
 build = ["npm", "run", "build"]
 
 [workflows]
-runButton = "Start Full Stack"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Start Full Stack"
@@ -68,6 +68,10 @@ externalPort = 8000
 [[ports]]
 localPort = 38265
 externalPort = 3001
+
+[[ports]]
+localPort = 38415
+externalPort = 3002
 
 [[ports]]
 localPort = 38973
