@@ -1,10 +1,9 @@
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any
 from core.database import get_db
 from services.dashboard_service import DashboardService
-from services.mock_data_service import MockDataService
+# Removed: from services.mock_data_service import MockDataService
 from schemas.dashboard import (
     DashboardStatsResponse,
     ChartDataResponse,

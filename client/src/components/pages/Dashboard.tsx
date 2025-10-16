@@ -201,16 +201,8 @@ export default function Dashboard() {
 
   const generateRealtimeTransactions = () => {
     if (!transactions || !Array.isArray(transactions) || transactions.length === 0) return [];
-    
-    return transactions.slice(0, 12).map((txn) => ({
-      id: txn.TransactionID || txn.id,
-      user: txn.UserID ? `User ${txn.UserID}` : 'Unknown',
-      service: txn.TransactionType || txn.type || 'Transaction',
-      amount: parseFloat(txn.Amount || txn.amount || '0'),
-      status: txn.Status || txn.status || 'Pending',
-      timestamp: txn.CreatedAt || txn.timestamp || new Date().toISOString(),
-      location: 'India',
-    }));
+
+    return transactions.slice(0, 12);
   };
 
   const getStatusBadge = (status: string) => {

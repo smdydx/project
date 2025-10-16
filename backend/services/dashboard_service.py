@@ -54,7 +54,7 @@ class DashboardService:
             )
         ).scalar() or 0
 
-        # Total Distributor LCR Money (sum of reward wallet balance)
+        # Total LCR Money (sum of reward wallet balance)
         # Updated to use LcrMoney table
         total_lcr_money_result = db.query(func.sum(LcrMoney.amount)).filter(LcrMoney.status == 1).scalar()
         total_lcr = Decimal(total_lcr_money_result) if total_lcr_money_result else Decimal("0.00")
@@ -188,25 +188,41 @@ class DashboardService:
         ]
 
     @staticmethod
-    def get_recent_users(db: Session, limit: int = 10) -> List[RecentUserResponse]:
-        """Get recently registered users with their details"""
-
-        users = db.query(User).filter(
-            User.IsDeleted == False
-        ).order_by(desc(User.CreatedAt)).limit(limit).all()
+    def get_recent_users(self, limit: int = 20) -> List[RecentUserResponse]:
+        """Get recently registered users"""
+        users = self.db.query(User)\
+            .filter(User.IsDeleted == False)\
+            .order_by(User.CreatedAt.desc())\
+            .limit(limit)\
+            .all()
 
         return [
-            {
-                "id": u.UserID,
-                "name": u.fullname or "Unknown",
-                "email": u.Email or "",
-                "phone": u.MobileNumber or "",
-                "member_id": u.member_id or "",
-                "kyc_status": "Verified" if u.IsKYCCompleted else "Pending",
-                "prime_status": u.prime_status or False,
-                "reward_balance": float(u.RewardWalletBalance) if u.RewardWalletBalance else 0.0,
-                "inr_balance": float(u.INRWalletBalance) if u.INRWalletBalance else 0.0,
-                "joined_date": u.CreatedAt.isoformat() if u.CreatedAt else None
-            }
-            for u in users
+            RecentUserResponse(
+                id=user.UserID,
+                name=user.fullname or "Unknown",
+                email=user.Email or "",
+                phone=user.MobileNumber or "",
+                kyc_status="Verified" if user.IsKYCCompleted else "Pending",
+                registered_at=user.CreatedAt.isoformat() if user.CreatedAt else datetime.now().isoformat()
+            )
+            for user in users
+        ]
+
+    def get_recent_transactions(self, limit: int = 50) -> List[LiveTransactionResponse]:
+        """Get recent transactions from payment gateway"""
+        transactions = self.db.query(Payment_Gateway)\
+            .order_by(Payment_Gateway.created_at.desc())\
+            .limit(limit)\
+            .all()
+
+        return [
+            LiveTransactionResponse(
+                id=f"TXN{txn.id}",
+                user_name=txn.payer_name or "Unknown",
+                service=txn.purpose or "Unknown Service",
+                amount=float(txn.amount) if txn.amount else 0.0,
+                status=txn.status or "PENDING",
+                timestamp=txn.created_at.isoformat() if txn.created_at else datetime.now().isoformat()
+            )
+            for txn in transactions
         ]

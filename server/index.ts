@@ -46,9 +46,15 @@ app.use((req, res, next) => {
   // Setup WebSocket
   const { broadcast } = setupWebSocket(server);
 
-  // Start data simulator for real-time updates
-  const simulator = createDataSimulator(broadcast);
-  simulator.start();
+  // Mock data simulator disabled - using real database
+  // const simulator = createDataSimulator(broadcast);
+  // simulator.start();
+
+  // Cleanup on server shutdown
+  // process.on('SIGINT', () => {
+  //   simulator.stop();
+  //   process.exit();
+  // });
 
   registerRoutes(app);
 
