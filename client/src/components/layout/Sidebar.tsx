@@ -67,6 +67,7 @@ const menuItems: MenuItem[] = [
   { path: '/services', label: 'Services', icon: Briefcase },
   { path: '/banners', label: 'App Banners', icon: Image },
   { path: '/devices', label: 'User Devices', icon: Monitor },
+  { path: '/model-browser', label: 'Model Browser', icon: Grid3X3 },
   { path: '/complaints', label: 'Complaints', icon: MessageSquare },
   { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
   { path: '/categories', label: 'Service Categories', icon: Grid3X3 },
