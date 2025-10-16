@@ -409,7 +409,7 @@ export default function Dashboard() {
       </div>
 
       {/* Live User Registrations and Live Transactions - Same Row (50-50 Split) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
         {/* Live User Registrations - Takes 50% */}
         <div className="flex" data-testid="registrations-section">
           <RealtimeUserRegistrations />
