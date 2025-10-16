@@ -15,7 +15,7 @@ class DashboardService:
 
             today = datetime.now().date()
             today_users = db.query(User).filter(
-                func.date(User.created_at) == today).count()
+                func.date(User.CreatedAt) == today).count()
 
             total_revenue = db.query(func.sum(Transactions.amount)).filter(
                 Transactions.status == 'success').scalar() or 0
@@ -38,30 +38,46 @@ class DashboardService:
     @staticmethod
     def get_recent_transactions(db: Session, limit: int = 50):
         transactions = db.query(Transactions).order_by(
-            desc(Transactions.created_at)).limit(limit).all()
+            desc(Transactions.CreatedAt)).limit(limit).all()
 
         return [{
-            "id": txn.id,
-            "user": txn.user_name or "Unknown",
-            "type": txn.transaction_type or "Recharge",
-            "amount": float(txn.amount),
-            "status": txn.status,
-            "date": txn.created_at.strftime("%Y-%m-%d"),
-            "time": txn.created_at.strftime("%H:%M:%S")
+            "id": txn.TransactionID,
+            "user": txn.UserName or "Unknown",
+            "type": txn.TransactionType or "Recharge",
+            "amount": float(txn.Amount) if txn.Amount else 0.0,
+            "status": txn.Status,
+            "date": txn.CreatedAt.strftime("%Y-%m-%d") if txn.CreatedAt else "",
+            "time": txn.CreatedAt.strftime("%H:%M:%S") if txn.CreatedAt else ""
+        } for txn in transactions]
+
+    @staticmethod
+    def get_live_transactions(db: Session, limit: int = 1):
+        """Get latest live transactions for WebSocket streaming"""
+        transactions = db.query(Transactions).order_by(
+            desc(Transactions.CreatedAt)).limit(limit).all()
+
+        return [{
+            "id": txn.TransactionID,
+            "user": txn.UserName or "Unknown",
+            "type": txn.TransactionType or "Recharge",
+            "amount": float(txn.Amount) if txn.Amount else 0.0,
+            "status": txn.Status,
+            "date": txn.CreatedAt.strftime("%Y-%m-%d") if txn.CreatedAt else "",
+            "time": txn.CreatedAt.strftime("%H:%M:%S") if txn.CreatedAt else ""
         } for txn in transactions]
 
     @staticmethod
     def get_recent_users(db: Session, limit: int = 20):
         users = db.query(User).order_by(desc(
-            User.created_at)).limit(limit).all()
+            User.CreatedAt)).limit(limit).all()
 
         return [{
-            "id": user.id,
-            "name": user.name or "Unknown",
-            "email": user.email or "",
-            "mobile": user.mobile or "",
-            "status": "Active" if user.is_active else "Blocked",
-            "joinDate": user.created_at.strftime("%Y-%m-%d")
+            "id": user.UserID,
+            "name": user.Name or "Unknown",
+            "email": user.Email or "",
+            "mobile": user.Mobile or "",
+            "status": "Active" if user.IsActive else "Blocked",
+            "joinDate": user.CreatedAt.strftime("%Y-%m-%d") if user.CreatedAt else ""
         } for user in users]
 
     @staticmethod
@@ -74,7 +90,7 @@ class DashboardService:
         daily_data = []
         for day in last_7_days:
             count = db.query(Transactions).filter(
-                func.date(Transactions.created_at) == day).count()
+                func.date(Transactions.CreatedAt) == day).count()
             daily_data.append({
                 "date": day.strftime("%Y-%m-%d"),
                 "transactions": count

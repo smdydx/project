@@ -13,44 +13,63 @@ export function useWebSocket(channel: string) {
   const wsRef = useRef<WebSocket | null>(null);
 
   const connect = useCallback(() => {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-    const wsUrl = API_URL.replace('http://', 'ws://').replace('https://', 'wss://') + '/ws';
+    let reconnectTimeout: NodeJS.Timeout;
+    let ws: WebSocket | null = null;
 
-    console.log(`Connecting to WebSocket: ${wsUrl}`);
-    const ws = new WebSocket(wsUrl);
-
-    ws.onopen = () => {
-      console.log(`WebSocket connected to ${channel}`);
-      setIsConnected(true);
-    };
-
-    ws.onmessage = (event) => {
+    const connect = () => {
       try {
-        const message: WSMessage = JSON.parse(event.data);
-        console.log('WebSocket message received:', message);
-        if (message.channel === channel && message.type === 'data') {
-          setData(message.data);
-        }
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws`;
+
+        console.log('Connecting to WebSocket:', wsUrl);
+        ws = new WebSocket(wsUrl);
+
+        ws.onopen = () => {
+          console.log(`WebSocket connected to ${channel}`);
+          setIsConnected(true);
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const message: WSMessage = JSON.parse(event.data);
+            console.log('WebSocket message received:', message);
+            if (message.channel === channel && message.type === 'data') {
+              setData(message.data);
+            }
+          } catch (error) {
+            console.error('WebSocket message parse error:', error);
+          }
+        };
+
+        ws.onclose = () => {
+          console.log('WebSocket disconnected');
+          setIsConnected(false);
+
+          // Reconnect after 3 seconds
+          reconnectTimeout = setTimeout(() => {
+            console.log('Attempting to reconnect...');
+            connect();
+          }, 3000);
+        };
+
+        ws.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          setIsConnected(false);
+        };
       } catch (error) {
-        console.error('WebSocket message parse error:', error);
+        console.error('Failed to create WebSocket:', error);
+        reconnectTimeout = setTimeout(connect, 3000);
       }
     };
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+    connect();
+
+    return () => {
+      clearTimeout(reconnectTimeout);
+      if (ws) {
+        ws.close();
+      }
     };
-
-    ws.onclose = () => {
-      console.log('WebSocket disconnected');
-      setIsConnected(false);
-
-      // Reconnect after 3 seconds
-      setTimeout(() => {
-        connect();
-      }, 3000);
-    };
-
-    wsRef.current = ws;
   }, [channel]);
 
   useEffect(() => {
