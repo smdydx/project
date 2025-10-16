@@ -9,7 +9,8 @@ import AllUsers from './components/pages/AllUsers';
 import NewSignUp from './components/pages/NewSignUp';
 import KYCVerification from './components/pages/KYCVerification';
 import Transactions from './components/pages/Transactions';
-import MobileDTHTransactions from './components/pages/MobileDTHTransactions'; // Assuming this component will be created
+import MobileTransactions from './components/pages/MobileTransactions';
+import DthTransactions from './components/pages/DthTransactions';
 import Complaints from './components/pages/Complaints';
 import Reports from './components/pages/Reports';
 import Settings from './components/pages/Settings';
@@ -45,7 +46,8 @@ function AppContent() {
             <Route path="/users/new-signup" component={NewSignUp} />
             <Route path="/users/kyc" component={KYCVerification} />
             <Route path="/transactions" component={Transactions} />
-            <Route path="/mobile-dth-transactions" component={MobileDTHTransactions} />
+            <Route path="/transactions/mobile" component={MobileTransactions} />
+            <Route path="/transactions/dth" component={DthTransactions} />
             <Route path="/complaints" component={Complaints} />
             <Route path="/reports" component={Reports} />
             <Route path="/settings" component={Settings} />
