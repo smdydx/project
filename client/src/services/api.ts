@@ -3,10 +3,8 @@
  * Connects React frontend to backend APIs
  */
 
-// Python FastAPI backend on port 8000
-const API_BASE_URL = import.meta.env.VITE_API_URL
-  ? `${import.meta.env.VITE_API_URL}/api/v1`
-  : 'http://localhost:8000/api/v1';
+// API requests are proxied through Node.js server on port 5000 to FastAPI backend on port 8000
+const API_BASE_URL = '/api/v1';
 
 interface ApiResponse<T> {
   data?: T;

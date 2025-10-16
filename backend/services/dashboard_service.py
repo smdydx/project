@@ -10,29 +10,77 @@ class DashboardService:
     @staticmethod
     def get_dashboard_stats(db: Session):
         try:
-            total_users = db.query(User).count()
-            total_transactions = db.query(Transactions).count()
-
+            # Total users
+            total_users = db.query(User).filter(User.IsDeleted == False).count()
+            
+            # New signups today
             today = datetime.now().date()
-            today_users = db.query(User).filter(
-                func.date(User.CreatedAt) == today).count()
-
-            total_revenue = db.query(func.sum(Transactions.Amount)).filter(
-                Transactions.Status == 'success').scalar() or 0
+            new_signups_today = db.query(User).filter(
+                func.date(User.CreatedAt) == today,
+                User.IsDeleted == False
+            ).count()
+            
+            # KYC verified users
+            kyc_verified_users = db.query(User).filter(
+                User.IsKYCCompleted == True,
+                User.IsDeleted == False
+            ).count()
+            
+            # KYC verification percentage
+            kyc_verification_percentage = (
+                (kyc_verified_users / total_users * 100) if total_users > 0 else 0
+            )
+            
+            # Prime users
+            prime_users = db.query(User).filter(
+                User.prime_status == True,
+                User.IsDeleted == False
+            ).count()
+            
+            # Total distributor LCR money (sum of INR wallet balance)
+            total_lcr_money = db.query(func.sum(User.INRWalletBalance)).filter(
+                User.IsDeleted == False
+            ).scalar() or 0
+            
+            # Total distributor prime reward (sum of reward wallet balance)
+            total_prime_reward = db.query(func.sum(User.RewardWalletBalance)).filter(
+                User.IsDeleted == False
+            ).scalar() or 0
+            
+            # Mobile and DTH recharge counts from transactions
+            total_mobile_recharge = db.query(Transactions).filter(
+                Transactions.TransactionType.in_(['Mobile Recharge', 'Recharge']),
+                Transactions.IsDeleted == False
+            ).count()
+            
+            total_dth_recharge = db.query(Transactions).filter(
+                Transactions.TransactionType == 'DTH Recharge',
+                Transactions.IsDeleted == False
+            ).count()
 
             return {
-                "totalUsers": total_users,
-                "totalTransactions": total_transactions,
-                "todayUsers": today_users,
-                "totalRevenue": float(total_revenue)
+                "total_users": total_users,
+                "new_signups_today": new_signups_today,
+                "kyc_verified_users": kyc_verified_users,
+                "kyc_verification_percentage": round(kyc_verification_percentage, 2),
+                "prime_users": prime_users,
+                "total_distributor_lcr_money": float(total_lcr_money),
+                "total_distributor_prime_reward": float(total_prime_reward),
+                "total_mobile_recharge": total_mobile_recharge,
+                "total_dth_recharge": total_dth_recharge
             }
         except Exception as e:
             print(f"Error fetching dashboard stats: {e}")
             return {
-                "totalUsers": 0,
-                "totalTransactions": 0,
-                "todayUsers": 0,
-                "totalRevenue": 0.0
+                "total_users": 0,
+                "new_signups_today": 0,
+                "kyc_verified_users": 0,
+                "kyc_verification_percentage": 0.0,
+                "prime_users": 0,
+                "total_distributor_lcr_money": 0.0,
+                "total_distributor_prime_reward": 0.0,
+                "total_mobile_recharge": 0,
+                "total_dth_recharge": 0
             }
 
     @staticmethod
@@ -87,13 +135,45 @@ class DashboardService:
             for i in range(6, -1, -1)
         ]
 
-        daily_data = []
+        daily_volume = []
         for day in last_7_days:
             count = db.query(Transactions).filter(
-                func.date(Transactions.CreatedAt) == day).count()
-            daily_data.append({
-                "date": day.strftime("%Y-%m-%d"),
-                "transactions": count
+                func.date(Transactions.CreatedAt) == day,
+                Transactions.IsDeleted == False
+            ).count()
+            
+            amount = db.query(func.sum(Transactions.Amount)).filter(
+                func.date(Transactions.CreatedAt) == day,
+                Transactions.IsDeleted == False
+            ).scalar() or 0
+            
+            daily_volume.append({
+                "name": day.strftime("%b %d"),
+                "transactions": count,
+                "amount": float(amount)
             })
+        
+        # Service distribution
+        service_types = db.query(
+            Transactions.TransactionType,
+            func.count(Transactions.TransactionID).label('count')
+        ).filter(
+            Transactions.IsDeleted == False
+        ).group_by(Transactions.TransactionType).all()
+        
+        colors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"]
+        service_distribution = [
+            {
+                "name": service[0] or "Other",
+                "value": float(service[1]),
+                "color": colors[i % len(colors)]
+            }
+            for i, service in enumerate(service_types)
+        ]
 
-        return {"daily": daily_data, "monthly": []}
+        return {
+            "daily_volume": daily_volume,
+            "service_distribution": service_distribution if service_distribution else [
+                {"name": "No Data", "value": 0, "color": "#gray"}
+            ]
+        }

@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import { createProxyMiddleware } from "http-proxy-middleware";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic } from "./vite";
 import { setupWebSocket } from "./websocket";
@@ -7,6 +8,18 @@ import { createDataSimulator } from "./dataSimulator.js";
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Proxy /api/v1 requests to FastAPI backend on port 8000
+app.use('/api/v1', createProxyMiddleware({
+  target: 'http://localhost:8000',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/': '/api/v1/'  // Add /api/v1 back since Express strips it
+  },
+  onProxyReq: (proxyReq, req, res) => {
+    console.log(`Proxying: ${req.method} ${req.originalUrl} -> http://localhost:8000/api/v1${req.url}`);
+  }
+}));
 
 app.use((req, res, next) => {
   const start = Date.now();
