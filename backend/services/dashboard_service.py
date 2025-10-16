@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 from models.models import User
-from models.payment_gateway import PaymentGateway
+from models.payment_gateway import Payment_Gateway
 from datetime import datetime, timedelta
 
 class DashboardService:
@@ -26,7 +26,7 @@ class DashboardService:
         ).scalar() or 0
 
         # Total transactions
-        total_transactions = db.query(func.count(PaymentGateway.id)).scalar() or 0
+        total_transactions = db.query(func.count(Payment_Gateway.id)).scalar() or 0
 
         # Total LCR money
         total_lcr_money = db.query(func.sum(User.INRWalletBalance)).filter(
@@ -34,12 +34,12 @@ class DashboardService:
         ).scalar() or 0
 
         # Mobile and DTH recharges
-        mobile_recharges = db.query(func.count(PaymentGateway.id)).filter(
-            PaymentGateway.purpose.like('%mobile%')
+        mobile_recharges = db.query(func.count(Payment_Gateway.id)).filter(
+            Payment_Gateway.purpose.like('%mobile%')
         ).scalar() or 0
         
-        dth_recharges = db.query(func.count(PaymentGateway.id)).filter(
-            PaymentGateway.purpose.like('%DTH%')
+        dth_recharges = db.query(func.count(Payment_Gateway.id)).filter(
+            Payment_Gateway.purpose.like('%DTH%')
         ).scalar() or 0
 
         # Today's registrations
@@ -77,13 +77,13 @@ class DashboardService:
 
         # Last 7 days transactions
         transaction_data = db.query(
-            func.date(PaymentGateway.created_at).label('date'),
-            func.count(PaymentGateway.id).label('count'),
-            func.sum(PaymentGateway.amount).label('amount')
+            func.date(Payment_Gateway.created_at).label('date'),
+            func.count(Payment_Gateway.id).label('count'),
+            func.sum(Payment_Gateway.amount).label('amount')
         ).filter(
-            PaymentGateway.created_at >= seven_days_ago
+            Payment_Gateway.created_at >= seven_days_ago
         ).group_by(
-            func.date(PaymentGateway.created_at)
+            func.date(Payment_Gateway.created_at)
         ).all()
 
         # Format data for dashboard
@@ -136,8 +136,8 @@ class DashboardService:
     @staticmethod
     def get_recent_transactions(db: Session, limit: int = 50):
         """Get recent transactions"""
-        transactions = db.query(PaymentGateway).order_by(
-            desc(PaymentGateway.created_at)
+        transactions = db.query(Payment_Gateway).order_by(
+            desc(Payment_Gateway.created_at)
         ).limit(limit).all()
 
         return [
@@ -157,8 +157,8 @@ class DashboardService:
     @staticmethod
     def get_live_transactions(db: Session, limit: int = 50):
         """Get live transactions for dashboard"""
-        transactions = db.query(PaymentGateway).order_by(
-            desc(PaymentGateway.created_at)
+        transactions = db.query(Payment_Gateway).order_by(
+            desc(Payment_Gateway.created_at)
         ).limit(limit).all()
 
         # Sample locations for demo
