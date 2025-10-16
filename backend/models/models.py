@@ -1,4 +1,3 @@
-
 # models_postgres_sqlalchemy.py
 
 from __future__ import annotations
@@ -12,12 +11,13 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 
-from backend.core.base import Base, get_ist_time
+from app.core.base import Base,get_ist_time
 from sqlalchemy import select, func
 from decimal import Decimal
-
 # Timezone setup
 IST = pytz.timezone("Asia/Kolkata")
+
+
 
 # ============================= USERS =============================
 class User(Base):
@@ -217,6 +217,7 @@ class PrimeActivations(Base):
     prime_activator = relationship("User", back_populates="prime_incomes_activated", foreign_keys=[prime_initiated_by])
 
 
+# ============================= PROFILE / KYC =============================
 # ============================= PROFILE / KYC =============================
 class UserProfile(Base):
     __tablename__ = "userprofile"
@@ -469,6 +470,7 @@ class UserAddedBankDetails(Base):
     is_kyc_verfied = Column(Boolean, default=False)
     bankID = Column(String(20))
 
+    # Optional relationship to the User via member_id (non-PK target)
     uploader = relationship(
         "User",
         primaryjoin="User.member_id==UserAddedBankDetails.uploaded_by",
@@ -631,16 +633,16 @@ class UpiGatewayTransaction(Base):
     customer_email = Column(String(255))
     customer_mobile = Column(String(20))
     customer_name = Column(String(255))
-    customer_vpa = Column(String(255))
+    customer_vpa = Column(String(255))  # UPI ID if payment is successful
     p_info = Column(String(255))
     redirect_url = Column(String(255))
     remark = Column(String(255))
-    status = Column(String(20))
+    status = Column(String(20))  # success / failure
     txn_at = Column(DateTime(timezone=True))
     udf1 = Column(String(255))
     udf2 = Column(String(255))
     udf3 = Column(String(255))
-    upi_txn_id = Column(String(255))
+    upi_txn_id = Column(String(255))  # merchant app txn id or UTR number
     created_at = Column(DateTime(timezone=True), nullable=False)
 
 
@@ -665,7 +667,7 @@ class OfflineKYC(Base):
     aadhar_front_filename = Column(Text, nullable=False)
     aadhar_back_filename = Column(Text, nullable=False)
     name = Column(String(255), nullable=False)
-    dob = Column(DateTime, nullable=False)
+    dob = Column(DateTime, nullable=False)  # original used date; keep as DateTime if you want tz-naive dates
     aadhar_no = Column(String(50), nullable=False)
     district = Column(String(255), nullable=False)
     address = Column(Text, nullable=False)
@@ -731,12 +733,14 @@ class Emailotp(Base):
     created_at = Column(DateTime(timezone=True), default=get_ist_time)
 
 
+
+
 class LCRPackages(Base):
     __tablename__ = "lcr_packages"
 
     srno = Column(Integer, primary_key=True)
     amount = Column(DECIMAL(10, 5), default=Decimal("0.00000"))
-    package_name = Column(String(50))
+    package_name=Column(String(50))
 
 
 class LcrMoneyDistributionAmount(Base):
@@ -744,8 +748,9 @@ class LcrMoneyDistributionAmount(Base):
 
     srno = Column(Integer, primary_key=True)
     amount = Column(DECIMAL(10, 5), default=Decimal("0.00000"))
-    purpose = Column(String(255))
+    purpose=Column(String(255))
     set_date = Column(DateTime(timezone=True), default=get_ist_time)
+
 
 
 class LcrMoney(Base):
@@ -762,3 +767,5 @@ class LcrMoney(Base):
     remark = Column(String(255))
     validity = Column(DateTime(timezone=True))
     other = Column(String(255))
+
+
