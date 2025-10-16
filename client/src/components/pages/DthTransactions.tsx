@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Tv, Filter, Download, ChevronDown } from 'lucide-react';
 import Card from '@/components/common/Card';
 
@@ -16,33 +16,31 @@ interface DthTransaction {
   referenceId: string;
 }
 
-const generateDthTransactions = (): DthTransaction[] => {
-  const operators = ['Tata Play', 'Airtel DTH', 'Dish TV', 'Sun Direct', 'D2H'];
-  const plans = ['Basic HD', 'Premium', 'Sports Pack', 'Entertainment', 'Family Pack'];
-  const statuses: ('Success' | 'Pending' | 'Failed')[] = ['Success', 'Pending', 'Failed'];
-  
-  return Array.from({ length: 50 }, (_, i) => {
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
-    return {
-      id: i + 1,
-      transactionId: `DTH${String(i + 1).padStart(5, '0')}`,
-      user: `User ${i + 1}`,
-      subscriberId: `SUB${Math.floor(Math.random() * 900000000 + 100000000)}`,
-      operator: operators[Math.floor(Math.random() * operators.length)],
-      plan: plans[Math.floor(Math.random() * plans.length)],
-      amount: Math.floor(Math.random() * 1000) + 200,
-      status,
-      date: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-      time: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toLocaleTimeString(),
-      referenceId: `REF${Math.random().toString(36).substring(2, 10).toUpperCase()}`
-    };
-  });
+const generateDthTransactions = async (): Promise<DthTransaction[]> => {
+  try {
+    const response = await fetch('/api/transactions/dth?limit=100');
+    if (!response.ok) throw new Error('Failed to fetch transactions');
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching DTH transactions:', error);
+    return [];
+  }
 };
 
 export default function DthTransactions() {
-  const [transactions] = useState<DthTransaction[]>(generateDthTransactions());
+  const [transactions, setTransactions] = useState<DthTransaction[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+
+  useEffect(() => {
+    const loadTransactions = async () => {
+      const data = await generateDthTransactions();
+      setTransactions(data);
+    };
+    loadTransactions();
+  }, []);
 
   const filteredTransactions = transactions.filter(txn => {
     const matchesSearch = 

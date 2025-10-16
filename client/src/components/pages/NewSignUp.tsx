@@ -7,9 +7,17 @@ import AdvancedRealtimeTable from '../common/AdvancedRealtimeTable';
 import Card from '../common/Card';
 
 export default function NewSignUp() {
-  // Return empty array - real data will come from API/WebSocket
-  const generateNewSignups = () => {
-    return [];
+  const generateNewSignups = async () => {
+    try {
+      const response = await fetch('/api/users/signups?limit=100');
+      if (!response.ok) throw new Error('Failed to fetch signups');
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching signups:', error);
+      return [];
+    }
   };
 
   const columns = [

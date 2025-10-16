@@ -13,25 +13,22 @@ export default function KYCVerification() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
-  const generateKYCData = () => {
-    const statuses = ['Pending', 'Verified', 'Rejected'];
-    const names = ['Rajesh Kumar', 'Priya Sharma', 'Amit Patel', 'Sneha Reddy', 'Arjun Singh', 'Kavya Nair'];
-    const docTypes = ['Aadhaar Card', 'PAN Card', 'Driving License', 'Passport'];
-    
-    return Array.from({ length: 15 }, (_, i) => ({
-      id: `KYC${Math.floor(Math.random() * 10000)}`,
-      userId: `USR${Math.floor(Math.random() * 1000)}`,
-      name: names[Math.floor(Math.random() * names.length)],
-      email: `user${Math.floor(Math.random() * 1000)}@example.com`,
-      mobile: `+91 ${Math.floor(Math.random() * 9000000000) + 1000000000}`,
-      kycStatus: statuses[Math.floor(Math.random() * statuses.length)],
-      documentType: docTypes[Math.floor(Math.random() * docTypes.length)],
-      documentNumber: `${Math.random().toString(36).substring(2, 15).toUpperCase()}`,
-      submittedOn: new Date().toLocaleDateString(),
-      submittedTime: new Date().toLocaleTimeString(),
-      verifiedBy: Math.random() > 0.5 ? 'Admin' : null,
-      remarks: Math.random() > 0.5 ? 'All documents verified' : null
-    }));
+  const generateKYCData = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (kycStatusFilter !== 'All') {
+        params.append('status', kycStatusFilter.toLowerCase());
+      }
+      
+      const response = await fetch(`/api/kyc/verification?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch KYC data');
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching KYC data:', error);
+      return [];
+    }
   };
 
   const getKYCStatusBadge = (status: string) => {
