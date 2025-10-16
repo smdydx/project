@@ -17,8 +17,8 @@ class DashboardService:
             today_users = db.query(User).filter(
                 func.date(User.CreatedAt) == today).count()
 
-            total_revenue = db.query(func.sum(Transactions.amount)).filter(
-                Transactions.status == 'success').scalar() or 0
+            total_revenue = db.query(func.sum(Transactions.Amount)).filter(
+                Transactions.Status == 'success').scalar() or 0
 
             return {
                 "totalUsers": total_users,
