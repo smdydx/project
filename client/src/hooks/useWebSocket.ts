@@ -14,8 +14,13 @@ export function useWebSocket(channel: string) {
   const wsRef = useRef<WebSocket | null>(null);
 
   const connect = useCallback(() => {
+    // Determine WebSocket protocol and host
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
+    const host = window.location.host;
+    const wsUrl = `${protocol}//${host}/ws`;
+    
+    console.log(`Connecting to WebSocket: ${wsUrl}`);
+    const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
       console.log(`WebSocket connected to ${channel}`);
