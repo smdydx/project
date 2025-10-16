@@ -14,22 +14,26 @@ export default function AllUsers() {
   const [userTypeFilter, setUserTypeFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
 
-  const generateRealtimeUsers = () => {
-    const statuses = ['Active', 'Blocked'];
-    const userTypes = ['Prime User', 'Normal User'];
-    const names = ['Rajesh Kumar', 'Priya Sharma', 'Amit Patel', 'Sneha Reddy', 'Arjun Singh', 'Kavya Nair', 'Rohit Gupta', 'Anita Desai'];
-    
-    return Array.from({ length: 15 }, (_, i) => ({
-      id: `USR${Math.floor(Math.random() * 10000)}`,
-      name: names[Math.floor(Math.random() * names.length)],
-      email: `user${Math.floor(Math.random() * 1000)}@example.com`,
-      mobile: `+91 ${Math.floor(Math.random() * 9000000000) + 1000000000}`,
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      userType: userTypes[Math.floor(Math.random() * userTypes.length)],
-      joinedOn: new Date().toLocaleDateString(),
-      balance: Math.floor(Math.random() * 50000),
-      totalTransactions: Math.floor(Math.random() * 100)
-    }));
+  const generateRealtimeUsers = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (userTypeFilter !== 'All') {
+        params.append('user_type', userTypeFilter);
+      }
+      if (statusFilter !== 'All') {
+        params.append('status', statusFilter);
+      }
+      params.append('limit', '100');
+      
+      const response = await fetch(`/api/users/all?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch users');
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching all users:', error);
+      return [];
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -219,7 +223,7 @@ export default function AllUsers() {
         columns={columns}
         data={[]}
         onDataUpdate={generateRealtimeUsers}
-        updateInterval={8000}
+        updateInterval={10000}
         searchPlaceholder="Search by name, email, or mobile..."
         showStats={true}
         enableAnimations={true}
