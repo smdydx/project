@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   Eye, CheckCircle, XCircle, Shield, FileText, Upload, Download, AlertTriangle
 } from 'lucide-react';

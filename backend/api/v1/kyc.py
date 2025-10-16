@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from sqlalchemy import desc
+from typing import Optional
+
 from core.database import get_db
 from models.models import User, OfflineKYC
-from sqlalchemy import desc, or_
-from datetime import datetime
 
 router = APIRouter(tags=["kyc"])
 

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   Eye, Ban, CheckCircle, MessageSquare, Phone, Mail, UserCheck, 
   Shield, Crown, Star, Filter, Download, Search

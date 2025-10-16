@@ -13,10 +13,8 @@ export function useWebSocket(channel: string) {
   const wsRef = useRef<WebSocket | null>(null);
 
   const connect = useCallback(() => {
-    // Determine WebSocket protocol and host
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    // Connect to Python FastAPI backend WebSocket (port 8000)
-    const wsUrl = `${protocol}//${window.location.hostname}:8000/ws`;
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const wsUrl = API_URL.replace('http://', 'ws://').replace('https://', 'wss://') + '/ws';
 
     console.log(`Connecting to WebSocket: ${wsUrl}`);
     const ws = new WebSocket(wsUrl);

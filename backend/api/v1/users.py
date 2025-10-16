@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from sqlalchemy import func, desc
+from typing import Optional
+from datetime import datetime
+
 from core.database import get_db
 from models.models import User
 from models.payment_gateway import Payment_Gateway
-from sqlalchemy import desc, or_, func
-from datetime import datetime
 
 router = APIRouter(tags=["users"])
 
