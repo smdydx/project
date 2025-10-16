@@ -2,17 +2,17 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any
-from backend.core.database import get_db
-from backend.services.dashboard_service import DashboardService
-from backend.services.mock_data_service import MockDataService
-from backend.schemas.dashboard import (
+from core.database import get_db
+from services.dashboard_service import DashboardService
+from services.mock_data_service import MockDataService
+from schemas.dashboard import (
     DashboardStatsResponse,
     ChartDataResponse,
     LiveTransactionResponse,
     RecentUserResponse
 )
 
-router = APIRouter(prefix="/dashboard", tags=["dashboard"])
+router = APIRouter(tags=["dashboard"])
 
 @router.get("/stats", response_model=DashboardStatsResponse)
 async def get_dashboard_stats(db: Session = Depends(get_db)):

@@ -3,13 +3,13 @@ from sqlalchemy import func, and_, or_, case, desc
 from datetime import datetime, timedelta, date
 from decimal import Decimal
 from typing import List, Dict
-from backend.models.models import (
+from models.models import (
     User, Wallet, DirectIncome, LevelIncome,
     PrimeActivations, BillTransactions, Transactions, 
     LcrMoney, P2PTransaction, RechargeTransactions
 )
-from backend.models.payment_gateway import Payment_Gateway
-from backend.schemas.dashboard import (
+from models.payment_gateway import Payment_Gateway
+from schemas.dashboard import (
     DashboardStatsResponse, ChartDataResponse,
     DailyVolumeData, ServiceDistributionData,
     LiveTransactionResponse, RecentUserResponse,
