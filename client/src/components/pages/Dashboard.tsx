@@ -408,15 +408,15 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Live User Registrations and Live Transactions - Same Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Live User Registrations - Takes 1 column */}
-        <div className="lg:col-span-1 flex" data-testid="registrations-section">
+      {/* Live User Registrations and Live Transactions - Same Row (50-50 Split) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Live User Registrations - Takes 50% */}
+        <div className="flex" data-testid="registrations-section">
           <RealtimeUserRegistrations />
         </div>
 
-        {/* Live Transactions Table - Takes 2 columns */}
-        <div className="lg:col-span-2 flex" data-testid="transactions-section">
+        {/* Live Transactions Table - Takes 50% */}
+        <div className="flex" data-testid="transactions-section">
           <Card title="🔥 Live Transactions" className="flex-1 flex flex-col">
             <div className="flex-1 overflow-hidden">
               <AdvancedRealtimeTable
