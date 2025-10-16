@@ -57,7 +57,6 @@ const menuItems: MenuItem[] = [
       { path: '/transactions/dth', label: 'DTH Transactions', icon: Tv }
     ]
   },
-  { path: '/mobile-dth-transactions', label: 'Mobile & DTH', icon: Smartphone },
   { path: '/complaints', label: 'Complaints', icon: MessageSquare },
   { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
   { path: '/categories', label: 'Service Categories', icon: Grid3X3 },
