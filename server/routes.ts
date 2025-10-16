@@ -1,14 +1,49 @@
-import { type Express } from "express";
-import { MemStorage } from "./storage";
+import type { Express } from "express";
+import { db } from "@db";
+import {
+  users, transactions, banners, devices,
+  autoLoans, businessLoans, homeLoans, loanAgainstProperty,
+  machineLoans, personalLoans, privateFunding,
+  paymentGateway, serviceJobLogs, serviceRegistrations,
+  serviceRequests, settings, pushTokens
+} from "@db/schema";
+import { eq, desc, and, like, sql } from "drizzle-orm";
+
+// Backend API URL (Python FastAPI)
+const BACKEND_API = process.env.BACKEND_API_URL || 'http://localhost:8000/api';
 
 export function registerRoutes(app: Express) {
-  const storage = new MemStorage();
-
   // Dashboard Statistics
   app.get("/api/dashboard/stats", async (_req, res) => {
     try {
-      const stats = await storage.getDashboardStats();
-      res.json(stats);
+      const stats = await db.query.users.count(); // Example: Get total users
+      const transactionsCount = await db.query.transactions.count();
+      const totalTransactionAmount = await db.select({
+        sum: sql`SUM(${transactions.amount})`
+      }).from(transactions)
+      .then(result => result[0]?.sum || 0);
+
+      const recentTransactions = await db.query.transactions.findMany({
+        orderBy: desc(transactions.createdAt),
+        limit: 5,
+      });
+
+      const recentUsers = await db.query.users.findMany({
+        orderBy: desc(users.createdAt),
+        limit: 5,
+      });
+
+      const statsData = {
+        totalUsers: stats,
+        totalTransactions: transactionsCount,
+        totalTransactionAmount: totalTransactionAmount,
+        recentTransactions: recentTransactions,
+        recentUsers: recentUsers,
+        // Mock data for recharges, to be replaced by actual API calls
+        mobile_recharges: 4500,
+        dth_recharges: 2100,
+      };
+      res.json(statsData);
     } catch (error) {
       console.error("Error fetching dashboard stats:", error);
       res.status(500).json({ error: "Failed to fetch dashboard stats" });
@@ -19,7 +54,10 @@ export function registerRoutes(app: Express) {
   app.get("/api/transactions", async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
-      const transactions = await storage.getRecentTransactions(limit);
+      const transactions = await db.query.transactions.findMany({
+        orderBy: desc(transactions.createdAt),
+        limit: limit,
+      });
       res.json(transactions);
     } catch (error) {
       console.error("Error fetching transactions:", error);
@@ -30,7 +68,9 @@ export function registerRoutes(app: Express) {
   // Get All Transactions
   app.get("/api/transactions/all", async (_req, res) => {
     try {
-      const transactions = await storage.getAllTransactions();
+      const transactions = await db.query.transactions.findMany({
+        orderBy: desc(transactions.createdAt),
+      });
       res.json(transactions);
     } catch (error) {
       console.error("Error fetching all transactions:", error);
@@ -42,7 +82,10 @@ export function registerRoutes(app: Express) {
   app.get("/api/transactions/user/:userId", async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
-      const transactions = await storage.getTransactionsByUserId(userId);
+      const transactions = await db.query.transactions.findMany({
+        where: eq(transactions.userId, userId),
+        orderBy: desc(transactions.createdAt),
+      });
       res.json(transactions);
     } catch (error) {
       console.error("Error fetching user transactions:", error);
@@ -54,7 +97,10 @@ export function registerRoutes(app: Express) {
   app.get("/api/users/recent", async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
-      const users = await storage.getRecentUsers(limit);
+      const users = await db.query.users.findMany({
+        orderBy: desc(users.createdAt),
+        limit: limit,
+      });
       res.json(users);
     } catch (error) {
       console.error("Error fetching recent users:", error);
@@ -65,7 +111,9 @@ export function registerRoutes(app: Express) {
   // Get All Users
   app.get("/api/users", async (_req, res) => {
     try {
-      const users = await storage.getAllUsers();
+      const users = await db.query.users.findMany({
+        orderBy: desc(users.createdAt),
+      });
       res.json(users);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -77,7 +125,9 @@ export function registerRoutes(app: Express) {
   app.get("/api/users/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const user = await storage.getUserById(id);
+      const user = await db.query.users.findFirst({
+        where: eq(users.id, id),
+      });
 
       if (!user) {
         return res.status(404).json({ error: "User not found" });
@@ -93,7 +143,7 @@ export function registerRoutes(app: Express) {
   // Dashboard Charts Data - matching frontend format
   app.get("/api/dashboard/charts", async (_req, res) => {
     try {
-      const stats = await storage.getDashboardStats();
+      const stats = await db.query.transactions.count(); // Placeholder, replace with actual data fetching
 
       // Generate chart data in the format expected by frontend
       const chartData = {
@@ -109,8 +159,9 @@ export function registerRoutes(app: Express) {
         serviceDistribution: [
           { name: 'Electricity', value: 35, color: '#3B82F6' },
           { name: 'Gas', value: 20, color: '#6366F1' },
-          { name: 'Mobile', value: stats.mobile_recharges, color: '#10B981' },
-          { name: 'DTH', value: stats.dth_recharges, color: '#FBBF24' },
+          // These should ideally come from actual data if available or be dynamically calculated
+          { name: 'Mobile', value: 45, color: '#10B981' },
+          { name: 'DTH', value: 15, color: '#FBBF24' },
           { name: 'Water', value: 15, color: '#06B6D4' },
           { name: 'Broadband', value: 12, color: '#8B5CF6' }
         ]
@@ -123,11 +174,12 @@ export function registerRoutes(app: Express) {
     }
   });
 
-  // Loan Application Endpoints
+  // Proxy loan applications to the Python backend
   app.get("/api/loans/auto", async (_req, res) => {
     try {
-      const loans = await storage.getAllAutoLoans();
-      res.json(loans);
+      const response = await fetch(`${BACKEND_API}/loans/auto`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching auto loans:", error);
       res.status(500).json({ error: "Failed to fetch auto loans" });
@@ -136,8 +188,9 @@ export function registerRoutes(app: Express) {
 
   app.get("/api/loans/business", async (_req, res) => {
     try {
-      const loans = await storage.getAllBusinessLoans();
-      res.json(loans);
+      const response = await fetch(`${BACKEND_API}/loans/business`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching business loans:", error);
       res.status(500).json({ error: "Failed to fetch business loans" });
@@ -146,8 +199,9 @@ export function registerRoutes(app: Express) {
 
   app.get("/api/loans/home", async (_req, res) => {
     try {
-      const loans = await storage.getAllHomeLoans();
-      res.json(loans);
+      const response = await fetch(`${BACKEND_API}/loans/home`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching home loans:", error);
       res.status(500).json({ error: "Failed to fetch home loans" });
@@ -156,8 +210,9 @@ export function registerRoutes(app: Express) {
 
   app.get("/api/loans/lap", async (_req, res) => {
     try {
-      const loans = await storage.getAllLoanAgainstProperty();
-      res.json(loans);
+      const response = await fetch(`${BACKEND_API}/loans/lap`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching LAP:", error);
       res.status(500).json({ error: "Failed to fetch loan against property" });
@@ -166,8 +221,9 @@ export function registerRoutes(app: Express) {
 
   app.get("/api/loans/machine", async (_req, res) => {
     try {
-      const loans = await storage.getAllMachineLoans();
-      res.json(loans);
+      const response = await fetch(`${BACKEND_API}/loans/machine`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching machine loans:", error);
       res.status(500).json({ error: "Failed to fetch machine loans" });
@@ -176,8 +232,9 @@ export function registerRoutes(app: Express) {
 
   app.get("/api/loans/personal", async (_req, res) => {
     try {
-      const loans = await storage.getAllPersonalLoans();
-      res.json(loans);
+      const response = await fetch(`${BACKEND_API}/loans/personal`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching personal loans:", error);
       res.status(500).json({ error: "Failed to fetch personal loans" });
@@ -186,41 +243,45 @@ export function registerRoutes(app: Express) {
 
   app.get("/api/loans/private-funding", async (_req, res) => {
     try {
-      const loans = await storage.getAllPrivateFunding();
-      res.json(loans);
+      const response = await fetch(`${BACKEND_API}/loans/private-funding`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching private funding:", error);
       res.status(500).json({ error: "Failed to fetch private funding" });
     }
   });
 
-  // Banner Endpoints
+  // Proxy banner endpoints to the Python backend
   app.get("/api/banners", async (_req, res) => {
     try {
-      const banners = await storage.getAllBanners();
-      res.json(banners);
+      const response = await fetch(`${BACKEND_API}/banners`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching banners:", error);
       res.status(500).json({ error: "Failed to fetch banners" });
     }
   });
 
-  // Device Endpoints
+  // Proxy device endpoints to the Python backend
   app.get("/api/devices", async (_req, res) => {
     try {
-      const devices = await storage.getAllDevices();
-      res.json(devices);
+      const response = await fetch(`${BACKEND_API}/devices`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching devices:", error);
       res.status(500).json({ error: "Failed to fetch devices" });
     }
   });
 
-  // Service Endpoints
+  // Proxy service endpoints to the Python backend
   app.get("/api/service-registrations", async (_req, res) => {
     try {
-      const registrations = await storage.getAllServiceRegistrations();
-      res.json(registrations);
+      const response = await fetch(`${BACKEND_API}/service-registrations`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching service registrations:", error);
       res.status(500).json({ error: "Failed to fetch service registrations" });
@@ -229,8 +290,9 @@ export function registerRoutes(app: Express) {
 
   app.get("/api/service-requests", async (_req, res) => {
     try {
-      const requests = await storage.getAllServiceRequests();
-      res.json(requests);
+      const response = await fetch(`${BACKEND_API}/service-requests`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching service requests:", error);
       res.status(500).json({ error: "Failed to fetch service requests" });
@@ -239,8 +301,9 @@ export function registerRoutes(app: Express) {
 
   app.get("/api/payment-gateway", async (_req, res) => {
     try {
-      const payments = await storage.getAllPaymentGateway();
-      res.json(payments);
+      const response = await fetch(`${BACKEND_API}/payment-gateway`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching payment gateway:", error);
       res.status(500).json({ error: "Failed to fetch payment gateway" });
@@ -249,12 +312,12 @@ export function registerRoutes(app: Express) {
 
   app.get("/api/service-job-logs", async (_req, res) => {
     try {
-      const logs = await storage.getAllServiceJobLogs();
-      res.json(logs);
+      const response = await fetch(`${BACKEND_API}/service-job-logs`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching service job logs:", error);
       res.status(500).json({ error: "Failed to fetch service job logs" });
     }
   });
-
 }

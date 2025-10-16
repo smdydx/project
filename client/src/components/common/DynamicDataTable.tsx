@@ -11,10 +11,22 @@ interface DynamicDataTableProps {
 
 export function DynamicDataTable({ config }: DynamicDataTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterColumn, setFilterColumn] = useState("");
-  
-  const { data, isLoading, error } = useQuery<any[]>({
-    queryKey: [config.apiEndpoint],
+  const [filterColumn, setFilterColumn] = useState(""); // This state is not used in the provided snippet, but kept for completeness if it's intended for future use or was present in the original context.
+  const [filters, setFilters] = useState<Record<string, any>>({}); // Assuming filters state is intended to be used with the API call
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: [config.apiEndpoint, searchTerm, filters],
+    queryFn: async () => {
+      const params: Record<string, any> = {};
+      if (searchTerm) params.search = searchTerm;
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) params[key] = value;
+      });
+
+      const response = await fetch(`${config.apiEndpoint}?${new URLSearchParams(params)}`);
+      if (!response.ok) throw new Error('Failed to fetch data');
+      return response.json();
+    },
   });
 
   if (isLoading) {
@@ -40,7 +52,7 @@ export function DynamicDataTable({ config }: DynamicDataTableProps) {
 
   const filteredData = data?.filter((row) => {
     if (!searchTerm) return true;
-    
+
     return config.columns.some(col => {
       const value = row[col.key];
       if (value === null || value === undefined) return false;
@@ -65,13 +77,17 @@ export function DynamicDataTable({ config }: DynamicDataTableProps) {
               data-testid="input-search-dynamic-table"
             />
           </div>
-          
+
           {filterableColumns.length > 0 && (
             <div className="relative">
               <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <select
                 value={filterColumn}
-                onChange={(e) => setFilterColumn(e.target.value)}
+                onChange={(e) => {
+                  setFilterColumn(e.target.value);
+                  // Assuming filterColumn state should update filters state
+                  setFilters(prev => ({ ...prev, [e.target.value]: '' })); // Resetting other filters might be needed depending on desired behavior
+                }}
                 className="pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary"
                 data-testid="select-filter-column"
               >
@@ -80,6 +96,16 @@ export function DynamicDataTable({ config }: DynamicDataTableProps) {
                   <option key={col.key} value={col.key}>{col.label}</option>
                 ))}
               </select>
+              {/* Add input/select for the actual filter value based on filterColumn */}
+              {filterColumn && (
+                <input
+                  type="text" // Or a more specific input type based on column type
+                  placeholder={`Filter by ${filterableColumns.find(c => c.key === filterColumn)?.label}...`}
+                  value={filters[filterColumn] || ''}
+                  onChange={(e) => setFilters(prev => ({ ...prev, [filterColumn]: e.target.value }))}
+                  className="ml-2 pl-4 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              )}
             </div>
           )}
         </div>
@@ -114,7 +140,7 @@ export function DynamicDataTable({ config }: DynamicDataTableProps) {
                 </tr>
               ) : (
                 filteredData.map((row, rowIndex) => (
-                  <tr 
+                  <tr
                     key={row[config.primaryKey] || rowIndex}
                     className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                     data-testid={`row-data-${row[config.primaryKey] || rowIndex}`}
@@ -122,7 +148,7 @@ export function DynamicDataTable({ config }: DynamicDataTableProps) {
                     {config.columns.map((column) => {
                       const value = row[column.key];
                       const formattedValue = formatCellValue(value, column.type);
-                      
+
                       return (
                         <td
                           key={column.key}
@@ -155,7 +181,7 @@ export function DynamicDataTable({ config }: DynamicDataTableProps) {
             </tbody>
           </table>
         </div>
-        
+
         {filteredData.length > 0 && (
           <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
             <p className="text-sm text-gray-600 dark:text-gray-400" data-testid="text-total-records">

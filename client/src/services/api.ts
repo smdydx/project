@@ -1,30 +1,72 @@
+
 /**
- * API Service for Backend Connection
- * Connects React frontend to Express backend
+ * Production API Service
+ * Connects React frontend to backend APIs
  */
 
-export const apiService = {
-  getDashboardStats: async () => {
-    const response = await fetch('/api/dashboard/stats');
-    if (!response.ok) throw new Error('Failed to fetch dashboard stats');
-    return response.json();
-  },
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
-  getLiveTransactions: async () => {
-    const response = await fetch('/api/transactions?limit=50');
-    if (!response.ok) throw new Error('Failed to fetch transactions');
-    return response.json();
-  },
+interface ApiResponse<T> {
+  data?: T;
+  error?: string;
+}
 
-  getRecentUsers: async () => {
-    const response = await fetch('/api/users/recent?limit=20');
-    if (!response.ok) throw new Error('Failed to fetch users');
-    return response.json();
-  },
+class ApiService {
+  private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...options?.headers,
+        },
+      });
 
-  getChartData: async () => {
-    const response = await fetch('/api/dashboard/charts');
-    if (!response.ok) throw new Error('Failed to fetch chart data');
-    return response.json();
-  },
-};
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('API Request Failed:', error);
+      throw error;
+    }
+  }
+
+  // Dashboard Stats
+  async getDashboardStats() {
+    return this.request('/dashboard/stats');
+  }
+
+  async getChartData() {
+    return this.request('/dashboard/charts');
+  }
+
+  // Transactions
+  async getLiveTransactions(limit: number = 50) {
+    return this.request(`/transactions?limit=${limit}`);
+  }
+
+  async getAllTransactions(page: number = 1, limit: number = 100) {
+    return this.request(`/transactions?page=${page}&limit=${limit}`);
+  }
+
+  // Users
+  async getRecentUsers(limit: number = 20) {
+    return this.request(`/users/recent?limit=${limit}`);
+  }
+
+  async getAllUsers(page: number = 1, limit: number = 100) {
+    return this.request(`/users?page=${page}&limit=${limit}`);
+  }
+
+  // Specific Data Tables
+  async getTableData(endpoint: string, params?: Record<string, any>) {
+    const queryString = params 
+      ? '?' + new URLSearchParams(params).toString() 
+      : '';
+    return this.request(`${endpoint}${queryString}`);
+  }
+}
+
+export const apiService = new ApiService();

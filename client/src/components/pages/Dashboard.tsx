@@ -200,14 +200,16 @@ export default function Dashboard() {
   };
 
   const generateRealtimeTransactions = () => {
-    return transactions.slice(0, 12).map((txn, index) => ({
-      id: txn.transactionId || txn.id || `TXN${index}`,
-      user: txn.userName || txn.user || `User ${index}`,
-      service: txn.type || txn.service || txn.TransactionType || "Transaction",
-      amount: txn.amount || parseFloat(txn.Amount || "0"),
-      status: txn.status || txn.Status || "Pending",
-      timestamp: txn.timestamp || txn.time || new Date().toISOString(),
-      location: txn.location || "India",
+    if (!transactions || transactions.length === 0) return [];
+    
+    return transactions.slice(0, 12).map((txn) => ({
+      id: txn.TransactionID || txn.id,
+      user: txn.UserID ? `User ${txn.UserID}` : 'Unknown',
+      service: txn.TransactionType || txn.type || 'Transaction',
+      amount: parseFloat(txn.Amount || txn.amount || '0'),
+      status: txn.Status || txn.status || 'Pending',
+      timestamp: txn.CreatedAt || txn.timestamp || new Date().toISOString(),
+      location: 'India',
     }));
   };
 

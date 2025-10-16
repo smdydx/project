@@ -38,7 +38,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python -m backend.run"
+args = "cd backend && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
 
 [[workflows.workflow]]
 name = "Run FastAPI Backend"
@@ -56,10 +56,6 @@ externalPort = 80
 [[ports]]
 localPort = 8000
 externalPort = 8000
-
-[[ports]]
-localPort = 33233
-externalPort = 4200
 
 [[ports]]
 localPort = 34693
