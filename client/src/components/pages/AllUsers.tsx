@@ -25,7 +25,7 @@ export default function AllUsers() {
       }
       params.append('limit', '100');
       
-      const response = await fetch(`/api/users/all?${params}`);
+      const response = await fetch(`/api/v1/users/all?${params}`);
       if (!response.ok) throw new Error('Failed to fetch users');
       
       const data = await response.json();

@@ -18,16 +18,14 @@ interface MobileTransaction {
 
 const fetchMobileTransactions = async (): Promise<MobileTransaction[]> => {
   try {
-    const response = await fetch('/api/transactions/mobile?limit=100');
+    const response = await fetch('/api/v1/transactions/mobile?limit=100');
     if (!response.ok) throw new Error('Failed to fetch transactions');
 
     const data = await response.json();
-    // Assuming the API returns data in the expected MobileTransaction[] format
-    // If the API returns a different structure, you might need to map it here.
     return data; 
   } catch (error) {
     console.error('Error fetching mobile transactions:', error);
-    return []; // Return empty array in case of error
+    return [];
   }
 };
 

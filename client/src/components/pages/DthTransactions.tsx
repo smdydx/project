@@ -18,7 +18,7 @@ interface DthTransaction {
 
 const generateDthTransactions = async (): Promise<DthTransaction[]> => {
   try {
-    const response = await fetch('/api/transactions/dth?limit=100');
+    const response = await fetch('/api/v1/transactions/dth?limit=100');
     if (!response.ok) throw new Error('Failed to fetch transactions');
     
     const data = await response.json();

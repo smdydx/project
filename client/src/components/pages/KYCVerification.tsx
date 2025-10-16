@@ -20,7 +20,7 @@ export default function KYCVerification() {
         params.append('status', kycStatusFilter.toLowerCase());
       }
       
-      const response = await fetch(`/api/kyc/verification?${params}`);
+      const response = await fetch(`/api/v1/kyc/verification?${params}`);
       if (!response.ok) throw new Error('Failed to fetch KYC data');
       
       const data = await response.json();

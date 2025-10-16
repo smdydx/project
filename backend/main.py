@@ -32,17 +32,13 @@ app.add_middleware(
 )
 
 # Include API routes
-from api.v1 import dashboard, users, transactions, kyc, test
+from api.v1 import dashboard, users, kyc, test, transactions
 
-app.include_router(
-    dashboard.router,
-    prefix=f"{settings.API_V1_PREFIX}/dashboard",
-    tags=["dashboard"]
-)
-app.include_router(kyc.router, prefix=f"{settings.API_V1_PREFIX}/kyc", tags=["kyc"])
-app.include_router(users.router, prefix=f"{settings.API_V1_PREFIX}/users", tags=["users"])
-app.include_router(transactions.router, prefix=f"{settings.API_V1_PREFIX}/transactions", tags=["transactions"])
-app.include_router(test.router, prefix=f"{settings.API_V1_PREFIX}/test", tags=["test"])
+app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
+app.include_router(kyc.router, prefix="/api/v1/kyc", tags=["kyc"])
+app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
+app.include_router(transactions.router, prefix="/api/v1/transactions", tags=["transactions"])
+app.include_router(test.router, prefix="/api/v1/test", tags=["test"])
 
 @app.get("/")
 async def root():
