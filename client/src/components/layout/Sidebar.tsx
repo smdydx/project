@@ -57,6 +57,7 @@ const menuItems: MenuItem[] = [
       { path: '/transactions/dth', label: 'DTH Transactions', icon: Tv }
     ]
   },
+  { path: '/mobile-dth-transactions', label: 'Mobile & DTH', icon: Smartphone },
   { path: '/complaints', label: 'Complaints', icon: MessageSquare },
   { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
   { path: '/categories', label: 'Service Categories', icon: Grid3X3 },
@@ -97,7 +98,7 @@ export default function Sidebar({
       } lg:translate-x-0 ${
         isCollapsed ? 'lg:w-20' : 'lg:w-64'
       } w-64`}>
-        
+
         {/* Mobile Close Button */}
         <button
           onClick={onMobileClose}
@@ -136,7 +137,7 @@ export default function Sidebar({
             </div>
           </div>
         </div>
-        
+
         {/* Navigation */}
         <nav className={`mt-6 flex-1 overflow-y-auto transition-all duration-300 ${
           isCollapsed ? 'lg:px-2' : 'px-3'
@@ -146,7 +147,7 @@ export default function Sidebar({
             const isActive = location === item.path || (item.subMenu && item.subMenu.some(sub => location === sub.path));
             const isExpanded = expandedMenus.includes(item.path);
             const hasSubMenu = item.subMenu && item.subMenu.length > 0;
-            
+
             return (
               <div key={item.path} className="relative group mb-1">
                 {hasSubMenu ? (
@@ -164,19 +165,19 @@ export default function Sidebar({
                       {isActive && (
                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-r-full"></div>
                       )}
-                      
+
                       <div className={`flex items-center ${isCollapsed ? 'lg:justify-center' : 'space-x-3'}`}>
                         <Icon className={`flex-shrink-0 transition-all duration-200 ${
                           isActive ? 'w-6 h-6' : 'w-5 h-5'
                         }`} />
-                        
+
                         <span className={`font-medium truncate transition-all duration-300 ${
                           isCollapsed ? 'lg:hidden' : 'block'
                         }`}>
                           {item.label}
                         </span>
                       </div>
-                      
+
                       {!isCollapsed && (
                         <div className="ml-2">
                           {isExpanded ? (
@@ -228,11 +229,11 @@ export default function Sidebar({
                     {isActive && (
                       <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-r-full"></div>
                     )}
-                    
+
                     <Icon className={`flex-shrink-0 transition-all duration-200 ${
                       isActive ? 'w-6 h-6' : 'w-5 h-5'
                     }`} />
-                    
+
                     <span className={`font-medium truncate transition-all duration-300 ${
                       isCollapsed ? 'lg:hidden' : 'block'
                     }`}>
@@ -252,7 +253,7 @@ export default function Sidebar({
             );
           })}
         </nav>
-        
+
         {/* Logout Button */}
         <div className={`border-t border-gray-200 dark:border-gray-700 transition-all duration-300 ${
           isCollapsed ? 'lg:p-2' : 'p-3'

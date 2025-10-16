@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Route, Switch } from 'wouter';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -10,6 +9,7 @@ import AllUsers from './components/pages/AllUsers';
 import NewSignUp from './components/pages/NewSignUp';
 import KYCVerification from './components/pages/KYCVerification';
 import Transactions from './components/pages/Transactions';
+import MobileDTHTransactions from './components/pages/MobileDTHTransactions'; // Assuming this component will be created
 import Complaints from './components/pages/Complaints';
 import Reports from './components/pages/Reports';
 import Settings from './components/pages/Settings';
@@ -21,14 +21,14 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-      <Sidebar 
+      <Sidebar
         isMobileOpen={isMobileSidebarOpen}
         onMobileClose={() => setIsMobileSidebarOpen(false)}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
-      <Header 
-        dateFilter={dateFilter} 
+      <Header
+        dateFilter={dateFilter}
         setDateFilter={setDateFilter}
         onMobileMenuToggle={() => setIsMobileSidebarOpen(true)}
         isCollapsed={isSidebarCollapsed}
@@ -45,6 +45,7 @@ function AppContent() {
             <Route path="/users/new-signup" component={NewSignUp} />
             <Route path="/users/kyc" component={KYCVerification} />
             <Route path="/transactions" component={Transactions} />
+            <Route path="/mobile-dth-transactions" component={MobileDTHTransactions} />
             <Route path="/complaints" component={Complaints} />
             <Route path="/reports" component={Reports} />
             <Route path="/settings" component={Settings} />
