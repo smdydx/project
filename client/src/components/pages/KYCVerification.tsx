@@ -15,12 +15,13 @@ export default function KYCVerification() {
 
   const generateKYCData = async () => {
     try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const params = new URLSearchParams();
       if (kycStatusFilter !== 'All') {
         params.append('status', kycStatusFilter.toLowerCase());
       }
       
-      const response = await fetch(`/api/v1/kyc/verification?${params}`);
+      const response = await fetch(`${API_URL}/api/v1/kyc/verification?${params}`);
       if (!response.ok) throw new Error('Failed to fetch KYC data');
       
       const data = await response.json();

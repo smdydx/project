@@ -18,7 +18,8 @@ interface DthTransaction {
 
 const generateDthTransactions = async (): Promise<DthTransaction[]> => {
   try {
-    const response = await fetch('/api/v1/transactions/dth?limit=100');
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const response = await fetch(`${API_URL}/api/v1/transactions/dth?limit=100`);
     if (!response.ok) throw new Error('Failed to fetch transactions');
     
     const data = await response.json();
