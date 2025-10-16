@@ -25,9 +25,14 @@ async def get_dashboard_stats(db: Session = Depends(get_db)):
     """
     try:
         stats = DashboardService.get_dashboard_stats(db)
-        return stats
+        print(f"📊 Stats response: {stats}")
+        return DashboardStatsResponse(**stats)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching stats: {str(e)}")
+        print(f"❌ Error in get_dashboard_stats: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        # Return default values instead of error
+        return DashboardStatsResponse()
 
 @router.get("/charts", response_model=ChartDataResponse)
 async def get_chart_data(db: Session = Depends(get_db)):
@@ -38,9 +43,14 @@ async def get_chart_data(db: Session = Depends(get_db)):
     """
     try:
         charts = DashboardService.get_chart_data(db)
-        return charts
+        print(f"📈 Charts response: {charts}")
+        return ChartDataResponse(**charts)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching charts: {str(e)}")
+        print(f"❌ Error in get_chart_data: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        # Return empty chart data instead of error
+        return ChartDataResponse(daily_volume=[], service_distribution=[])
 
 @router.get("/transactions/live", response_model=List[LiveTransactionResponse])
 async def get_live_transactions(
