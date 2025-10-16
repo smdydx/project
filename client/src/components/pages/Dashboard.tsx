@@ -409,24 +409,27 @@ export default function Dashboard() {
       </div>
 
       {/* Live User Registrations and Live Transactions - Same Row (50-50 Split) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 -mx-2">
-        {/* Live User Registrations - Takes 50% */}
-        <div className="flex px-2" data-testid="registrations-section">
-          <RealtimeUserRegistrations />
-        </div>
+      <Card className="p-0 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+          {/* Live User Registrations - Takes 50% */}
+          <div className="flex border-r border-gray-200 dark:border-gray-700" data-testid="registrations-section">
+            <RealtimeUserRegistrations />
+          </div>
 
-        {/* Live Transactions Table - Takes 50% */}
-        <div className="flex px-2" data-testid="transactions-section">
-          <Card title="🔥 Live Transactions" className="flex-1 flex flex-col">
-            <div className="flex-1 overflow-hidden">
+          {/* Live Transactions Table - Takes 50% */}
+          <div className="flex flex-col" data-testid="transactions-section">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">🔥 Live Transactions</h3>
+            </div>
+            <div className="flex-1 overflow-hidden p-6">
               <AdvancedRealtimeTable
                 columns={transactionColumns}
                 data={generateRealtimeTransactions()}
               />
             </div>
-          </Card>
+          </div>
         </div>
-      </div>
+      </Card>
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
