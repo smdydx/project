@@ -1,3 +1,4 @@
+
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 from models.models import User
@@ -28,7 +29,7 @@ class DashboardService:
         # Total transactions
         total_transactions = db.query(func.count(Payment_Gateway.id)).scalar() or 0
 
-        # Total LCR money
+        # Total LCR money (sum of all user wallet balances)
         total_lcr_money = db.query(func.sum(User.INRWalletBalance)).filter(
             User.IsDeleted == False
         ).scalar() or 0
@@ -49,6 +50,9 @@ class DashboardService:
             func.date(User.CreatedAt) == today
         ).scalar() or 0
 
+        # Calculate prime rewards (247 per prime user)
+        total_prime_rewards = prime_users * 247
+
         return {
             "total_users": total_users,
             "new_signups_today": new_signups_today,
@@ -56,26 +60,21 @@ class DashboardService:
             "prime_users": prime_users,
             "total_transactions": total_transactions,
             "total_lcr_money": float(total_lcr_money),
+            "total_distributor_lcr_money": float(total_lcr_money),
+            "total_distributor_prime_reward": total_prime_rewards,
             "mobile_recharges": mobile_recharges,
-            "dth_recharges": dth_recharges
+            "dth_recharges": dth_recharges,
+            "total_mobile_recharge": mobile_recharges,
+            "total_dth_recharge": dth_recharges
         }
 
     @staticmethod
     def get_chart_data(db: Session):
         """Get chart data for dashboard"""
-        # Last 7 days user registrations
+        # Last 7 days data
         seven_days_ago = datetime.now() - timedelta(days=7)
-        user_registrations = db.query(
-            func.date(User.CreatedAt).label('date'),
-            func.count(User.UserID).label('count')
-        ).filter(
-            User.IsDeleted == False,
-            User.CreatedAt >= seven_days_ago
-        ).group_by(
-            func.date(User.CreatedAt)
-        ).all()
-
-        # Last 7 days transactions
+        
+        # Get transaction data for last 7 days
         transaction_data = db.query(
             func.date(Payment_Gateway.created_at).label('date'),
             func.count(Payment_Gateway.id).label('count'),
@@ -86,17 +85,20 @@ class DashboardService:
             func.date(Payment_Gateway.created_at)
         ).all()
 
-        # Format data for dashboard
+        # Format data for daily volume chart
         days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
         daily_volume = []
+        
         for i, day in enumerate(days):
-            matching_data = next((t for t in transaction_data if t.date == (datetime.now() - timedelta(days=6-i)).date()), None)
+            target_date = (datetime.now() - timedelta(days=6-i)).date()
+            matching_data = next((t for t in transaction_data if t.date == target_date), None)
             daily_volume.append({
                 "name": day,
                 "transactions": matching_data.count if matching_data else 0,
                 "amount": float(matching_data.amount) if matching_data and matching_data.amount else 0
             })
 
+        # Service distribution
         service_distribution = [
             {"name": "Mobile", "value": 35, "color": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"},
             {"name": "DTH", "value": 25, "color": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"},
@@ -121,6 +123,11 @@ class DashboardService:
 
         return [
             {
+                "id": str(user.UserID),
+                "name": user.fullname or f"User {user.UserID}",
+                "role": "Prime User" if user.prime_status else "Regular User",
+                "joined_on": user.CreatedAt.isoformat() if user.CreatedAt else datetime.now().isoformat(),
+                "mobile": user.MobileNumber,
                 "UserID": user.UserID,
                 "fullname": user.fullname,
                 "MobileNumber": user.MobileNumber,
@@ -131,27 +138,6 @@ class DashboardService:
                 "prime_status": user.prime_status
             }
             for user in users
-        ]
-
-    @staticmethod
-    def get_recent_transactions(db: Session, limit: int = 50):
-        """Get recent transactions"""
-        transactions = db.query(Payment_Gateway).order_by(
-            desc(Payment_Gateway.created_at)
-        ).limit(limit).all()
-
-        return [
-            {
-                "id": txn.id,
-                "payer_name": txn.payer_name,
-                "payer_mobile": txn.payer_mobile,
-                "amount": float(txn.amount) if txn.amount else 0,
-                "purpose": txn.purpose,
-                "status": txn.status,
-                "payment_mode": txn.payment_mode,
-                "created_at": txn.created_at.isoformat() if txn.created_at else None
-            }
-            for txn in transactions
         ]
 
     @staticmethod
