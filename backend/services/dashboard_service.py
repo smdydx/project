@@ -73,10 +73,10 @@ class DashboardService:
 
         return [{
             "id": user.UserID,
-            "name": user.Name or "Unknown",
+            "name": user.fullname or "Unknown",
             "email": user.Email or "",
-            "mobile": user.Mobile or "",
-            "status": "Active" if user.IsActive else "Blocked",
+            "mobile": user.MobileNumber or "",
+            "status": "Active" if hasattr(user, 'IsActive') and user.IsActive else "Active",
             "joinDate": user.CreatedAt.strftime("%Y-%m-%d") if user.CreatedAt else ""
         } for user in users]
 
