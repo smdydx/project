@@ -2,7 +2,7 @@
 from datetime import datetime
 import uuid
 from sqlalchemy.orm import Mapped, mapped_column
-from app.core.base import Base,IntPrimaryKeyMixin, TimestampMixin
+from core.base import Base,IntPrimaryKeyMixin, TimestampMixin
 
 from sqlalchemy import String, Boolean, DateTime, Enum, ForeignKey
 import enum

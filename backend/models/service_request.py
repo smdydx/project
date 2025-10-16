@@ -14,9 +14,9 @@ from sqlalchemy import (
     ForeignKey,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.core.base import Base, IntPrimaryKeyMixin
-from app.models.models import User
-from app.models.payment_gateway import Payment_Gateway  # import at bottom to avoid circular import
+from core.base import Base, IntPrimaryKeyMixin
+from models.models import User
+from models.payment_gateway import Payment_Gateway  # import at bottom to avoid circular import
 
 
 class Service_Request(IntPrimaryKeyMixin, Base):

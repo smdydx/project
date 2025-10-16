@@ -11,7 +11,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 
-from app.core.base import Base,get_ist_time
+from core.base import Base,get_ist_time
 from sqlalchemy import select, func
 from decimal import Decimal
 # Timezone setup

@@ -6,7 +6,7 @@ from typing import List, Dict
 from models.models import (
     User, Wallet, DirectIncome, LevelIncome,
     PrimeActivations, BillTransactions, Transactions, 
-    LcrMoney, P2PTransaction, RechargeTransactions
+    LcrMoney, P2PTransaction
 )
 from models.payment_gateway import Payment_Gateway
 from schemas.dashboard import (
@@ -64,17 +64,17 @@ class DashboardService:
         total_prime_reward = Decimal(total_prime_reward_result) if total_prime_reward_result else Decimal("0.00")
 
 
-        # Mobile recharge count (from RechargeTransactions)
-        # Using service_type column as per original model
-        mobile_recharge_count = db.query(func.count(RechargeTransactions.id)).filter(
-            RechargeTransactions.service_type.ilike('%mobile%'),
-            RechargeTransactions.status == 'SUCCESS'
+        # Mobile recharge count (from Payment_Gateway)
+        # Using purpose column to determine service type
+        mobile_recharge_count = db.query(func.count(Payment_Gateway.id)).filter(
+            Payment_Gateway.purpose.ilike('%mobile%'),
+            Payment_Gateway.status == 'SUCCESS'
         ).scalar() or 0
 
-        # DTH recharge count (from RechargeTransactions)
-        dth_recharge_count = db.query(func.count(RechargeTransactions.id)).filter(
-            RechargeTransactions.service_type.ilike('%dth%'),
-            RechargeTransactions.status == 'SUCCESS'
+        # DTH recharge count (from Payment_Gateway)
+        dth_recharge_count = db.query(func.count(Payment_Gateway.id)).filter(
+            Payment_Gateway.purpose.ilike('%dth%'),
+            Payment_Gateway.status == 'SUCCESS'
         ).scalar() or 0
 
         return DashboardStatsResponse(

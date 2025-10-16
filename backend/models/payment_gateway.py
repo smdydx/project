@@ -13,7 +13,7 @@ from sqlalchemy import (
     ForeignKey
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.core.base import Base, IntPrimaryKeyMixin
+from core.base import Base, IntPrimaryKeyMixin
 
 
 class Payment_Gateway(IntPrimaryKeyMixin, Base):
@@ -137,9 +137,9 @@ class Payment_Gateway(IntPrimaryKeyMixin, Base):
 
 
 # from sqlalchemy.orm import Mapped, mapped_column
-# from app.core.base import Base, IntPrimaryKeyMixin, TimestampMixin
-# from app.models.models import User
-# from app.models.service_request import Service_Request
+# from core.base import Base, IntPrimaryKeyMixin, TimestampMixin
+# from models.models import User
+# from models.service_request import Service_Request
 
 
 # class Payment_Gateway(IntPrimaryKeyMixin, Base):

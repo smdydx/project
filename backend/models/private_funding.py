@@ -1,4 +1,5 @@
-from sqlalchemy import Column, String, Numeric, Integer
+from sqlalchemy import Column, String, Numeric, Integer, DateTime, Float
+from datetime import datetime
 from core.base import Base
 
 class PrivateFunding(Base):

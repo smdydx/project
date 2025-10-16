@@ -3,7 +3,7 @@ from sqlalchemy import (
     Integer,
     Boolean,
 )
-from app.core.base import Base
+from core.base import Base
 # ================================Setting Table Come Here ===========================================================
 
 
