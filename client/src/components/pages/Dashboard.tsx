@@ -200,7 +200,7 @@ export default function Dashboard() {
   };
 
   const generateRealtimeTransactions = () => {
-    if (!transactions || transactions.length === 0) return [];
+    if (!transactions || !Array.isArray(transactions) || transactions.length === 0) return [];
     
     return transactions.slice(0, 12).map((txn) => ({
       id: txn.TransactionID || txn.id,
