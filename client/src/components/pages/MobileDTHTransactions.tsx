@@ -9,64 +9,8 @@ const statusTypes = ['All', 'Success', 'Pending', 'Failed'];
 const operators = ['All', 'Airtel', 'Jio', 'Vi', 'BSNL', 'Tata Sky', 'Dish TV', 'Airtel Digital', 'Sun Direct'];
 
 // Mock data - replace with actual API calls
-const mockTransactions = [
-  {
-    id: 'TXN001',
-    userId: 'USR123',
-    userName: 'Rajesh Kumar',
-    mobile: '+91 9876543210',
-    type: 'Mobile',
-    operator: 'Airtel',
-    amount: 399,
-    status: 'Success',
-    date: '2024-02-20 10:30',
-    rechargeNumber: '9876543210',
-    referenceId: 'REF123456789',
-    operatorTxnId: 'OP123456789'
-  },
-  {
-    id: 'TXN002',
-    userId: 'USR124',
-    userName: 'Priya Sharma',
-    mobile: '+91 9876543211',
-    type: 'DTH',
-    operator: 'Tata Sky',
-    amount: 650,
-    status: 'Success',
-    date: '2024-02-20 11:15',
-    rechargeNumber: '1234567890',
-    referenceId: 'REF123456790',
-    operatorTxnId: 'OP123456790'
-  },
-  {
-    id: 'TXN003',
-    userId: 'USR125',
-    userName: 'Amit Patel',
-    mobile: '+91 9876543212',
-    type: 'Mobile',
-    operator: 'Jio',
-    amount: 299,
-    status: 'Pending',
-    date: '2024-02-20 12:00',
-    rechargeNumber: '9876543212',
-    referenceId: 'REF123456791',
-    operatorTxnId: 'OP123456791'
-  },
-  {
-    id: 'TXN004',
-    userId: 'USR126',
-    userName: 'Sneha Reddy',
-    mobile: '+91 9876543213',
-    type: 'DTH',
-    operator: 'Dish TV',
-    amount: 750,
-    status: 'Failed',
-    date: '2024-02-20 13:45',
-    rechargeNumber: '9876543213',
-    referenceId: 'REF123456792',
-    operatorTxnId: 'OP123456792'
-  }
-];
+// Real transactions will come from API - no mock data
+const mockTransactions: any[] = [];
 
 export default function MobileDTHTransactions() {
   const [typeFilter, setTypeFilter] = useState('All');

@@ -40,20 +40,9 @@ export default function UserManagement() {
     return roleMatch;
   });
 
+  // Data will come from mockUsers already filtered above
   const generateRealtimeUsers = () => {
-    const statuses = ['Active', 'Blocked'];
-    const roles = ['Retailer', 'Distributor', 'Admin'];
-    const names = ['Rajesh Kumar', 'Priya Sharma', 'Amit Patel', 'Sneha Reddy', 'Arjun Singh', 'Kavya Nair', 'Rohit Gupta', 'Anita Desai'];
-    
-    return Array.from({ length: 15 }, (_, i) => ({
-      id: `USR${Math.floor(Math.random() * 10000)}`,
-      name: names[Math.floor(Math.random() * names.length)],
-      email: `user${Math.floor(Math.random() * 1000)}@example.com`,
-      mobile: `+91 ${Math.floor(Math.random() * 9000000000) + 1000000000}`,
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      role: roles[Math.floor(Math.random() * roles.length)],
-      joinedOn: new Date().toLocaleDateString()
-    }));
+    return filteredUsers;
   };
 
   const getAdvancedStatusBadge = (status: string) => {

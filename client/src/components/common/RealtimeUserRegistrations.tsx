@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UserPlus, Globe, Smartphone, MapPin, Clock, Star, Shield, Crown } from 'lucide-react';
+import { useWebSocket } from '../../hooks/useWebSocket';
 
 interface NewUser {
   id: string;
@@ -12,55 +13,32 @@ interface NewUser {
   avatar?: string;
 }
 
-const userPool = [
-  { name: 'Rajesh Kumar', email: 'rajesh.kumar@example.com', role: 'Retailer' as const, location: 'Mumbai, India' },
-  { name: 'Priya Sharma', email: 'priya.sharma@example.com', role: 'Distributor' as const, location: 'Delhi, India' },
-  { name: 'Amit Patel', email: 'amit.patel@example.com', role: 'Retailer' as const, location: 'Ahmedabad, India' },
-  { name: 'Sneha Reddy', email: 'sneha.reddy@example.com', role: 'Distributor' as const, location: 'Bangalore, India' },
-  { name: 'Arjun Singh', email: 'arjun.singh@example.com', role: 'Retailer' as const, location: 'Jaipur, India' },
-  { name: 'Kavya Nair', email: 'kavya.nair@example.com', role: 'Retailer' as const, location: 'Kochi, India' },
-  { name: 'Rohit Gupta', email: 'rohit.gupta@example.com', role: 'Distributor' as const, location: 'Pune, India' },
-  { name: 'Anita Desai', email: 'anita.desai@example.com', role: 'Retailer' as const, location: 'Surat, India' },
-  { name: 'Vikram Shah', email: 'vikram.shah@example.com', role: 'Retailer' as const, location: 'Hyderabad, India' },
-  { name: 'Meera Joshi', email: 'meera.joshi@example.com', role: 'Distributor' as const, location: 'Chennai, India' }
-];
-
 export default function RealtimeUserRegistrations() {
   const [newUsers, setNewUsers] = useState<NewUser[]>([]);
   const [totalRegistrations, setTotalRegistrations] = useState(0);
+  const { data: wsUser } = useWebSocket("user-registrations");
 
+  // Add new users from WebSocket
   useEffect(() => {
-    const generateNewUser = () => {
-      const baseUser = userPool[Math.floor(Math.random() * userPool.length)];
-      const devices = ['Mobile', 'Desktop'] as const;
-      
+    if (wsUser) {
       const newUser: NewUser = {
-        id: `USR${Math.floor(Math.random() * 100000)}`,
-        name: baseUser.name,
-        email: baseUser.email,
-        role: baseUser.role,
-        location: baseUser.location,
-        device: devices[Math.floor(Math.random() * devices.length)],
-        joinedAt: new Date()
+        id: wsUser.id || `USR${Date.now()}`,
+        name: wsUser.name || "Unknown",
+        email: wsUser.email || "",
+        role: (wsUser.role || 'Retailer') as 'Retailer' | 'Distributor' | 'Admin',
+        location: wsUser.location || "Unknown",
+        device: (wsUser.device || 'Desktop') as 'Mobile' | 'Desktop',
+        joinedAt: new Date(wsUser.registered_at || Date.now())
       };
 
       setNewUsers(prev => {
-        const updated = [newUser, ...prev].slice(0, 8); // Keep only latest 8
+        const updated = [newUser, ...prev].slice(0, 8);
         return updated;
       });
 
       setTotalRegistrations(prev => prev + 1);
-    };
-
-    // Generate initial users
-    for (let i = 0; i < 5; i++) {
-      setTimeout(() => generateNewUser(), i * 500);
     }
-
-    // Continue generating users
-    const interval = setInterval(generateNewUser, 4000 + Math.random() * 6000);
-    return () => clearInterval(interval);
-  }, []);
+  }, [wsUser]);
 
   const getRoleIcon = (role: string) => {
     switch (role) {

@@ -7,22 +7,9 @@ import AdvancedRealtimeTable from '../common/AdvancedRealtimeTable';
 import Card from '../common/Card';
 
 export default function NewSignUp() {
+  // Return empty array - real data will come from API/WebSocket
   const generateNewSignups = () => {
-    const names = ['Rahul Verma', 'Deepika Singh', 'Sanjay Mehta', 'Pooja Kapoor', 'Vikash Yadav'];
-    const cities = ['Delhi', 'Mumbai', 'Bangalore', 'Pune', 'Hyderabad'];
-    
-    return Array.from({ length: 10 }, (_, i) => ({
-      id: `NSU${Math.floor(Math.random() * 10000)}`,
-      name: names[Math.floor(Math.random() * names.length)],
-      email: `newuser${Math.floor(Math.random() * 1000)}@example.com`,
-      mobile: `+91 ${Math.floor(Math.random() * 9000000000) + 1000000000}`,
-      city: cities[Math.floor(Math.random() * cities.length)],
-      signupDate: new Date().toLocaleDateString(),
-      signupTime: new Date().toLocaleTimeString(),
-      referredBy: Math.random() > 0.5 ? `USR${Math.floor(Math.random() * 1000)}` : 'Direct',
-      deviceType: Math.random() > 0.5 ? 'Mobile' : 'Desktop',
-      accountType: Math.random() > 0.5 ? 'Retailer' : 'Distributor'
-    }));
+    return [];
   };
 
   const columns = [
