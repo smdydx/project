@@ -408,15 +408,15 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Live User Registrations - Full Width */}
-      <div className="w-full" data-testid="registrations-section">
-        <RealtimeUserRegistrations />
-      </div>
+      {/* Live User Registrations and Live Transactions - Same Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        {/* Live User Registrations - Takes 1 column */}
+        <div className="lg:col-span-1 flex" data-testid="registrations-section">
+          <RealtimeUserRegistrations />
+        </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:gap-6">
-        {/* Live Transactions Table - Full width in same row */}
-        <div className="w-full flex" data-testid="transactions-section">
+        {/* Live Transactions Table - Takes 2 columns */}
+        <div className="lg:col-span-2 flex" data-testid="transactions-section">
           <Card title="🔥 Live Transactions" className="flex-1 flex flex-col">
             <div className="flex-1 overflow-hidden">
               <AdvancedRealtimeTable
