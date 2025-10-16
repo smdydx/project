@@ -1,7 +1,7 @@
 import type { Express } from "express";
 
 // Backend API URL (Python FastAPI)
-const BACKEND_API = process.env.BACKEND_API_URL || 'http://localhost:8000/api';
+const BACKEND_API = process.env.BACKEND_API_URL || "http://localhost:8000/api/v1";
 
 export function registerRoutes(app: Express) {
   // Dashboard Statistics - Proxy to Backend

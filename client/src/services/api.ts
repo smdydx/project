@@ -48,7 +48,7 @@ class ApiService {
   }
 
   async getAllTransactions(page: number = 1, limit: number = 100) {
-    return this.request(`/transactions?page=${page}&limit=${limit}`);
+    return this.request(`/dashboard/transactions?page=${page}&limit=${limit}`);
   }
 
   // Users
@@ -57,7 +57,7 @@ class ApiService {
   }
 
   async getAllUsers(page: number = 1, limit: number = 100) {
-    return this.request(`/users?page=${page}&limit=${limit}`);
+    return this.request(`/dashboard/users?page=${page}&limit=${limit}`);
   }
 
   // Specific Data Tables
