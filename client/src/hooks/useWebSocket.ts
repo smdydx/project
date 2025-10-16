@@ -16,7 +16,7 @@ export function useWebSocket(channel: string) {
     let reconnectTimeout: NodeJS.Timeout;
     let ws: WebSocket | null = null;
 
-    const connect = () => {
+    const connectWebSocket = () => {
       try {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const host = window.location.hostname;
@@ -24,6 +24,7 @@ export function useWebSocket(channel: string) {
 
         console.log('Connecting to WebSocket:', wsUrl);
         ws = new WebSocket(wsUrl);
+        wsRef.current = ws; // Assign to ref
 
         ws.onopen = () => {
           console.log(`WebSocket connected to ${channel}`);
@@ -42,15 +43,18 @@ export function useWebSocket(channel: string) {
           }
         };
 
-        ws.onclose = () => {
-          console.log('WebSocket disconnected');
+        ws.onclose = (event) => {
+          console.log('WebSocket disconnected', event.code, event.reason);
           setIsConnected(false);
 
-          // Reconnect after 3 seconds
-          reconnectTimeout = setTimeout(() => {
-            console.log('Attempting to reconnect...');
-            connect();
-          }, 3000);
+          // Reconnect after 3 seconds if not a normal closure
+          if (event.code !== 1000 && event.code !== 1001) {
+            setTimeout(() => {
+              if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
+                connectWebSocket();
+              }
+            }, 3000);
+          }
         };
 
         ws.onerror = (error) => {
@@ -59,16 +63,16 @@ export function useWebSocket(channel: string) {
         };
       } catch (error) {
         console.error('Failed to create WebSocket:', error);
-        reconnectTimeout = setTimeout(connect, 3000);
+        reconnectTimeout = setTimeout(connectWebSocket, 3000);
       }
     };
 
-    connect();
+    connectWebSocket();
 
     return () => {
       clearTimeout(reconnectTimeout);
-      if (ws) {
-        ws.close();
+      if (wsRef.current) {
+        wsRef.current.close();
       }
     };
   }, [channel]);

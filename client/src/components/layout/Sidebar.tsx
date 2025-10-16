@@ -136,13 +136,15 @@ export default function Sidebar({
           <div className={`flex items-center transition-all duration-300 ${
             isCollapsed ? 'lg:justify-center' : 'space-x-3'
           }`}>
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
-              <CreditCard className="w-5 h-5 text-white" />
-            </div>
+            <img 
+              src="/lcrpay-logo.png" 
+              alt="LCR Pay Logo" 
+              className="w-10 h-10 rounded-full object-cover shadow-lg"
+            />
             <div className={`transition-all duration-300 overflow-hidden ${
               isCollapsed ? 'lg:w-0 lg:opacity-0' : 'w-auto opacity-100'
             }`}>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white whitespace-nowrap">LCR Admin Panel</h1>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white whitespace-nowrap">LCRpay Admin</h1>
               <p className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Payment System</p>
             </div>
           </div>

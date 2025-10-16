@@ -1,4 +1,3 @@
-
 import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
 
@@ -16,10 +15,12 @@ export function setupWebSocket(server: Server) {
 
   // Store active connections by channel
   const channels = new Map<string, Set<WebSocket>>();
+  const clients = new Set<WebSocket>(); // Keep track of all connected clients
 
   wss.on('connection', (ws: WebSocket) => {
     console.log('WebSocket client connected');
-    
+    clients.add(ws); // Add new client to the set
+
     const userChannels = new Set<string>();
 
     ws.on('message', (message: string) => {
@@ -51,18 +52,20 @@ export function setupWebSocket(server: Server) {
       }
     });
 
-    ws.on('close', () => {
+    ws.on('close', (code, reason) => {
       // Clean up subscriptions
       userChannels.forEach(channel => {
         if (channels.has(channel)) {
           channels.get(channel)!.delete(ws);
         }
       });
-      console.log('WebSocket client disconnected');
+      clients.delete(ws); // Remove client from the set
+      console.log(`Client disconnected (${code}). Total clients: ${clients.size}`);
     });
 
     ws.on('error', (error) => {
       console.error('WebSocket error:', error);
+      clients.delete(ws); // Ensure client is removed on error
     });
   });
 
