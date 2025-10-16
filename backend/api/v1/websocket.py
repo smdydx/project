@@ -39,11 +39,11 @@ async def websocket_endpoint(websocket: WebSocket):
     print(f"WebSocket client connected. Total connections: {len(manager.active_connections)}")
 
     try:
-        # Get a fresh database session for this connection
-        from core.database import SessionLocal
-        db = SessionLocal()
-
         while True:
+            # Create fresh DB session for each iteration
+            from core.database import SessionLocal
+            db = SessionLocal()
+            
             try:
                 # Send dashboard stats
                 stats = DashboardService.get_dashboard_stats(db)
@@ -75,16 +75,15 @@ async def websocket_endpoint(websocket: WebSocket):
                     }, websocket)
             except Exception as e:
                 print(f"Error sending data: {e}")
-                # Optionally, break the loop or handle specific errors
-                # For now, we'll just log and continue to allow for potential recovery
+            finally:
+                # Always close the session after each iteration
+                db.close()
 
-            await asyncio.sleep(3) # Adjusted sleep interval
+            await asyncio.sleep(5)
+            
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         print(f"WebSocket client disconnected. Total connections: {len(manager.active_connections)}")
     except Exception as e:
         print(f"WebSocket error: {e}")
-        manager.disconnect(websocket) # Ensure disconnect on other errors
-    finally:
-        if 'db' in locals() and db:
-            db.close()
+        manager.disconnect(websocket)

@@ -9,22 +9,31 @@ class DashboardService:
 
     @staticmethod
     def get_dashboard_stats(db: Session):
-        total_users = db.query(User).count()
-        total_transactions = db.query(Transactions).count()
+        try:
+            total_users = db.query(User).count()
+            total_transactions = db.query(Transactions).count()
 
-        today = datetime.now().date()
-        today_users = db.query(User).filter(
-            func.date(User.created_at) == today).count()
+            today = datetime.now().date()
+            today_users = db.query(User).filter(
+                func.date(User.created_at) == today).count()
 
-        total_revenue = db.query(func.sum(Transactions.amount)).filter(
-            Transactions.status == 'success').scalar() or 0
+            total_revenue = db.query(func.sum(Transactions.amount)).filter(
+                Transactions.status == 'success').scalar() or 0
 
-        return {
-            "totalUsers": total_users,
-            "totalTransactions": total_transactions,
-            "todayUsers": today_users,
-            "totalRevenue": float(total_revenue)
-        }
+            return {
+                "totalUsers": total_users,
+                "totalTransactions": total_transactions,
+                "todayUsers": today_users,
+                "totalRevenue": float(total_revenue)
+            }
+        except Exception as e:
+            print(f"Error fetching dashboard stats: {e}")
+            return {
+                "totalUsers": 0,
+                "totalTransactions": 0,
+                "todayUsers": 0,
+                "totalRevenue": 0.0
+            }
 
     @staticmethod
     def get_recent_transactions(db: Session, limit: int = 50):
