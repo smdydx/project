@@ -1,224 +1,136 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_, or_, case, desc
-from datetime import datetime, timedelta, date
-from decimal import Decimal
-from typing import List, Dict
-from models.models import (
-    User, Wallet, DirectIncome, LevelIncome,
-    PrimeActivations, BillTransactions, Transactions, 
-    LcrMoney, P2PTransaction
-)
-from models.payment_gateway import Payment_Gateway
-from schemas.dashboard import (
-    DashboardStatsResponse, ChartDataResponse,
-    DailyVolumeData, ServiceDistributionData,
-    LiveTransactionResponse, RecentUserResponse,
-    TransactionDetailResponse
-)
+from sqlalchemy import func, desc
+from models.models import User
+from models.payment_gateway import PaymentGateway
+from datetime import datetime, timedelta
 
 class DashboardService:
+    def __init__(self, db: Session):
+        self.db = db
 
-    @staticmethod
-    def get_dashboard_stats(db: Session) -> DashboardStatsResponse:
-        """Get comprehensive dashboard statistics with real-time data"""
-
-        # Total registered users (not deleted)
-        total_users = db.query(func.count(User.UserID)).filter(
+    def get_dashboard_stats(self):
+        """Get dashboard statistics"""
+        # Total users
+        total_users = self.db.query(func.count(User.UserID)).filter(
             User.IsDeleted == False
         ).scalar() or 0
 
-        # New users today
-        today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        new_users_today = db.query(func.count(User.UserID)).filter(
-            and_(
-                User.CreatedAt >= today_start,
-                User.IsDeleted == False
-            )
+        # Active users (KYC completed)
+        active_users = self.db.query(func.count(User.UserID)).filter(
+            User.IsDeleted == False,
+            User.IsKYCCompleted == True
         ).scalar() or 0
 
-        # KYC verified users
-        kyc_verified = db.query(func.count(User.UserID)).filter(
-            and_(
-                User.IsKYCCompleted == True,
-                User.IsDeleted == False
-            )
+        # Total transactions
+        total_transactions = self.db.query(func.count(PaymentGateway.id)).scalar() or 0
+
+        # Success transactions
+        success_transactions = self.db.query(func.count(PaymentGateway.id)).filter(
+            PaymentGateway.status == "success"
         ).scalar() or 0
 
-        kyc_percentage = (kyc_verified / total_users * 100) if total_users > 0 else 0.0
-
-        # Total Prime users
-        prime_users = db.query(func.count(User.UserID)).filter(
-            and_(
-                User.prime_status == True,
-                User.IsDeleted == False
-            )
+        # Total revenue
+        total_revenue = self.db.query(func.sum(PaymentGateway.amount)).filter(
+            PaymentGateway.status == "success"
         ).scalar() or 0
 
-        # Total LCR Money (sum of reward wallet balance)
-        # Updated to use LcrMoney table
-        total_lcr_money_result = db.query(func.sum(LcrMoney.amount)).filter(LcrMoney.status == 1).scalar()
-        total_lcr = Decimal(total_lcr_money_result) if total_lcr_money_result else Decimal("0.00")
-
-        # Total Prime Rewards distributed (from Wallet table)
-        total_prime_reward_result = db.query(func.sum(Wallet.transaction_amount)).filter(
-            Wallet.transaction_type.like('%reward%')
-        ).scalar()
-        total_prime_reward = Decimal(total_prime_reward_result) if total_prime_reward_result else Decimal("0.00")
-
-
-        # Mobile recharge count (from Payment_Gateway)
-        # Using purpose column to determine service type
-        mobile_recharge_count = db.query(func.count(Payment_Gateway.id)).filter(
-            Payment_Gateway.purpose.ilike('%mobile%'),
-            Payment_Gateway.status == 'SUCCESS'
+        # Today's registrations
+        today = datetime.now().date()
+        today_registrations = self.db.query(func.count(User.UserID)).filter(
+            User.IsDeleted == False,
+            func.date(User.CreatedAt) == today
         ).scalar() or 0
 
-        # DTH recharge count (from Payment_Gateway)
-        dth_recharge_count = db.query(func.count(Payment_Gateway.id)).filter(
-            Payment_Gateway.purpose.ilike('%dth%'),
-            Payment_Gateway.status == 'SUCCESS'
-        ).scalar() or 0
-
-        return DashboardStatsResponse(
-            total_users=total_users,
-            new_signups_today=new_users_today,
-            kyc_verified_users=kyc_verified,
-            kyc_verification_percentage=round(kyc_percentage, 2),
-            prime_users=prime_users,
-            total_distributor_lcr_money=total_lcr,
-            total_distributor_prime_reward=total_prime_reward,
-            total_mobile_recharge=mobile_recharge_count,
-            total_dth_recharge=dth_recharge_count
-        )
-
-    @staticmethod
-    def get_chart_data(db: Session) -> ChartDataResponse:
-        """Get chart data for visualization"""
-
-        # Daily volume for last 7 days
-        daily_volume = []
-        for i in range(7):
-            day_date = date.today() - timedelta(days=6-i)
-            day_start = datetime.combine(day_date, datetime.min.time())
-            day_end = datetime.combine(day_date, datetime.max.time())
-
-            txn_count = db.query(func.count(Payment_Gateway.id)).filter(
-                and_(
-                    Payment_Gateway.created_at >= day_start,
-                    Payment_Gateway.created_at <= day_end,
-                    Payment_Gateway.status == 'SUCCESS'
-                )
-            ).scalar() or 0
-
-            txn_amount = db.query(func.sum(Payment_Gateway.amount)).filter(
-                and_(
-                    Payment_Gateway.created_at >= day_start,
-                    Payment_Gateway.created_at <= day_end,
-                    Payment_Gateway.status == 'SUCCESS'
-                )
-            ).scalar() or 0.0
-
-            daily_volume.append(DailyVolumeData(
-                name=day_date.strftime('%a'),
-                transactions=txn_count,
-                amount=float(txn_amount)
-            ))
-
-        # Service distribution
-        service_colors = {
-            'Electricity': '#3B82F6',
-            'Gas': '#6366F1',
-            'Mobile': '#10B981',
-            'DTH': '#F59E0B',
-            'Water': '#EF4444',
-            'Others': '#8B5CF6'
+        return {
+            "total_users": total_users,
+            "active_users": active_users,
+            "total_transactions": total_transactions,
+            "success_transactions": success_transactions,
+            "total_revenue": float(total_revenue),
+            "today_registrations": today_registrations
         }
 
-        service_dist = []
-        # Total successful transactions for percentage calculation
-        total_services = db.query(func.count(Payment_Gateway.id)).filter(
-            Payment_Gateway.status == 'SUCCESS'
-        ).scalar() or 1
+    def get_chart_data(self):
+        """Get chart data for dashboard"""
+        # Last 7 days user registrations
+        seven_days_ago = datetime.now() - timedelta(days=7)
+        user_registrations = self.db.query(
+            func.date(User.CreatedAt).label('date'),
+            func.count(User.UserID).label('count')
+        ).filter(
+            User.IsDeleted == False,
+            User.CreatedAt >= seven_days_ago
+        ).group_by(
+            func.date(User.CreatedAt)
+        ).all()
 
-        for service_name, color in service_colors.items():
-            # Using Payment_Gateway.purpose to determine service type
-            count = db.query(func.count(Payment_Gateway.id)).filter(
-                and_(
-                    Payment_Gateway.purpose.like(f'%{service_name.lower()}%'),
-                    Payment_Gateway.status == 'SUCCESS'
-                )
-            ).scalar() or 0
+        # Last 7 days transactions
+        transaction_data = self.db.query(
+            func.date(PaymentGateway.created_at).label('date'),
+            func.count(PaymentGateway.id).label('count'),
+            func.sum(PaymentGateway.amount).label('amount')
+        ).filter(
+            PaymentGateway.created_at >= seven_days_ago
+        ).group_by(
+            func.date(PaymentGateway.created_at)
+        ).all()
 
-            percentage = (count / total_services * 100) if total_services > 0 else 0
+        return {
+            "user_registrations": [
+                {
+                    "date": str(item.date),
+                    "count": item.count
+                }
+                for item in user_registrations
+            ],
+            "transactions": [
+                {
+                    "date": str(item.date),
+                    "count": item.count,
+                    "amount": float(item.amount) if item.amount else 0
+                }
+                for item in transaction_data
+            ]
+        }
 
-            service_dist.append(ServiceDistributionData(
-                name=service_name,
-                value=round(percentage, 2),
-                color=color
-            ))
-
-        return ChartDataResponse(
-            daily_volume=daily_volume,
-            service_distribution=service_dist
-        )
-
-    @staticmethod
-    def get_live_transactions(db: Session, limit: int = 10) -> List[LiveTransactionResponse]:
-        """Get latest transactions from Payment Gateway"""
-        
-        transactions = db.query(Payment_Gateway)\
-            .order_by(Payment_Gateway.created_at.desc())\
-            .limit(limit)\
-            .all()
-
-        return [
-            LiveTransactionResponse(
-                id=f"TXN{txn.id}",
-                user=txn.payer_name or "Unknown",
-                service=txn.purpose or "Unknown Service",
-                amount=float(txn.amount) if txn.amount else 0.0,
-                status=txn.status or "PENDING",
-                timestamp=txn.created_at if txn.created_at else datetime.now()
-            )
-            for txn in transactions
-        ]
-
-    @staticmethod
-    def get_recent_users(db: Session, limit: int = 20) -> List[RecentUserResponse]:
+    def get_recent_users(self, limit: int = 20):
         """Get recently registered users"""
-        users = db.query(User)\
-            .filter(User.IsDeleted == False)\
-            .order_by(User.CreatedAt.desc())\
-            .limit(limit)\
-            .all()
+        users = self.db.query(User).filter(
+            User.IsDeleted == False
+        ).order_by(
+            desc(User.CreatedAt)
+        ).limit(limit).all()
 
         return [
-            RecentUserResponse(
-                id=user.UserID,
-                name=user.fullname or "Unknown",
-                role="User",
-                joined_on=user.CreatedAt if user.CreatedAt else datetime.now(),
-                mobile=user.MobileNumber
-            )
+            {
+                "UserID": user.UserID,
+                "fullname": user.fullname,
+                "MobileNumber": user.MobileNumber,
+                "Email": user.Email,
+                "IsKYCCompleted": user.IsKYCCompleted,
+                "CreatedAt": user.CreatedAt.isoformat() if user.CreatedAt else None,
+                "activation_status": user.activation_status,
+                "prime_status": user.prime_status
+            }
             for user in users
         ]
 
-    @staticmethod
-    def get_recent_transactions(db: Session, limit: int = 50) -> List[LiveTransactionResponse]:
-        """Get recent transactions from payment gateway"""
-        transactions = db.query(Payment_Gateway)\
-            .order_by(Payment_Gateway.created_at.desc())\
-            .limit(limit)\
-            .all()
+    def get_recent_transactions(self, limit: int = 50):
+        """Get recent transactions"""
+        transactions = self.db.query(PaymentGateway).order_by(
+            desc(PaymentGateway.created_at)
+        ).limit(limit).all()
 
         return [
-            LiveTransactionResponse(
-                id=f"TXN{txn.id}",
-                user=txn.payer_name or "Unknown",
-                service=txn.purpose or "Unknown Service",
-                amount=float(txn.amount) if txn.amount else 0.0,
-                status=txn.status or "PENDING",
-                timestamp=txn.created_at if txn.created_at else datetime.now()
-            )
+            {
+                "id": txn.id,
+                "payer_name": txn.payer_name,
+                "payer_mobile": txn.payer_mobile,
+                "amount": float(txn.amount) if txn.amount else 0,
+                "purpose": txn.purpose,
+                "status": txn.status,
+                "payment_mode": txn.payment_mode,
+                "created_at": txn.created_at.isoformat() if txn.created_at else None
+            }
             for txn in transactions
         ]
