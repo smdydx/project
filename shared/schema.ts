@@ -155,3 +155,216 @@ export const p2pTransaction = pgTable("p2p_transaction", {
 });
 
 export type P2PTransaction = typeof p2pTransaction.$inferSelect;
+
+// ============================= LOAN APPLICATIONS =============================
+export const autoLoan = pgTable("auto_loan_applications", {
+  id: serial("id").primaryKey(),
+  full_name: varchar("full_name", { length: 100 }).notNull(),
+  email: varchar("email", { length: 100 }).notNull(),
+  phone_number: varchar("phone_number", { length: 15 }).notNull(),
+  vehicle_type: varchar("vehicle_type", { length: 10 }).notNull(),
+  vehicle_value: decimal("vehicle_value", { precision: 10, scale: 2 }).notNull(),
+  emis_paid: integer("emis_paid"),
+  user_mobile: varchar("user_mobile", { length: 15 }).notNull(),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export type AutoLoan = typeof autoLoan.$inferSelect;
+
+export const businessLoan = pgTable("business_loan_applications", {
+  id: serial("id").primaryKey(),
+  full_name: varchar("full_name", { length: 100 }).notNull(),
+  email: varchar("email", { length: 100 }).notNull(),
+  phone_number: varchar("phone_number", { length: 15 }).notNull(),
+  business_name: varchar("business_name", { length: 100 }).notNull(),
+  business_type: varchar("business_type", { length: 100 }).notNull(),
+  annual_turnover: decimal("annual_turnover", { precision: 12, scale: 2 }).notNull(),
+  loan_amount: decimal("loan_amount", { precision: 12, scale: 2 }).notNull(),
+  collateral_value: decimal("collateral_value", { precision: 12, scale: 2 }).notNull(),
+  business_continuity: integer("business_continuity").notNull(),
+  user_mobile: varchar("user_mobile", { length: 15 }).notNull(),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export type BusinessLoan = typeof businessLoan.$inferSelect;
+
+export const homeLoan = pgTable("home_loan_applications", {
+  id: serial("id").primaryKey(),
+  full_name: varchar("full_name", { length: 100 }).notNull(),
+  email: varchar("email", { length: 100 }).notNull(),
+  phone_number: varchar("phone_number", { length: 15 }).notNull(),
+  loan_amount: decimal("loan_amount", { precision: 12, scale: 2 }).notNull(),
+  property_value: decimal("property_value", { precision: 12, scale: 2 }).notNull(),
+  income_continuity: varchar("income_continuity", { length: 100 }).notNull(),
+  employment_status: varchar("employment_status", { length: 50 }).notNull(),
+  user_mobile: varchar("user_mobile", { length: 15 }).notNull(),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export type HomeLoan = typeof homeLoan.$inferSelect;
+
+export const loanAgainstProperty = pgTable("loan_against_property_applications", {
+  id: serial("id").primaryKey(),
+  full_name: varchar("full_name", { length: 100 }).notNull(),
+  email: varchar("email", { length: 100 }).notNull(),
+  phone_number: varchar("phone_number", { length: 15 }).notNull(),
+  loan_amount: decimal("loan_amount", { precision: 12, scale: 2 }).notNull(),
+  property_value: decimal("property_value", { precision: 12, scale: 2 }).notNull(),
+  income_continuity: varchar("income_continuity", { length: 100 }).notNull(),
+  employment_status: varchar("employment_status", { length: 50 }).notNull(),
+  user_mobile: varchar("user_mobile", { length: 15 }).notNull(),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export type LoanAgainstProperty = typeof loanAgainstProperty.$inferSelect;
+
+export const machineLoan = pgTable("machine_loan_applications", {
+  id: serial("id").primaryKey(),
+  full_name: varchar("full_name", { length: 100 }).notNull(),
+  email: varchar("email", { length: 100 }).notNull(),
+  phone_number: varchar("phone_number", { length: 15 }).notNull(),
+  business_name: varchar("business_name", { length: 100 }).notNull(),
+  machine_type: varchar("machine_type", { length: 100 }).notNull(),
+  machine_cost: decimal("machine_cost", { precision: 12, scale: 2 }).notNull(),
+  loan_amount: decimal("loan_amount", { precision: 12, scale: 2 }).notNull(),
+  business_continuity: integer("business_continuity").notNull(),
+  co_applicant: varchar("co_applicant", { length: 100 }),
+  user_mobile: varchar("user_mobile", { length: 15 }).notNull(),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export type MachineLoan = typeof machineLoan.$inferSelect;
+
+export const personalLoan = pgTable("personal_loan_applications", {
+  id: serial("id").primaryKey(),
+  full_name: varchar("full_name", { length: 100 }).notNull(),
+  email: varchar("email", { length: 100 }).notNull(),
+  phone_number: varchar("phone_number", { length: 15 }).notNull(),
+  employment_status: varchar("employment_status", { length: 20 }).notNull(),
+  company_name: varchar("company_name", { length: 100 }),
+  monthly_income: decimal("monthly_income", { precision: 12, scale: 2 }).notNull(),
+  existing_emis: decimal("existing_emis", { precision: 12, scale: 2 }),
+  loan_amount: decimal("loan_amount", { precision: 12, scale: 2 }).notNull(),
+  tenure: integer("tenure").notNull(),
+  cibil_score: integer("cibil_score").notNull(),
+  user_mobile: varchar("user_mobile", { length: 15 }).notNull(),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export type PersonalLoan = typeof personalLoan.$inferSelect;
+
+export const privateFunding = pgTable("private_funding_applications", {
+  id: serial("id").primaryKey(),
+  full_name: varchar("full_name", { length: 100 }).notNull(),
+  email: varchar("email", { length: 100 }).notNull(),
+  phone_number: varchar("phone_number", { length: 15 }).notNull(),
+  loan_amount: decimal("loan_amount", { precision: 12, scale: 2 }).notNull(),
+  annual_turnover: decimal("annual_turnover", { precision: 12, scale: 2 }).notNull(),
+  employment_type: varchar("employment_type", { length: 10 }).notNull(),
+  funding_purpose: varchar("funding_purpose", { length: 255 }).notNull(),
+  user_mobile: varchar("user_mobile", { length: 15 }).notNull(),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export type PrivateFunding = typeof privateFunding.$inferSelect;
+
+// ============================= BANNERS =============================
+export const banner = pgTable("banners", {
+  id: serial("id").primaryKey(),
+  serial_no: integer("serial_no").notNull(),
+  image_url: varchar("image_url", { length: 500 }).notNull(),
+  navigation_url: varchar("navigation_url", { length: 500 }).notNull(),
+  navigation_type: varchar("navigation_type", { length: 50 }).notNull(),
+  valid_till: timestamp("valid_till", { withTimezone: true }).notNull(),
+});
+
+export type Banner = typeof banner.$inferSelect;
+
+// ============================= DEVICES =============================
+export const device = pgTable("device", {
+  id: serial("id").primaryKey(),
+  user_id: integer("user_id").references(() => users.UserID).notNull(),
+  token: varchar("token", { length: 255 }).unique().notNull(),
+  platform: varchar("platform", { length: 16 }).default("android"),
+  app_version: varchar("app_version", { length: 32 }),
+  is_active: boolean("is_active").default(true).notNull(),
+  last_seen: timestamp("last_seen", { withTimezone: true }),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export type Device = typeof device.$inferSelect;
+
+// ============================= SERVICE REGISTRATION =============================
+export const serviceRegistration = pgTable("service_registration", {
+  id: serial("id").primaryKey(),
+  mobile: varchar("mobile", { length: 15 }).notNull(),
+  service_type: varchar("service_type", { length: 100 }).notNull(),
+  registered_at: timestamp("registered_at", { withTimezone: true }).defaultNow(),
+});
+
+export type ServiceRegistration = typeof serviceRegistration.$inferSelect;
+
+// ============================= SERVICE REQUEST =============================
+export const serviceRequest = pgTable("service_request", {
+  id: serial("id").primaryKey(),
+  user_id: integer("user_id").references(() => users.UserID).notNull(),
+  service_type: varchar("service_type", { length: 30 }).notNull(),
+  operator_code: varchar("operator_code", { length: 50 }),
+  mobile_number: varchar("mobile_number", { length: 20 }),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  reference_id: varchar("reference_id", { length: 30 }).unique().notNull(),
+  status: varchar("status", { length: 15 }).default("pending").notNull(),
+  payment_txn_id: varchar("payment_txn_id", { length: 50 }),
+  utr_no: varchar("utr_no", { length: 50 }),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export type ServiceRequest = typeof serviceRequest.$inferSelect;
+
+// ============================= PAYMENT GATEWAY =============================
+export const paymentGateway = pgTable("payment_gateway", {
+  id: serial("id").primaryKey(),
+  service_request_id: integer("service_request_id").references(() => serviceRequest.id),
+  payer_name: varchar("payer_name", { length: 255 }),
+  payer_email: varchar("payer_email", { length: 255 }),
+  payer_mobile: varchar("payer_mobile", { length: 20 }).notNull(),
+  client_txn_id: varchar("client_txn_id", { length: 50 }).unique().notNull(),
+  sabpaisa_txn_id: varchar("sabpaisa_txn_id", { length: 50 }),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  paid_amount: decimal("paid_amount", { precision: 10, scale: 2 }),
+  payment_mode: varchar("payment_mode", { length: 20 }),
+  bank_name: varchar("bank_name", { length: 50 }),
+  rrn: varchar("rrn", { length: 50 }),
+  purpose: varchar("purpose", { length: 50 }),
+  status: varchar("status", { length: 20 }).default("PENDING").notNull(),
+  status_code: varchar("status_code", { length: 10 }),
+  sabpaisa_message: varchar("sabpaisa_message", { length: 255 }),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export type PaymentGateway = typeof paymentGateway.$inferSelect;
+
+// ============================= SERVICE JOB LOG =============================
+export const serviceJobLog = pgTable("service_job_log", {
+  id: serial("id").primaryKey(),
+  service_request_id: integer("service_request_id").references(() => serviceRequest.id).notNull(),
+  job_type: varchar("job_type", { length: 30 }).notNull(),
+  status: varchar("status", { length: 20 }).default("pending").notNull(),
+  message: varchar("message", { length: 255 }),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export type ServiceJobLog = typeof serviceJobLog.$inferSelect;
+
+// ============================= SETTINGS =============================
+export const settings = pgTable("settings", {
+  id: serial("id").primaryKey(),
+  Referal: boolean("Referal").default(true),
+  PhoneAutoCapture: boolean("PhoneAutoCapture").default(true),
+});
+
+export type Settings = typeof settings.$inferSelect;

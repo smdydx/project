@@ -123,4 +123,138 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // Loan Application Endpoints
+  app.get("/api/loans/auto", async (_req, res) => {
+    try {
+      const loans = await storage.getAllAutoLoans();
+      res.json(loans);
+    } catch (error) {
+      console.error("Error fetching auto loans:", error);
+      res.status(500).json({ error: "Failed to fetch auto loans" });
+    }
+  });
+
+  app.get("/api/loans/business", async (_req, res) => {
+    try {
+      const loans = await storage.getAllBusinessLoans();
+      res.json(loans);
+    } catch (error) {
+      console.error("Error fetching business loans:", error);
+      res.status(500).json({ error: "Failed to fetch business loans" });
+    }
+  });
+
+  app.get("/api/loans/home", async (_req, res) => {
+    try {
+      const loans = await storage.getAllHomeLoans();
+      res.json(loans);
+    } catch (error) {
+      console.error("Error fetching home loans:", error);
+      res.status(500).json({ error: "Failed to fetch home loans" });
+    }
+  });
+
+  app.get("/api/loans/lap", async (_req, res) => {
+    try {
+      const loans = await storage.getAllLoanAgainstProperty();
+      res.json(loans);
+    } catch (error) {
+      console.error("Error fetching LAP:", error);
+      res.status(500).json({ error: "Failed to fetch loan against property" });
+    }
+  });
+
+  app.get("/api/loans/machine", async (_req, res) => {
+    try {
+      const loans = await storage.getAllMachineLoans();
+      res.json(loans);
+    } catch (error) {
+      console.error("Error fetching machine loans:", error);
+      res.status(500).json({ error: "Failed to fetch machine loans" });
+    }
+  });
+
+  app.get("/api/loans/personal", async (_req, res) => {
+    try {
+      const loans = await storage.getAllPersonalLoans();
+      res.json(loans);
+    } catch (error) {
+      console.error("Error fetching personal loans:", error);
+      res.status(500).json({ error: "Failed to fetch personal loans" });
+    }
+  });
+
+  app.get("/api/loans/private-funding", async (_req, res) => {
+    try {
+      const loans = await storage.getAllPrivateFunding();
+      res.json(loans);
+    } catch (error) {
+      console.error("Error fetching private funding:", error);
+      res.status(500).json({ error: "Failed to fetch private funding" });
+    }
+  });
+
+  // Banner Endpoints
+  app.get("/api/banners", async (_req, res) => {
+    try {
+      const banners = await storage.getAllBanners();
+      res.json(banners);
+    } catch (error) {
+      console.error("Error fetching banners:", error);
+      res.status(500).json({ error: "Failed to fetch banners" });
+    }
+  });
+
+  // Device Endpoints
+  app.get("/api/devices", async (_req, res) => {
+    try {
+      const devices = await storage.getAllDevices();
+      res.json(devices);
+    } catch (error) {
+      console.error("Error fetching devices:", error);
+      res.status(500).json({ error: "Failed to fetch devices" });
+    }
+  });
+
+  // Service Endpoints
+  app.get("/api/service-registrations", async (_req, res) => {
+    try {
+      const registrations = await storage.getAllServiceRegistrations();
+      res.json(registrations);
+    } catch (error) {
+      console.error("Error fetching service registrations:", error);
+      res.status(500).json({ error: "Failed to fetch service registrations" });
+    }
+  });
+
+  app.get("/api/service-requests", async (_req, res) => {
+    try {
+      const requests = await storage.getAllServiceRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching service requests:", error);
+      res.status(500).json({ error: "Failed to fetch service requests" });
+    }
+  });
+
+  app.get("/api/payment-gateway", async (_req, res) => {
+    try {
+      const payments = await storage.getAllPaymentGateway();
+      res.json(payments);
+    } catch (error) {
+      console.error("Error fetching payment gateway:", error);
+      res.status(500).json({ error: "Failed to fetch payment gateway" });
+    }
+  });
+
+  app.get("/api/service-job-logs", async (_req, res) => {
+    try {
+      const logs = await storage.getAllServiceJobLogs();
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching service job logs:", error);
+      res.status(500).json({ error: "Failed to fetch service job logs" });
+    }
+  });
+
 }

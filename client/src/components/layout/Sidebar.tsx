@@ -17,7 +17,12 @@ import {
   Tv,
   UserCheck,
   UserPlus,
-  Shield
+  Shield,
+  Banknote,
+  Wallet,
+  Briefcase,
+  Image,
+  Monitor
 } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import { useState } from 'react';
@@ -57,6 +62,11 @@ const menuItems: MenuItem[] = [
       { path: '/transactions/dth', label: 'DTH Transactions', icon: Tv }
     ]
   },
+  { path: '/loans', label: 'Loan Applications', icon: Banknote },
+  { path: '/payments', label: 'Payment Gateway', icon: Wallet },
+  { path: '/services', label: 'Services', icon: Briefcase },
+  { path: '/banners', label: 'App Banners', icon: Image },
+  { path: '/devices', label: 'User Devices', icon: Monitor },
   { path: '/complaints', label: 'Complaints', icon: MessageSquare },
   { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
   { path: '/categories', label: 'Service Categories', icon: Grid3X3 },

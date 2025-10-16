@@ -14,6 +14,11 @@ import DthTransactions from './components/pages/DthTransactions';
 import Complaints from './components/pages/Complaints';
 import Reports from './components/pages/Reports';
 import Settings from './components/pages/Settings';
+import { LoansPage } from './pages/LoansPage';
+import { PaymentsPage } from './pages/PaymentsPage';
+import { ServicesPage } from './pages/ServicesPage';
+import { BannersPage } from './pages/BannersPage';
+import { DevicesPage } from './pages/DevicesPage';
 
 function AppContent() {
   const [dateFilter, setDateFilter] = useState('today');
@@ -48,6 +53,11 @@ function AppContent() {
             <Route path="/transactions" component={Transactions} />
             <Route path="/transactions/mobile" component={MobileTransactions} />
             <Route path="/transactions/dth" component={DthTransactions} />
+            <Route path="/loans" component={LoansPage} />
+            <Route path="/payments" component={PaymentsPage} />
+            <Route path="/services" component={ServicesPage} />
+            <Route path="/banners" component={BannersPage} />
+            <Route path="/devices" component={DevicesPage} />
             <Route path="/complaints" component={Complaints} />
             <Route path="/reports" component={Reports} />
             <Route path="/settings" component={Settings} />

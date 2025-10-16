@@ -1,4 +1,21 @@
-import type { User, Transaction, Wallet } from "@shared/schema";
+import type { 
+  User, 
+  Transaction, 
+  Wallet,
+  AutoLoan,
+  BusinessLoan,
+  HomeLoan,
+  LoanAgainstProperty,
+  MachineLoan,
+  PersonalLoan,
+  PrivateFunding,
+  Banner,
+  Device,
+  ServiceRegistration,
+  ServiceRequest,
+  PaymentGateway,
+  ServiceJobLog
+} from "@shared/schema";
 
 export interface DashboardStats {
   total_users: number;
@@ -23,11 +40,45 @@ export interface IStorage {
   // Transaction methods
   getAllTransactions(): Promise<Transaction[]>;
   getTransactionsByUserId(userId: number): Promise<Transaction[]>;
+  
+  // Loan methods
+  getAllAutoLoans(): Promise<AutoLoan[]>;
+  getAllBusinessLoans(): Promise<BusinessLoan[]>;
+  getAllHomeLoans(): Promise<HomeLoan[]>;
+  getAllLoanAgainstProperty(): Promise<LoanAgainstProperty[]>;
+  getAllMachineLoans(): Promise<MachineLoan[]>;
+  getAllPersonalLoans(): Promise<PersonalLoan[]>;
+  getAllPrivateFunding(): Promise<PrivateFunding[]>;
+  
+  // Banner methods
+  getAllBanners(): Promise<Banner[]>;
+  
+  // Device methods
+  getAllDevices(): Promise<Device[]>;
+  
+  // Service methods
+  getAllServiceRegistrations(): Promise<ServiceRegistration[]>;
+  getAllServiceRequests(): Promise<ServiceRequest[]>;
+  getAllPaymentGateway(): Promise<PaymentGateway[]>;
+  getAllServiceJobLogs(): Promise<ServiceJobLog[]>;
 }
 
 export class MemStorage implements IStorage {
   private users: User[] = [];
   private transactions: Transaction[] = [];
+  private autoLoans: AutoLoan[] = [];
+  private businessLoans: BusinessLoan[] = [];
+  private homeLoans: HomeLoan[] = [];
+  private loanAgainstProperty: LoanAgainstProperty[] = [];
+  private machineLoans: MachineLoan[] = [];
+  private personalLoans: PersonalLoan[] = [];
+  private privateFunding: PrivateFunding[] = [];
+  private banners: Banner[] = [];
+  private devices: Device[] = [];
+  private serviceRegistrations: ServiceRegistration[] = [];
+  private serviceRequests: ServiceRequest[] = [];
+  private paymentGateway: PaymentGateway[] = [];
+  private serviceJobLogs: ServiceJobLog[] = [];
 
   constructor() {
     this.seedData();
@@ -164,5 +215,61 @@ export class MemStorage implements IStorage {
 
   async getTransactionsByUserId(userId: number): Promise<Transaction[]> {
     return this.transactions.filter(t => t.UserID === userId);
+  }
+
+  // Loan methods
+  async getAllAutoLoans(): Promise<AutoLoan[]> {
+    return this.autoLoans;
+  }
+
+  async getAllBusinessLoans(): Promise<BusinessLoan[]> {
+    return this.businessLoans;
+  }
+
+  async getAllHomeLoans(): Promise<HomeLoan[]> {
+    return this.homeLoans;
+  }
+
+  async getAllLoanAgainstProperty(): Promise<LoanAgainstProperty[]> {
+    return this.loanAgainstProperty;
+  }
+
+  async getAllMachineLoans(): Promise<MachineLoan[]> {
+    return this.machineLoans;
+  }
+
+  async getAllPersonalLoans(): Promise<PersonalLoan[]> {
+    return this.personalLoans;
+  }
+
+  async getAllPrivateFunding(): Promise<PrivateFunding[]> {
+    return this.privateFunding;
+  }
+
+  // Banner methods
+  async getAllBanners(): Promise<Banner[]> {
+    return this.banners;
+  }
+
+  // Device methods
+  async getAllDevices(): Promise<Device[]> {
+    return this.devices;
+  }
+
+  // Service methods
+  async getAllServiceRegistrations(): Promise<ServiceRegistration[]> {
+    return this.serviceRegistrations;
+  }
+
+  async getAllServiceRequests(): Promise<ServiceRequest[]> {
+    return this.serviceRequests;
+  }
+
+  async getAllPaymentGateway(): Promise<PaymentGateway[]> {
+    return this.paymentGateway;
+  }
+
+  async getAllServiceJobLogs(): Promise<ServiceJobLog[]> {
+    return this.serviceJobLogs;
   }
 }
