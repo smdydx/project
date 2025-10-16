@@ -34,10 +34,10 @@ function AppContent() {
         isCollapsed={isSidebarCollapsed}
       />
 
-      <main className={`pt-20 p-4 lg:p-6 transition-all duration-300 ${
+      <main className={`pt-20 px-3 sm:px-4 lg:px-6 pb-6 transition-all duration-300 ${
         isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'
       }`}>
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-[1600px] mx-auto w-full">
           <Switch>
             <Route path="/" component={Dashboard} />
             <Route path="/users" component={UserManagement} />

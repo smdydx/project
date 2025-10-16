@@ -301,19 +301,19 @@ export default function Dashboard() {
   return (
     <div className="space-y-6" data-testid="dashboard-container">
       {/* Live Transaction Stream Banner */}
-      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl p-6 text-white shadow-2xl animate-gradient-x relative overflow-hidden" data-testid="live-stream-banner">
+      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white shadow-2xl animate-gradient-x relative overflow-hidden" data-testid="live-stream-banner">
         <div className="absolute inset-0 bg-black opacity-10"></div>
-        <div className="relative z-10 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="relative">
-              <Activity className="w-6 h-6 animate-pulse" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping"></span>
+              <Activity className="w-5 h-5 sm:w-6 sm:h-6 animate-pulse" />
+              <span className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-green-400 rounded-full animate-ping"></span>
             </div>
-            <span className="text-lg font-bold" data-testid="live-stream-title">LIVE TRANSACTION STREAM</span>
-            <Zap className="w-5 h-5 animate-bounce" />
+            <span className="text-sm sm:text-lg font-bold" data-testid="live-stream-title">LIVE TRANSACTION STREAM</span>
+            <Zap className="w-4 h-4 sm:w-5 sm:h-5 animate-bounce" />
           </div>
-          <div className="flex items-center space-x-4">
-            <span className="text-2xl font-extrabold" data-testid="live-transaction-count">
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <span className="text-lg sm:text-2xl font-extrabold" data-testid="live-transaction-count">
               {stats?.total_transactions ? `TXN${stats.total_transactions}:` : 'TXN43:'} ₹{stats?.total_transactions ? (stats.total_transactions * 127).toLocaleString() : '8'}
             </span>
           </div>
@@ -322,20 +322,16 @@ export default function Dashboard() {
 
       {/* Stats Cards - Responsive Grid */}
       <div className="relative" data-testid="stats-carousel">
-
-        
-        </div>
-
         {/* Swipe-enabled Container - All Devices */}
         <div
           id="stats-scroll-container"
-          className="overflow-x-auto scrollbar-hide scroll-smooth px-2 sm:px-4 lg:px-12 touch-pan-x cursor-grab active:cursor-grabbing"
+          className="overflow-x-auto scrollbar-hide scroll-smooth px-2 sm:px-4 lg:px-6 touch-pan-x cursor-grab active:cursor-grabbing"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           data-testid="stats-container"
         >
           <div className="flex space-x-3 sm:space-x-4 lg:space-x-6 pb-4">
             {allStatCards.map((card, index) => (
-              <div key={index} className="flex-shrink-0 w-[85vw] sm:w-[45vw] md:w-[350px] lg:w-[350px]" data-testid={`stat-card-${index}`}>
+              <div key={index} className="flex-shrink-0 w-[85vw] sm:w-[45vw] md:w-[45vw] lg:w-[350px] xl:w-[380px]" data-testid={`stat-card-${index}`}>
                 <AdvancedStatCard
                   title={card.title}
                   subtitle={card.subtitle}
@@ -351,7 +347,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Live Transactions Table - Takes 2 columns */}
         <div className="lg:col-span-2" data-testid="transactions-section">
           <Card title="🔥 Live Transactions">
@@ -369,7 +365,7 @@ export default function Dashboard() {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Daily Transaction Volume Chart */}
         <Card title="📊 Daily Transaction Volume & Service Distribution" data-testid="chart-daily-volume">
           <div className="space-y-6">
