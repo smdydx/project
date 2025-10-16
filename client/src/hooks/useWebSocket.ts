@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState, useCallback } from 'react';
 
 interface WSMessage {
@@ -16,16 +15,16 @@ export function useWebSocket(channel: string) {
   const connect = useCallback(() => {
     // Determine WebSocket protocol and host
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host;
-    const wsUrl = `${protocol}//${host}/ws`;
-    
+    // Connect to Python FastAPI backend WebSocket (port 8000)
+    const wsUrl = `${protocol}//${window.location.hostname}:8000/ws`;
+
     console.log(`Connecting to WebSocket: ${wsUrl}`);
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
       console.log(`WebSocket connected to ${channel}`);
       setIsConnected(true);
-      
+
       // Subscribe to channel
       ws.send(JSON.stringify({
         type: 'subscribe',
@@ -51,7 +50,7 @@ export function useWebSocket(channel: string) {
     ws.onclose = () => {
       console.log('WebSocket disconnected');
       setIsConnected(false);
-      
+
       // Reconnect after 3 seconds
       setTimeout(() => {
         connect();
