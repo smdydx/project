@@ -1,11 +1,11 @@
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from core.database import get_db
 from models.models import User
+from models.payment_gateway import Payment_Gateway
 from sqlalchemy import desc, or_, func
-from datetime import datetime, timedelta
+from datetime import datetime
 
 router = APIRouter(tags=["users"])
 
@@ -19,42 +19,39 @@ async def get_all_users(
     """Get all users with filters"""
     try:
         query = db.query(User).filter(User.IsDeleted == False)
-        
-        # Apply filters if provided
-        if user_type and user_type.lower() != 'all':
-            if user_type.lower() == 'prime user':
+
+        if user_type and user_type != 'All':
+            if user_type == 'Prime User':
                 query = query.filter(User.prime_status == True)
-            else:
+            elif user_type == 'Normal User':
                 query = query.filter(User.prime_status == False)
-        
-        if status and status.lower() != 'all':
-            # Note: You might need to add a status field to User model
-            # For now, we'll use activation_status as proxy
-            if status.lower() == 'active':
+
+        if status and status != 'All':
+            if status == 'Active':
                 query = query.filter(User.activation_status == True)
-            elif status.lower() == 'blocked':
+            elif status == 'Blocked':
                 query = query.filter(User.activation_status == False)
-        
+
         users = query.order_by(desc(User.CreatedAt)).limit(limit).all()
-        
+
         result = []
         for user in users:
-            # Calculate wallet balance and transactions from related data
-            wallet_balance = float(user.INRWalletBalance) if user.INRWalletBalance else 0
-            total_transactions = len(user.transactions) if user.transactions else 0
-            
+            # Get transaction count for this user
+            txn_count = db.query(func.count(Payment_Gateway.id)).filter(
+                Payment_Gateway.payer_mobile == user.MobileNumber
+            ).scalar() or 0
+
             result.append({
-                "id": f"USR{user.UserID}",
-                "name": user.fullname or "Unknown",
-                "email": user.Email or "",
-                "mobile": user.MobileNumber or "",
-                "status": "Active" if user.activation_status else "Blocked",
+                "id": str(user.UserID),
+                "name": user.fullname or f"User {user.UserID}",
+                "email": user.Email or "N/A",
+                "mobile": user.MobileNumber,
                 "userType": "Prime User" if user.prime_status else "Normal User",
-                "joinedOn": user.CreatedAt.strftime('%Y-%m-%d') if user.CreatedAt else "",
-                "balance": wallet_balance,
-                "totalTransactions": total_transactions
+                "balance": float(user.INRWalletBalance) if user.INRWalletBalance else 0,
+                "totalTransactions": txn_count,
+                "status": "Active" if user.activation_status else "Blocked"
             })
-        
+
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -69,23 +66,23 @@ async def get_new_signups(
         users = db.query(User).filter(
             User.IsDeleted == False
         ).order_by(desc(User.CreatedAt)).limit(limit).all()
-        
+
         result = []
         for user in users:
             result.append({
-                "id": f"SUP{user.UserID}",
-                "name": user.fullname or "Unknown",
-                "email": user.Email or "",
-                "mobile": user.MobileNumber or "",
+                "id": f"SUP{user.UserID:06d}",
+                "name": user.fullname or f"User {user.UserID}",
+                "email": user.Email or "N/A",
+                "mobile": user.MobileNumber,
+                "userId": str(user.UserID),
                 "city": "Unknown",
-                "accountType": "Retailer",
+                "accountType": "Prime" if user.prime_status else "Retailer",
                 "signupDate": user.CreatedAt.strftime('%Y-%m-%d') if user.CreatedAt else "",
                 "signupTime": user.CreatedAt.strftime('%H:%M:%S') if user.CreatedAt else "",
                 "referredBy": user.introducer_id or "Direct",
-                "deviceType": "Mobile",
-                "kycStatus": "Verified" if user.IsKYCCompleted else "Pending"
+                "deviceType": "Android"
             })
-        
+
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

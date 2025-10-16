@@ -11,35 +11,42 @@ router = APIRouter(tags=["transactions"])
 
 @router.get("/mobile")
 async def get_mobile_transactions(
-    status: Optional[str] = Query(None),
     limit: int = Query(100, le=500),
     db: Session = Depends(get_db)
 ):
     """Get mobile recharge transactions"""
     try:
-        query = db.query(Payment_Gateway).filter(
-            Payment_Gateway.purpose.ilike('%mobile%')
-        )
-        
-        if status and status.lower() != 'all':
-            query = query.filter(Payment_Gateway.status == status.upper())
-        
-        transactions = query.order_by(desc(Payment_Gateway.created_at)).limit(limit).all()
+        transactions = db.query(Payment_Gateway).filter(
+            or_(
+                Payment_Gateway.purpose.ilike('%mobile%'),
+                Payment_Gateway.purpose.ilike('%recharge%')
+            )
+        ).order_by(desc(Payment_Gateway.created_at)).limit(limit).all()
         
         result = []
         for txn in transactions:
+            # Get operator and circle from service_data JSON if available
+            operator = "Unknown"
+            circle = "Unknown"
+            if txn.service_data:
+                operator = txn.service_data.get('operator', 'Unknown')
+                circle = txn.service_data.get('circle', 'Unknown')
+            
+            # Determine status
+            status = "Success" if txn.status and txn.status.lower() == "success" else "Pending" if txn.status and txn.status.lower() == "pending" else "Failed"
+            
             result.append({
                 "id": txn.id,
-                "transactionId": txn.client_txn_id,
+                "transactionId": txn.client_txn_id or f"TXN{txn.id:06d}",
                 "user": txn.payer_name or "Unknown",
-                "mobileNumber": txn.payer_mobile,
-                "operator": "Unknown",
-                "circle": "Unknown",
+                "mobileNumber": txn.payer_mobile or "",
+                "operator": operator,
+                "circle": circle,
                 "amount": float(txn.amount) if txn.amount else 0,
-                "status": txn.status.capitalize() if txn.status else "Pending",
+                "status": status,
                 "date": txn.created_at.strftime('%Y-%m-%d') if txn.created_at else "",
                 "time": txn.created_at.strftime('%H:%M:%S') if txn.created_at else "",
-                "referenceId": txn.sabpaisa_txn_id or txn.client_txn_id
+                "referenceId": txn.rrn or txn.sabpaisa_txn_id or txn.client_txn_id or f"REF{txn.id}"
             })
         
         return result
@@ -48,35 +55,41 @@ async def get_mobile_transactions(
 
 @router.get("/dth")
 async def get_dth_transactions(
-    status: Optional[str] = Query(None),
     limit: int = Query(100, le=500),
     db: Session = Depends(get_db)
 ):
     """Get DTH recharge transactions"""
     try:
-        query = db.query(Payment_Gateway).filter(
+        transactions = db.query(Payment_Gateway).filter(
             Payment_Gateway.purpose.ilike('%dth%')
-        )
-        
-        if status and status.lower() != 'all':
-            query = query.filter(Payment_Gateway.status == status.upper())
-        
-        transactions = query.order_by(desc(Payment_Gateway.created_at)).limit(limit).all()
+        ).order_by(desc(Payment_Gateway.created_at)).limit(limit).all()
         
         result = []
         for txn in transactions:
+            # Get operator, plan, subscriber ID from service_data JSON if available
+            operator = "Unknown"
+            plan = "Standard"
+            subscriber_id = f"SUB{txn.id}"
+            if txn.service_data:
+                operator = txn.service_data.get('operator', 'Unknown')
+                plan = txn.service_data.get('plan', 'Standard')
+                subscriber_id = txn.service_data.get('subscriber_id', f"SUB{txn.id}")
+            
+            # Determine status
+            status = "Success" if txn.status and txn.status.lower() == "success" else "Pending" if txn.status and txn.status.lower() == "pending" else "Failed"
+            
             result.append({
                 "id": txn.id,
-                "transactionId": txn.client_txn_id,
+                "transactionId": txn.client_txn_id or f"DTH{txn.id:06d}",
                 "user": txn.payer_name or "Unknown",
-                "subscriberId": txn.payer_mobile,
-                "operator": "Unknown",
-                "plan": "Unknown",
+                "subscriberId": subscriber_id,
+                "operator": operator,
+                "plan": plan,
                 "amount": float(txn.amount) if txn.amount else 0,
-                "status": txn.status.capitalize() if txn.status else "Pending",
+                "status": status,
                 "date": txn.created_at.strftime('%Y-%m-%d') if txn.created_at else "",
                 "time": txn.created_at.strftime('%H:%M:%S') if txn.created_at else "",
-                "referenceId": txn.sabpaisa_txn_id or txn.client_txn_id
+                "referenceId": txn.rrn or txn.sabpaisa_txn_id or txn.client_txn_id or f"REF{txn.id}"
             })
         
         return result
