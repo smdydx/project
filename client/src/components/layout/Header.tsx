@@ -26,13 +26,20 @@ export default function Header({ dateFilter, setDateFilter, onMobileMenuToggle, 
       isCollapsed ? 'lg:left-20' : 'lg:left-64'
     } left-0`}>
       <div className="flex items-center justify-between px-4 lg:px-6 py-4">
-        {/* Mobile Menu Button */}
-        <button
-          onClick={onMobileMenuToggle}
-          className="lg:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-        >
-          <Menu className="w-6 h-6" />
-        </button>
+        {/* Mobile Menu Button & Logo */}
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={onMobileMenuToggle}
+            className="lg:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+          <img 
+            src="/lcrpay-logo.png" 
+            alt="LCRpay Logo" 
+            className="h-8 w-auto lg:hidden"
+          />
+        </div>
 
         <div className="flex items-center space-x-4 flex-1 lg:flex-initial">
           <div className="relative hidden md:block">
