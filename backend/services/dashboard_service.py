@@ -2,22 +2,22 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 from datetime import datetime, timedelta
 import random
-from models.models import User, Transaction
+from models.models import User, Transactions
+
 
 class DashboardService:
+
     @staticmethod
     def get_dashboard_stats(db: Session):
         total_users = db.query(User).count()
-        total_transactions = db.query(Transaction).count()
+        total_transactions = db.query(Transactions).count()
 
         today = datetime.now().date()
         today_users = db.query(User).filter(
-            func.date(User.created_at) == today
-        ).count()
+            func.date(User.created_at) == today).count()
 
-        total_revenue = db.query(func.sum(Transaction.amount)).filter(
-            Transaction.status == 'success'
-        ).scalar() or 0
+        total_revenue = db.query(func.sum(Transactions.amount)).filter(
+            Transactions.status == 'success').scalar() or 0
 
         return {
             "totalUsers": total_users,
@@ -28,9 +28,8 @@ class DashboardService:
 
     @staticmethod
     def get_recent_transactions(db: Session, limit: int = 50):
-        transactions = db.query(Transaction).order_by(
-            desc(Transaction.created_at)
-        ).limit(limit).all()
+        transactions = db.query(Transactions).order_by(
+            desc(Transactions.created_at)).limit(limit).all()
 
         return [{
             "id": txn.id,
@@ -44,9 +43,8 @@ class DashboardService:
 
     @staticmethod
     def get_recent_users(db: Session, limit: int = 20):
-        users = db.query(User).order_by(
-            desc(User.created_at)
-        ).limit(limit).all()
+        users = db.query(User).order_by(desc(
+            User.created_at)).limit(limit).all()
 
         return [{
             "id": user.id,
@@ -59,19 +57,18 @@ class DashboardService:
 
     @staticmethod
     def get_chart_data(db: Session):
-        last_7_days = [datetime.now().date() - timedelta(days=i) for i in range(6, -1, -1)]
+        last_7_days = [
+            datetime.now().date() - timedelta(days=i)
+            for i in range(6, -1, -1)
+        ]
 
         daily_data = []
         for day in last_7_days:
-            count = db.query(Transaction).filter(
-                func.date(Transaction.created_at) == day
-            ).count()
+            count = db.query(Transactions).filter(
+                func.date(Transactions.created_at) == day).count()
             daily_data.append({
                 "date": day.strftime("%Y-%m-%d"),
                 "transactions": count
             })
 
-        return {
-            "daily": daily_data,
-            "monthly": []
-        }
+        return {"daily": daily_data, "monthly": []}
