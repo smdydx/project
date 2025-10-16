@@ -27,9 +27,18 @@ export interface DashboardStats {
   dth_recharges: number;
 }
 
+export interface ChartData {
+  labels: string[];
+  datasets: {
+    label: string;
+    data: number[];
+  }[];
+}
+
 export interface IStorage {
   // Dashboard methods
   getDashboardStats(): Promise<DashboardStats>;
+  getChartData(): Promise<ChartData>;
   getRecentTransactions(limit?: number): Promise<Transaction[]>;
   getRecentUsers(limit?: number): Promise<User[]>;
   
@@ -178,6 +187,42 @@ export class MemStorage implements IStorage {
       new_signups_today: newSignupsToday,
       kyc_verified_users: kycVerified,
       dth_recharges: dthRecharges,
+    };
+  }
+
+  async getChartData(): Promise<ChartData> {
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      return date.toISOString().split('T')[0];
+    });
+
+    const userSignups = last7Days.map(date => {
+      return this.users.filter(u => {
+        const userDate = u.CreatedAt ? new Date(u.CreatedAt).toISOString().split('T')[0] : '';
+        return userDate === date;
+      }).length;
+    });
+
+    const transactionCounts = last7Days.map(date => {
+      return this.transactions.filter(t => {
+        const txDate = t.CreatedAt ? new Date(t.CreatedAt).toISOString().split('T')[0] : '';
+        return txDate === date && t.Status === 'Completed';
+      }).length;
+    });
+
+    return {
+      labels: last7Days,
+      datasets: [
+        {
+          label: 'User Signups',
+          data: userSignups,
+        },
+        {
+          label: 'Transactions',
+          data: transactionCounts,
+        },
+      ],
     };
   }
 
