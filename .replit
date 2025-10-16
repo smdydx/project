@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "web", "python-3.11"]
+modules = ["python-3.12", "nodejs-20", "cpp-clang14", "c-clang14"]
 [agent]
 expertMode = true
 
@@ -11,7 +11,7 @@ run = ["npm", "run", "start"]
 build = ["npm", "run", "build"]
 
 [workflows]
-runButton = "Start Python Backend & Frontend"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Start Full Stack"
@@ -60,6 +60,10 @@ args = "npm run dev"
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 35427
+externalPort = 3002
 
 [[ports]]
 localPort = 38265
