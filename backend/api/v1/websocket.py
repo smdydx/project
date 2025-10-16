@@ -5,9 +5,73 @@ from services.dashboard_service import DashboardService
 import json
 import asyncio
 from datetime import datetime
-import random # Added for random data generation
 
 router = APIRouter()
+
+# Store active WebSocket connections
+active_connections: list[WebSocket] = []
+
+@router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket, db: Session = Depends(get_db)):
+    await websocket.accept()
+    active_connections.append(websocket)
+    print(f"WebSocket client connected. Total connections: {len(active_connections)}")
+    
+    try:
+        # Send initial data immediately
+        stats = DashboardService.get_dashboard_stats(db)
+        await websocket.send_json({
+            "type": "data",
+            "channel": "dashboard-stats",
+            "data": stats,
+            "timestamp": datetime.now().isoformat()
+        })
+        
+        # Start broadcasting loop
+        while True:
+            try:
+                # Broadcast dashboard stats every 5 seconds
+                stats = DashboardService.get_dashboard_stats(db)
+                await websocket.send_json({
+                    "type": "data",
+                    "channel": "dashboard-stats",
+                    "data": stats,
+                    "timestamp": datetime.now().isoformat()
+                })
+                
+                # Broadcast latest transaction
+                transactions = DashboardService.get_live_transactions(db, limit=1)
+                if transactions:
+                    await websocket.send_json({
+                        "type": "data",
+                        "channel": "transactions",
+                        "data": transactions[0],
+                        "timestamp": datetime.now().isoformat()
+                    })
+                
+                # Broadcast latest user registration
+                users = DashboardService.get_recent_users(db, limit=1)
+                if users:
+                    await websocket.send_json({
+                        "type": "data",
+                        "channel": "user-registrations",
+                        "data": users[0],
+                        "timestamp": datetime.now().isoformat()
+                    })
+                
+                await asyncio.sleep(5)
+                
+            except Exception as e:
+                print(f"Error broadcasting data: {e}")
+                break
+                
+    except WebSocketDisconnect:
+        active_connections.remove(websocket)
+        print(f"WebSocket client disconnected. Total connections: {len(active_connections)}")
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+        if websocket in active_connections:
+            active_connections.remove(websocket)
 
 class ConnectionManager:
     def __init__(self):
