@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime
+from sqlalchemy import Column, String, Numeric, Integer, DateTime
 from datetime import datetime
-from app.core.base import Base
+from core.base import Base
 
 class AutoLoan(Base):
     __tablename__ = "auto_loan_applications"

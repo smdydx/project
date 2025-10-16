@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import VARCHAR, TIMESTAMP, ForeignKey, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.core.base import Base, IntPrimaryKeyMixin
+from core.base import Base, IntPrimaryKeyMixin
 
 
 class ServiceJobLog(IntPrimaryKeyMixin, Base):

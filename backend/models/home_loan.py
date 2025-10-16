@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime
 from datetime import datetime
-from app.core.base import Base
+from core.base import Base
 
 class HomeLoan(Base):
     __tablename__ = "home_loan_applications"

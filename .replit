@@ -14,51 +14,6 @@ build = ["npm", "run", "build"]
 runButton = "Start Full Stack"
 
 [[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Start application"
-
-[[workflows.workflow]]
-name = "Start application"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev"
-waitForPort = 5000
-
-[[workflows.workflow]]
-name = "Start Backend API"
-author = 48675141
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd backend && pip install -q -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
-
-[[workflows.workflow]]
-name = "Run FastAPI Backend"
-author = 48675141
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python -m backend.run"
-
-[[workflows.workflow]]
-name = "Start Python Backend"
-author = 48690313
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd backend && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
-
-[[workflows.workflow]]
 name = "Start Full Stack"
 author = 48690313
 mode = "parallel"

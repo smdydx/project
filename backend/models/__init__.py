@@ -1,9 +1,15 @@
-# app/models/__init__.py
-import importlib, pkgutil
-
-# Auto-import all submodules and subpackages under app.models
-for _, module_name, _ in pkgutil.walk_packages(__path__, prefix=__name__ + "."):
-    # skip private/dunder modules
-    if module_name.rsplit(".", 1)[-1].startswith("_"):
-        continue
-    importlib.import_module(module_name)
+# Import all models explicitly to avoid circular imports
+from models.models import *
+from models.payment_gateway import *
+from models.auto_loan import *
+from models.banner import *
+from models.business_loan import *
+from models.device import *
+from models.home_loan import *
+from models.loan_against_property import *
+from models.machine_loan import *
+from models.personal_loan import *
+from models.private_funding import *
+from models.service_job_log import *
+from models.service_registration import *
+from models.setting import *

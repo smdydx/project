@@ -13,4 +13,3 @@ class userSetting(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     Referal = Column(Boolean, default=True)
     PhoneAutoCapture = Column(Boolean, default=True)
-

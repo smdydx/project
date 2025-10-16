@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import VARCHAR, BOOLEAN, TIMESTAMP, Index, ForeignKey, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime, timezone
-from app.core.base import Base,IntPrimaryKeyMixin, TimestampMixin
+from core.base import Base,IntPrimaryKeyMixin, TimestampMixin
 # from app.models.mixins import IntPrimaryKeyMixin, TimestampMixin
 from app.models.models import User
 

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime
 from datetime import datetime
-from app.core.base import Base
+from core.base import Base
 
 class MachineLoan(Base):
     __tablename__ = "machine_loan_applications"
