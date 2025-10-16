@@ -1,48 +1,15 @@
 import type { Express } from "express";
-import {
-  users, transactions, banners, devices,
-  autoLoans, businessLoans, homeLoans, loanAgainstProperty,
-  machineLoans, personalLoans, privateFunding,
-  paymentGateway, serviceJobLogs, serviceRegistrations,
-  serviceRequests, settings, pushTokens
-} from "@db/schema";
-import { eq, desc, and, like, sql } from "drizzle-orm";
 
 // Backend API URL (Python FastAPI)
 const BACKEND_API = process.env.BACKEND_API_URL || 'http://localhost:8000/api';
 
 export function registerRoutes(app: Express) {
-  // Dashboard Statistics
+  // Dashboard Statistics - Proxy to Backend
   app.get("/api/dashboard/stats", async (_req, res) => {
     try {
-      const stats = await db.query.users.count(); // Example: Get total users
-      const transactionsCount = await db.query.transactions.count();
-      const totalTransactionAmount = await db.select({
-        sum: sql`SUM(${transactions.amount})`
-      }).from(transactions)
-      .then(result => result[0]?.sum || 0);
-
-      const recentTransactions = await db.query.transactions.findMany({
-        orderBy: desc(transactions.createdAt),
-        limit: 5,
-      });
-
-      const recentUsers = await db.query.users.findMany({
-        orderBy: desc(users.createdAt),
-        limit: 5,
-      });
-
-      const statsData = {
-        totalUsers: stats,
-        totalTransactions: transactionsCount,
-        totalTransactionAmount: totalTransactionAmount,
-        recentTransactions: recentTransactions,
-        recentUsers: recentUsers,
-        // Mock data for recharges, to be replaced by actual API calls
-        mobile_recharges: 4500,
-        dth_recharges: 2100,
-      };
-      res.json(statsData);
+      const response = await fetch(`${BACKEND_API}/dashboard/stats`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching dashboard stats:", error);
       res.status(500).json({ error: "Failed to fetch dashboard stats" });
@@ -52,12 +19,10 @@ export function registerRoutes(app: Express) {
   // Get Recent Transactions
   app.get("/api/transactions", async (req, res) => {
     try {
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
-      const transactions = await db.query.transactions.findMany({
-        orderBy: desc(transactions.createdAt),
-        limit: limit,
-      });
-      res.json(transactions);
+      const limit = req.query.limit || 10;
+      const response = await fetch(`${BACKEND_API}/transactions?limit=${limit}`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching transactions:", error);
       res.status(500).json({ error: "Failed to fetch transactions" });
@@ -67,10 +32,9 @@ export function registerRoutes(app: Express) {
   // Get All Transactions
   app.get("/api/transactions/all", async (_req, res) => {
     try {
-      const transactions = await db.query.transactions.findMany({
-        orderBy: desc(transactions.createdAt),
-      });
-      res.json(transactions);
+      const response = await fetch(`${BACKEND_API}/transactions/all`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching all transactions:", error);
       res.status(500).json({ error: "Failed to fetch all transactions" });
@@ -80,12 +44,10 @@ export function registerRoutes(app: Express) {
   // Get Transactions by User ID
   app.get("/api/transactions/user/:userId", async (req, res) => {
     try {
-      const userId = parseInt(req.params.userId);
-      const transactions = await db.query.transactions.findMany({
-        where: eq(transactions.userId, userId),
-        orderBy: desc(transactions.createdAt),
-      });
-      res.json(transactions);
+      const userId = req.params.userId;
+      const response = await fetch(`${BACKEND_API}/transactions/user/${userId}`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching user transactions:", error);
       res.status(500).json({ error: "Failed to fetch user transactions" });
@@ -95,12 +57,10 @@ export function registerRoutes(app: Express) {
   // Get Recent Users
   app.get("/api/users/recent", async (req, res) => {
     try {
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
-      const users = await db.query.users.findMany({
-        orderBy: desc(users.createdAt),
-        limit: limit,
-      });
-      res.json(users);
+      const limit = req.query.limit || 10;
+      const response = await fetch(`${BACKEND_API}/users/recent?limit=${limit}`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching recent users:", error);
       res.status(500).json({ error: "Failed to fetch recent users" });
@@ -110,10 +70,9 @@ export function registerRoutes(app: Express) {
   // Get All Users
   app.get("/api/users", async (_req, res) => {
     try {
-      const users = await db.query.users.findMany({
-        orderBy: desc(users.createdAt),
-      });
-      res.json(users);
+      const response = await fetch(`${BACKEND_API}/users`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching users:", error);
       res.status(500).json({ error: "Failed to fetch users" });
@@ -123,50 +82,22 @@ export function registerRoutes(app: Express) {
   // Get User by ID
   app.get("/api/users/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      const user = await db.query.users.findFirst({
-        where: eq(users.id, id),
-      });
-
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-
-      res.json(user);
+      const id = req.params.id;
+      const response = await fetch(`${BACKEND_API}/users/${id}`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ error: "Failed to fetch user" });
     }
   });
 
-  // Dashboard Charts Data - matching frontend format
+  // Dashboard Charts Data
   app.get("/api/dashboard/charts", async (_req, res) => {
     try {
-      const stats = await db.query.transactions.count(); // Placeholder, replace with actual data fetching
-
-      // Generate chart data in the format expected by frontend
-      const chartData = {
-        dailyVolume: [
-          { name: 'Mon', transactions: 1200, amount: 245000 },
-          { name: 'Tue', transactions: 1800, amount: 389000 },
-          { name: 'Wed', transactions: 1500, amount: 312000 },
-          { name: 'Thu', transactions: 2400, amount: 498000 },
-          { name: 'Fri', transactions: 2200, amount: 456000 },
-          { name: 'Sat', transactions: 3100, amount: 689000 },
-          { name: 'Sun', transactions: 2900, amount: 612000 }
-        ],
-        serviceDistribution: [
-          { name: 'Electricity', value: 35, color: '#3B82F6' },
-          { name: 'Gas', value: 20, color: '#6366F1' },
-          // These should ideally come from actual data if available or be dynamically calculated
-          { name: 'Mobile', value: 45, color: '#10B981' },
-          { name: 'DTH', value: 15, color: '#FBBF24' },
-          { name: 'Water', value: 15, color: '#06B6D4' },
-          { name: 'Broadband', value: 12, color: '#8B5CF6' }
-        ]
-      };
-
-      res.json(chartData);
+      const response = await fetch(`${BACKEND_API}/dashboard/charts`);
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
       console.error("Error fetching chart data:", error);
       res.status(500).json({ error: "Failed to fetch chart data" });

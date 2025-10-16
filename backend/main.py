@@ -1,13 +1,12 @@
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.core.config import settings
-from backend.api.v1 import dashboard
-from backend.core.database import engine
-from backend.core.base import Base
+
+from core.config import settings
+from core.database import engine
+from core.base import Base
 
 # Import all models to register them with Base
-from backend.models import (
+from models import (
     auto_loan, banner, business_loan, device, home_loan,
     loan_against_property, machine_loan, models, payment_gateway,
     personal_loan, private_funding, service_job_log,
@@ -32,8 +31,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(dashboard.router, prefix=settings.API_V1_PREFIX)
+# Include API routes
+from api.v1 import dashboard
+
+app.include_router(
+    dashboard.router,
+    prefix=f"{settings.API_V1_PREFIX}/dashboard",
+    tags=["dashboard"]
+)
 
 @app.get("/")
 async def root():
