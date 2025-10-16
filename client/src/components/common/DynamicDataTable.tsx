@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import Card from "./Card";
+// Default export hai, so import statement sahi hai
 import { type TableConfig, formatCellValue, getStatusColor } from "../../config/tableConfig";
 import { Loader2, Search, Filter } from "lucide-react";
 import { useState } from "react";
