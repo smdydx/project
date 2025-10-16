@@ -200,9 +200,18 @@ export default function Dashboard() {
   };
 
   const generateRealtimeTransactions = () => {
-    if (!transactions || !Array.isArray(transactions) || transactions.length === 0) return [];
+    if (!transactions || !Array.isArray(transactions) || transactions.length === 0) {
+      return [];
+    }
 
-    return transactions.slice(0, 12);
+    return transactions.slice(0, 12).map(txn => ({
+      id: txn.id || txn.TransactionID || 'N/A',
+      user: txn.user || txn.fullname || 'Unknown',
+      service: txn.service || txn.purpose || 'N/A',
+      amount: txn.amount || 0,
+      status: txn.status || 'Pending',
+      location: txn.location || 'Unknown'
+    }));
   };
 
   const getStatusBadge = (status: string) => {
@@ -263,7 +272,7 @@ export default function Dashboard() {
           className="font-mono text-xs bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded"
           data-testid={`txn-id-${value}`}
         >
-          {value}
+          {value || 'N/A'}
         </span>
       ),
     },
@@ -275,7 +284,7 @@ export default function Dashboard() {
           className="font-medium text-gray-900 dark:text-white"
           data-testid={`user-${value}`}
         >
-          {value}
+          {value || 'Unknown'}
         </span>
       ),
     },
@@ -287,7 +296,7 @@ export default function Dashboard() {
           className="text-sm text-gray-700 dark:text-gray-300"
           data-testid={`service-${value}`}
         >
-          {value}
+          {value || 'N/A'}
         </span>
       ),
     },
@@ -299,14 +308,14 @@ export default function Dashboard() {
           className="font-bold text-green-600 dark:text-green-400"
           data-testid={`amount-${value}`}
         >
-          ₹{value.toLocaleString()}
+          ₹{value ? value.toLocaleString() : '0'}
         </span>
       ),
     },
     {
       key: "status",
       title: "Status",
-      render: (value: string) => getStatusBadge(value),
+      render: (value: string) => getStatusBadge(value || 'Pending'),
     },
     {
       key: "location",
@@ -316,7 +325,7 @@ export default function Dashboard() {
           className="text-xs text-gray-600 dark:text-gray-400"
           data-testid={`location-${value}`}
         >
-          {value}
+          {value || 'Unknown'}
         </span>
       ),
     },
