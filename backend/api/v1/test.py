@@ -22,7 +22,7 @@ async def test_database(db: Session = Depends(get_db)):
         result = db.execute(text("SELECT 1")).scalar()
         
         # Count users
-        user_count = db.execute(text("SELECT COUNT(*) FROM users WHERE IsDeleted = 0")).scalar()
+        user_count = db.execute(text('SELECT COUNT(*) FROM users WHERE "IsDeleted" = FALSE')).scalar()
         
         # Count transactions
         txn_count = db.execute(text("SELECT COUNT(*) FROM payment_gateway")).scalar()
