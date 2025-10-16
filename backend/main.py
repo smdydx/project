@@ -36,7 +36,7 @@ from api.v1 import dashboard
 
 app.include_router(
     dashboard.router,
-    prefix=f"{settings.API_V1_PREFIX}",
+    prefix=f"{settings.API_V1_PREFIX}/dashboard",
     tags=["dashboard"]
 )
 

@@ -60,7 +60,9 @@ class DashboardService:
         total_lcr = Decimal(total_lcr_money_result) if total_lcr_money_result else Decimal("0.00")
 
         # Total Prime Rewards distributed (from Wallet table)
-        total_prime_reward_result = db.query(func.sum(Wallet.amount)).filter(Wallet.wallet_type == 'reward').scalar()
+        total_prime_reward_result = db.query(func.sum(Wallet.transaction_amount)).filter(
+            Wallet.transaction_type.like('%reward%')
+        ).scalar()
         total_prime_reward = Decimal(total_prime_reward_result) if total_prime_reward_result else Decimal("0.00")
 
 
@@ -78,11 +80,11 @@ class DashboardService:
         ).scalar() or 0
 
         return DashboardStatsResponse(
-            total_registered_users=total_users,
-            new_users_today=new_users_today,
-            total_kyc_verified=kyc_verified,
+            total_users=total_users,
+            new_signups_today=new_users_today,
+            kyc_verified_users=kyc_verified,
             kyc_verification_percentage=round(kyc_percentage, 2),
-            total_prime_users=prime_users,
+            prime_users=prime_users,
             total_distributor_lcr_money=total_lcr,
             total_distributor_prime_reward=total_prime_reward,
             total_mobile_recharge=mobile_recharge_count,
@@ -162,35 +164,29 @@ class DashboardService:
 
     @staticmethod
     def get_live_transactions(db: Session, limit: int = 10) -> List[LiveTransactionResponse]:
-        """Get latest transactions from Wallet table"""
-
-        # Querying from Wallet table and joining with User for user details
-        wallet_txns = db.query(
-            Wallet.id,
-            User.fullname,
-            Wallet.transaction_type,
-            Wallet.amount,
-            Wallet.transaction_date
-        ).join(User, User.UserID == Wallet.member_id).order_by(
-            desc(Wallet.transaction_date)
-        ).limit(limit).all()
+        """Get latest transactions from Payment Gateway"""
+        
+        transactions = db.query(Payment_Gateway)\
+            .order_by(Payment_Gateway.created_at.desc())\
+            .limit(limit)\
+            .all()
 
         return [
-            {
-                "id": t.id,
-                "user": t.fullname or "Unknown",
-                "type": t.transaction_type or "Unknown",
-                "amount": float(t.amount) if t.amount else 0.0,
-                "status": "completed", # Assuming all wallet transactions are completed for this view
-                "timestamp": t.transaction_date.isoformat() if t.transaction_date else None
-            }
-            for t in wallet_txns
+            LiveTransactionResponse(
+                id=f"TXN{txn.id}",
+                user=txn.payer_name or "Unknown",
+                service=txn.purpose or "Unknown Service",
+                amount=float(txn.amount) if txn.amount else 0.0,
+                status=txn.status or "PENDING",
+                timestamp=txn.created_at if txn.created_at else datetime.now()
+            )
+            for txn in transactions
         ]
 
     @staticmethod
-    def get_recent_users(self, limit: int = 20) -> List[RecentUserResponse]:
+    def get_recent_users(db: Session, limit: int = 20) -> List[RecentUserResponse]:
         """Get recently registered users"""
-        users = self.db.query(User)\
+        users = db.query(User)\
             .filter(User.IsDeleted == False)\
             .order_by(User.CreatedAt.desc())\
             .limit(limit)\
@@ -200,17 +196,17 @@ class DashboardService:
             RecentUserResponse(
                 id=user.UserID,
                 name=user.fullname or "Unknown",
-                email=user.Email or "",
-                phone=user.MobileNumber or "",
-                kyc_status="Verified" if user.IsKYCCompleted else "Pending",
-                registered_at=user.CreatedAt.isoformat() if user.CreatedAt else datetime.now().isoformat()
+                role="User",
+                joined_on=user.CreatedAt if user.CreatedAt else datetime.now(),
+                mobile=user.MobileNumber
             )
             for user in users
         ]
 
-    def get_recent_transactions(self, limit: int = 50) -> List[LiveTransactionResponse]:
+    @staticmethod
+    def get_recent_transactions(db: Session, limit: int = 50) -> List[LiveTransactionResponse]:
         """Get recent transactions from payment gateway"""
-        transactions = self.db.query(Payment_Gateway)\
+        transactions = db.query(Payment_Gateway)\
             .order_by(Payment_Gateway.created_at.desc())\
             .limit(limit)\
             .all()
@@ -218,11 +214,11 @@ class DashboardService:
         return [
             LiveTransactionResponse(
                 id=f"TXN{txn.id}",
-                user_name=txn.payer_name or "Unknown",
+                user=txn.payer_name or "Unknown",
                 service=txn.purpose or "Unknown Service",
                 amount=float(txn.amount) if txn.amount else 0.0,
                 status=txn.status or "PENDING",
-                timestamp=txn.created_at.isoformat() if txn.created_at else datetime.now().isoformat()
+                timestamp=txn.created_at if txn.created_at else datetime.now()
             )
             for txn in transactions
         ]

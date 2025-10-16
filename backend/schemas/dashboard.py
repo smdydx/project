@@ -5,11 +5,11 @@ from datetime import datetime
 from decimal import Decimal
 
 class DashboardStatsResponse(BaseModel):
-    total_registered_users: int
-    new_users_today: int
-    total_kyc_verified: int
+    total_users: int
+    new_signups_today: int
+    kyc_verified_users: int
     kyc_verification_percentage: float
-    total_prime_users: int
+    prime_users: int
     total_distributor_lcr_money: Decimal
     total_distributor_prime_reward: Decimal
     total_mobile_recharge: int

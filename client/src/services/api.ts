@@ -35,16 +35,16 @@ class ApiService {
 
   // Dashboard Stats
   async getDashboardStats() {
-    return this.request('/stats');
+    return this.request('/dashboard/stats');
   }
 
   async getChartData() {
-    return this.request('/charts');
+    return this.request('/dashboard/charts');
   }
 
   // Transactions
   async getLiveTransactions(limit: number = 50) {
-    return this.request(`/transactions/recent?limit=${limit}`);
+    return this.request(`/dashboard/transactions?limit=${limit}`);
   }
 
   async getAllTransactions(page: number = 1, limit: number = 100) {
@@ -53,7 +53,7 @@ class ApiService {
 
   // Users
   async getRecentUsers(limit: number = 20) {
-    return this.request(`/users/recent?limit=${limit}`);
+    return this.request(`/dashboard/users/recent?limit=${limit}`);
   }
 
   async getAllUsers(page: number = 1, limit: number = 100) {
