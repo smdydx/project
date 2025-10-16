@@ -347,9 +347,9 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Live Transactions Table - Takes 2 columns */}
-        <div className="lg:col-span-2 flex" data-testid="transactions-section">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
+        {/* Live Transactions Table - Takes 3 columns */}
+        <div className="lg:col-span-3 flex" data-testid="transactions-section">
           <Card title="🔥 Live Transactions" className="flex-1 flex flex-col">
             <div className="flex-1 overflow-hidden">
               <AdvancedRealtimeTable
@@ -360,8 +360,8 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Live User Registrations - Takes 1 column */}
-        <div className="lg:col-span-1 flex" data-testid="registrations-section">
+        {/* Live User Registrations - Takes 2 columns */}
+        <div className="lg:col-span-2 flex" data-testid="registrations-section">
           <RealtimeUserRegistrations />
         </div>
       </div>
