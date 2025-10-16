@@ -121,7 +121,7 @@ export default function Dashboard() {
     {
       title: "Total KYC Verified User",
       subtitle: "Verified accounts",
-      value: stats?.kyc_verified_users?.toLocaleString() || "0",
+      value: (stats?.verified_accounts || stats?.kyc_verified_users || 0).toLocaleString(),
       icon: CheckCircle,
       trend: { value: 2.1, isPositive: true, period: "vs yesterday" },
       color: "purple" as const,
@@ -137,7 +137,7 @@ export default function Dashboard() {
     {
       title: "Total Distributor LCR Money",
       subtitle: "LCR balance",
-      value: `₹${(stats?.total_distributor_lcr_money || stats?.total_lcr_money || 0).toLocaleString()}`,
+      value: `₹${(stats?.total_distributor_lcr_money || 0).toLocaleString()}`,
       icon: DollarSign,
       trend: { value: 8.2, isPositive: true, period: "vs yesterday" },
       color: "green" as const,
@@ -145,7 +145,7 @@ export default function Dashboard() {
     {
       title: "Total Distributor Prime Reward",
       subtitle: "Rewards earned",
-      value: `₹${(stats?.total_distributor_prime_reward || (stats?.prime_users ? stats.prime_users * 247 : 0)).toLocaleString()}`,
+      value: `₹${(stats?.total_distributor_prime_reward || 0).toLocaleString()}`,
       icon: Activity,
       trend: { value: 18.3, isPositive: true, period: "vs yesterday" },
       color: "red" as const,
@@ -153,7 +153,7 @@ export default function Dashboard() {
     {
       title: "Total Mobile Recharge",
       subtitle: "Recharge volume",
-      value: (stats?.total_mobile_recharge || stats?.mobile_recharges || 0).toLocaleString(),
+      value: (stats?.total_mobile_recharge || 0).toLocaleString(),
       icon: Smartphone,
       trend: { value: 12.5, isPositive: true, period: "vs yesterday" },
       color: "indigo" as const,
@@ -161,7 +161,7 @@ export default function Dashboard() {
     {
       title: "Total DTH Recharge",
       subtitle: "DTH services",
-      value: (stats?.total_dth_recharge || stats?.dth_recharges || 0).toLocaleString(),
+      value: (stats?.total_dth_recharge || 0).toLocaleString(),
       icon: Globe,
       trend: { value: 12.4, isPositive: true, period: "vs last week" },
       color: "pink" as const,

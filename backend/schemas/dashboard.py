@@ -8,6 +8,7 @@ class DashboardStatsResponse(BaseModel):
     total_users: int
     new_signups_today: int
     kyc_verified_users: int
+    verified_accounts: int
     kyc_verification_percentage: float
     prime_users: int
     total_distributor_lcr_money: Decimal

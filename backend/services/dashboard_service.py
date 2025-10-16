@@ -1,8 +1,9 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, cast, Numeric
 from datetime import datetime, timedelta
-import random
+from decimal import Decimal
 from models.models import User, Transactions
+from models.payment_gateway import Payment_Gateway
 
 
 class DashboardService:
@@ -38,43 +39,53 @@ class DashboardService:
             ).count()
             
             # Total distributor LCR money (sum of INR wallet balance)
-            total_lcr_money = db.query(func.sum(User.INRWalletBalance)).filter(
+            lcr_money_sum = db.query(func.sum(cast(User.INRWalletBalance, Numeric))).filter(
                 User.IsDeleted == False
-            ).scalar() or 0
+            ).scalar()
+            total_lcr_money = float(lcr_money_sum) if lcr_money_sum else 0.0
             
             # Total distributor prime reward (sum of reward wallet balance)
-            total_prime_reward = db.query(func.sum(User.RewardWalletBalance)).filter(
+            prime_reward_sum = db.query(func.sum(cast(User.RewardWalletBalance, Numeric))).filter(
                 User.IsDeleted == False
-            ).scalar() or 0
+            ).scalar()
+            total_prime_reward = float(prime_reward_sum) if prime_reward_sum else 0.0
             
-            # Mobile and DTH recharge counts from transactions
-            total_mobile_recharge = db.query(Transactions).filter(
-                Transactions.TransactionType.in_(['Mobile Recharge', 'Recharge']),
-                Transactions.IsDeleted == False
+            # Mobile recharge from Payment_Gateway
+            total_mobile_recharge = db.query(Payment_Gateway).filter(
+                Payment_Gateway.purpose.ilike('%mobile%'),
+                Payment_Gateway.status == 'success'
             ).count()
             
-            total_dth_recharge = db.query(Transactions).filter(
-                Transactions.TransactionType == 'DTH Recharge',
-                Transactions.IsDeleted == False
+            # DTH recharge from Payment_Gateway
+            total_dth_recharge = db.query(Payment_Gateway).filter(
+                Payment_Gateway.purpose.ilike('%dth%'),
+                Payment_Gateway.status == 'success'
             ).count()
+
+            # Calculate verified accounts (KYC completed users)
+            verified_accounts = kyc_verified_users
 
             return {
                 "total_users": total_users,
                 "new_signups_today": new_signups_today,
                 "kyc_verified_users": kyc_verified_users,
+                "verified_accounts": verified_accounts,
                 "kyc_verification_percentage": round(kyc_verification_percentage, 2),
                 "prime_users": prime_users,
-                "total_distributor_lcr_money": float(total_lcr_money),
-                "total_distributor_prime_reward": float(total_prime_reward),
+                "total_distributor_lcr_money": round(total_lcr_money, 2),
+                "total_distributor_prime_reward": round(total_prime_reward, 2),
                 "total_mobile_recharge": total_mobile_recharge,
                 "total_dth_recharge": total_dth_recharge
             }
         except Exception as e:
             print(f"Error fetching dashboard stats: {e}")
+            import traceback
+            traceback.print_exc()
             return {
                 "total_users": 0,
                 "new_signups_today": 0,
                 "kyc_verified_users": 0,
+                "verified_accounts": 0,
                 "kyc_verification_percentage": 0.0,
                 "prime_users": 0,
                 "total_distributor_lcr_money": 0.0,
