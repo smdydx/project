@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./admin_dashboard.db"
 
     # CORS - Allow all origins in Replit environment
-    ALLOWED_ORIGINS: List[str] = ["*"]
+    ALLOWED_ORIGINS: str = "*"
 
     class Config:
         env_file = ".env"

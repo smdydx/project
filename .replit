@@ -11,7 +11,7 @@ run = ["npm", "run", "start"]
 build = ["npm", "run", "build"]
 
 [workflows]
-runButton = "Project"
+runButton = "Start Full Stack"
 
 [[workflows.workflow]]
 name = "Project"
@@ -48,6 +48,28 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python -m backend.run"
+
+[[workflows.workflow]]
+name = "Start Python Backend"
+author = 48690313
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+
+[[workflows.workflow]]
+name = "Start Full Stack"
+author = 48690313
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
 
 [[ports]]
 localPort = 5000
