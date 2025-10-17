@@ -20,8 +20,8 @@ interface ServiceRequestTransaction {
 const fetchServiceRequests = async (): Promise<ServiceRequestTransaction[]> => {
   try {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-    console.log('Fetching from API:', `${API_URL}/api/v1/service-requests?limit=100`);
-    const response = await fetch(`${API_URL}/api/v1/service-requests?limit=100`);
+    console.log('Fetching from API:', `${API_URL}/api/crud/service-request`);
+    const response = await fetch(`${API_URL}/api/crud/service-request`);
     
     if (!response.ok) {
       const errorText = await response.text();
