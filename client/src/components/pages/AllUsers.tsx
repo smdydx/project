@@ -22,7 +22,7 @@ export default function AllUsers() {
   const generateRealtimeUsers = async () => {
     try {
       setLoading(true);
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const API_URL = import.meta.env.VITE_API_URL || '';
       const params = new URLSearchParams();
       
       // Filter logic for All Users page
@@ -374,7 +374,7 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
   useEffect(() => {
     const fetchUserDetail = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        const API_URL = import.meta.env.VITE_API_URL || '';
         const response = await fetch(`${API_URL}/api/v1/users/detail/${userId}`);
         if (!response.ok) throw new Error('Failed to fetch user details');
         const data = await response.json();

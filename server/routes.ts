@@ -153,6 +153,93 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // User Management Endpoints
+  app.get("/api/v1/users/all", async (req, res) => {
+    try {
+      const userType = req.query.user_type as string;
+      const verificationStatus = req.query.verification_status as string;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
+
+      let users = await storage.getAllUsers();
+
+      // Add computed fields
+      users = users.map((user: any) => ({
+        ...user,
+        userType: user.prime_status ? 'Prime User' : 'Normal User',
+        verification_status: user.aadhar_verification_status && user.pan_verification_status 
+          ? 'Verified' 
+          : user.aadhar_verification_status || user.pan_verification_status 
+            ? 'Partial Verified' 
+            : 'Not Verified'
+      }));
+
+      // Filter by user type
+      if (userType && userType !== 'All') {
+        users = users.filter((u: any) => u.userType === userType);
+      }
+
+      // Filter by verification status
+      if (verificationStatus && verificationStatus !== 'All') {
+        users = users.filter((u: any) => u.verification_status === verificationStatus);
+      }
+
+      // Apply limit
+      users = users.slice(0, limit);
+
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching all users:", error);
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+
+  app.get("/api/v1/users/detail/:id", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUserById(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Add computed fields
+      const userWithDetails = {
+        ...user,
+        userType: user.prime_status ? 'Prime User' : 'Normal User',
+        verification_status: user.aadhar_verification_status && user.pan_verification_status 
+          ? 'Verified' 
+          : user.aadhar_verification_status || user.pan_verification_status 
+            ? 'Partial Verified' 
+            : 'Not Verified',
+        aadhaar: user.aadhar_verification_status ? {
+          aadharNumber: "XXXX-XXXX-" + (Math.floor(Math.random() * 9000) + 1000),
+          dateOfBirth: "1990-01-01",
+          gender: "Male",
+          address: {
+            house: "123",
+            street: "Main Street",
+            locality: "Downtown",
+            district: "Central",
+            state: "Maharashtra",
+            pin: "400001"
+          },
+          photo: "https://via.placeholder.com/400x300?text=Aadhaar+Photo"
+        } : null,
+        pan: user.pan_verification_status ? {
+          pan_number: "ABCDE" + (Math.floor(Math.random() * 9000) + 1000) + "F",
+          pan_holder_name: user.fullname,
+          category: "Individual",
+          pan_image: "https://via.placeholder.com/400x300?text=PAN+Card"
+        } : null
+      };
+
+      res.json(userWithDetails);
+    } catch (error) {
+      console.error("Error fetching user detail:", error);
+      res.status(500).json({ error: "Failed to fetch user detail" });
+    }
+  });
+
   // Dashboard Statistics
   app.get("/api/dashboard/stats", async (_req, res) => {
     try {
