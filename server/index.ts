@@ -3,7 +3,6 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic } from "./vite";
 import { setupWebSocket } from "./websocket";
-import { createDataSimulator } from "./dataSimulator.js";
 
 const app = express();
 app.use(express.json());

@@ -137,43 +137,65 @@ class DashboardService:
         } for txn in transactions]
 
     @staticmethod
-    def get_live_transactions(db: Session, limit: int = 1):
-        """Get latest live transactions for WebSocket streaming"""
-        # Get from Payment_Gateway first
-        pg_txns = db.query(Payment_Gateway).order_by(
-            desc(Payment_Gateway.created_at)
-        ).limit(limit).all()
-        
+    def get_live_transactions(db: Session, limit: int = 100):
+        """Get latest live transactions for WebSocket streaming - REAL DATA ONLY"""
         result = []
-        for txn in pg_txns:
-            result.append({
-                "id": txn.client_txn_id or f"PG{txn.id}",
-                "user": txn.payer_name or "Unknown",
-                "service": txn.purpose or "Service",
-                "amount": float(txn.amount) if txn.amount else 0.0,
-                "status": txn.status or "Pending",
-                "location": "India"
-            })
+        
+        # Try Payment_Gateway table first
+        try:
+            pg_txns = db.query(Payment_Gateway).order_by(
+                desc(Payment_Gateway.created_at)
+            ).limit(limit).all()
+            
+            print(f"📊 Payment_Gateway transactions found: {len(pg_txns)}")
+            
+            for txn in pg_txns:
+                result.append({
+                    "id": txn.client_txn_id or f"PG{txn.id}",
+                    "TransactionID": txn.client_txn_id or f"PG{txn.id}",
+                    "user": txn.payer_name or "Unknown User",
+                    "fullname": txn.payer_name or "Unknown User",
+                    "service": txn.purpose or "Service",
+                    "purpose": txn.purpose or "Service",
+                    "amount": float(txn.amount) if txn.amount else 0.0,
+                    "status": txn.status.capitalize() if txn.status else "Pending",
+                    "location": "India",
+                    "date": txn.created_at.strftime('%Y-%m-%d') if txn.created_at else "",
+                    "time": txn.created_at.strftime('%H:%M:%S') if txn.created_at else ""
+                })
+        except Exception as e:
+            print(f"Error fetching Payment_Gateway: {e}")
         
         # If no Payment_Gateway data, try Transactions table
         if not result:
-            transactions = db.query(Transactions).join(
-                User, Transactions.UserID == User.UserID
-            ).order_by(
-                desc(Transactions.CreatedAt)
-            ).limit(limit).all()
-            
-            for txn in transactions:
-                result.append({
-                    "id": str(txn.TransactionID),
-                    "user": txn.user.fullname if txn.user else "Unknown",
-                    "service": txn.TransactionType or "Transaction",
-                    "amount": float(txn.Amount) if txn.Amount else 0.0,
-                    "status": txn.Status or "Pending",
-                    "location": "India"
-                })
+            try:
+                transactions = db.query(Transactions).join(
+                    User, Transactions.UserID == User.UserID
+                ).order_by(
+                    desc(Transactions.CreatedAt)
+                ).limit(limit).all()
+                
+                print(f"📊 Transactions table records found: {len(transactions)}")
+                
+                for txn in transactions:
+                    result.append({
+                        "id": str(txn.TransactionID),
+                        "TransactionID": str(txn.TransactionID),
+                        "user": txn.user.fullname if txn.user else "Unknown User",
+                        "fullname": txn.user.fullname if txn.user else "Unknown User",
+                        "service": txn.TransactionType or "Transaction",
+                        "purpose": txn.TransactionType or "Transaction",
+                        "amount": float(txn.Amount) if txn.Amount else 0.0,
+                        "status": txn.Status.capitalize() if txn.Status else "Pending",
+                        "location": "India",
+                        "date": txn.CreatedAt.strftime('%Y-%m-%d') if txn.CreatedAt else "",
+                        "time": txn.CreatedAt.strftime('%H:%M:%S') if txn.CreatedAt else ""
+                    })
+            except Exception as e:
+                print(f"Error fetching Transactions: {e}")
         
-        return result
+        print(f"📊 Total transactions to return: {len(result)}")
+        return resultesult
 
     @staticmethod
     def get_recent_users(db: Session, limit: int = 20):

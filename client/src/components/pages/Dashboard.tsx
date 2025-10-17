@@ -202,14 +202,18 @@ export default function Dashboard() {
       return [];
     }
 
-    return transactions.slice(0, 12).map(txn => ({
-      id: txn.id || txn.TransactionID || 'N/A',
-      user: txn.user || txn.fullname || 'Unknown',
-      service: txn.service || txn.purpose || 'N/A',
-      amount: txn.amount || 0,
-      status: txn.status || 'Pending',
-      location: txn.location || 'Unknown'
-    }));
+    // Only show real database transactions - no dummy data
+    return transactions
+      .filter(txn => txn.id || txn.TransactionID) // Filter out any invalid entries
+      .slice(0, 12)
+      .map(txn => ({
+        id: txn.id || txn.TransactionID || 'N/A',
+        user: txn.user || txn.fullname || 'Unknown',
+        service: txn.service || txn.purpose || 'Service',
+        amount: txn.amount || 0,
+        status: txn.status || 'Pending',
+        location: txn.location || 'India'
+      }));
   };
 
   const getStatusBadge = (status: string) => {
@@ -358,7 +362,7 @@ export default function Dashboard() {
               className="text-sm sm:text-lg font-bold"
               data-testid="live-stream-title"
             >
-              LIVE TRANSACTION STREAM
+              {wsConnected ? 'LIVE TRANSACTION STREAM' : 'REAL DATABASE TRANSACTIONS'}
             </span>
             <Zap className="w-4 h-4 sm:w-5 sm:h-5 animate-bounce" />
           </div>
@@ -367,11 +371,12 @@ export default function Dashboard() {
               className="text-lg sm:text-2xl font-extrabold"
               data-testid="live-transaction-count"
             >
-              {stats?.total_transactions
-                ? `TXN${stats.total_transactions}:`
-                : "TXN43:"}{" "}
-              ₹
-              {stats?.total_transactions
+              {transactions && transactions.length > 0
+                ? `Total: ${transactions.length}`
+                : "No Transactions"}{" "}
+              {stats?.total_mobile_recharge && stats?.total_dth_recharge
+                ? `| ₹${(stats.total_mobile_recharge + stats.total_dth_recharge).toLocaleString()}`
+                : ""sactions
                 ? (stats.total_transactions * 127).toLocaleString()
                 : "8"}
             </span>
