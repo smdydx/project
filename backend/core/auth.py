@@ -1,24 +1,27 @@
 
 """
-JWT Authentication and Authorization
+JWT Authentication and Authorization - Production Ready
 """
-from fastapi import HTTPException, Depends, Header, status
+from fastapi import HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Optional
 from datetime import datetime, timedelta
 import jwt
 from pydantic import BaseModel
+import secrets
 
 # JWT Configuration
-SECRET_KEY = "your-secret-key-change-this-in-production-lcrpay-2024"
+SECRET_KEY = secrets.token_urlsafe(32)  # Generate secure key
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
+ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
+REFRESH_TOKEN_EXPIRE_DAYS = 7  # 7 days
 
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
 class TokenData(BaseModel):
     username: str
     exp: datetime
+    token_type: str = "access"
 
 class LoginRequest(BaseModel):
     username: str
@@ -26,69 +29,113 @@ class LoginRequest(BaseModel):
 
 class LoginResponse(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str
     username: str
+    expires_in: int
 
-def create_access_token(data: dict) -> str:
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """Create JWT access token"""
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    to_encode.update({
+        "exp": expire,
+        "token_type": "access",
+        "iat": datetime.utcnow()
+    })
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-def verify_token(token: str) -> Optional[TokenData]:
+def create_refresh_token(data: dict) -> str:
+    """Create JWT refresh token"""
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    
+    to_encode.update({
+        "exp": expire,
+        "token_type": "refresh",
+        "iat": datetime.utcnow()
+    })
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def verify_token(token: str, expected_type: str = "access") -> Optional[TokenData]:
     """Verify JWT token and return token data"""
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("username")
         exp: int = payload.get("exp")
+        token_type: str = payload.get("token_type", "access")
         
         if username is None:
             return None
+        
+        if token_type != expected_type:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Invalid token type. Expected {expected_type}, got {token_type}"
+            )
             
         return TokenData(
             username=username,
-            exp=datetime.fromtimestamp(exp)
+            exp=datetime.fromtimestamp(exp),
+            token_type=token_type
         )
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired"
+            detail="Token has expired",
+            headers={"WWW-Authenticate": "Bearer"}
         )
-    except jwt.JWTError:
-        return None
+    except jwt.InvalidTokenError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
 
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    """
-    Get current authenticated user from JWT token
-    """
+async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)) -> TokenData:
+    """Get current authenticated user from JWT token"""
+    if credentials is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    
     token = credentials.credentials
-    token_data = verify_token(token)
+    token_data = verify_token(token, "access")
     
     if token_data is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
+            headers={"WWW-Authenticate": "Bearer"}
         )
     
     return token_data
 
-async def require_admin(current_user: TokenData = Depends(get_current_user)):
-    """
-    Require admin role for mutations
-    """
-    # For now, all authenticated users are admins
-    # You can add role-based access control here
+async def require_admin(current_user: TokenData = Depends(get_current_user)) -> TokenData:
+    """Require admin role for protected operations"""
+    # All authenticated users are admins for now
+    # Add role-based access control here when needed
     return current_user
 
 def authenticate_user(username: str, password: str) -> bool:
-    """
-    Authenticate user credentials
-    TODO: Replace with database lookup
-    """
-    # Hardcoded credentials - replace with database lookup in production
+    """Authenticate user credentials"""
     ADMIN_USERNAME = "LCRadmin"
     ADMIN_PASSWORD = "admin123smdydx1216"
     

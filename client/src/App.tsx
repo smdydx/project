@@ -53,11 +53,25 @@ function AppContent() {
     }
   };
 
-  const handleLogout = () => {
-    authStorage.removeToken();
-    localStorage.removeItem('lcrpay_username');
-    localStorage.removeItem('isAuthenticated'); // Remove this if authStorage.isAuthenticated() is the sole source
-    setIsAuthenticated(false);
+  const handleLogout = async () => {
+    try {
+      // Call logout endpoint
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/auth/logout`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('lcrpay_auth_token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // Clear all auth data
+      localStorage.removeItem('lcrpay_auth_token');
+      localStorage.removeItem('lcrpay_refresh_token');
+      localStorage.removeItem('lcrpay_username');
+      setIsAuthenticated(false);
+    }
   };
 
   if (!isAuthenticated) {

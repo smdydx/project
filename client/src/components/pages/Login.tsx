@@ -53,14 +53,15 @@ export default function Login({ onLogin }: LoginProps) {
 
       if (response.ok) {
         const data = await response.json();
-        // Store JWT token
+        // Store JWT tokens
         localStorage.setItem('lcrpay_auth_token', data.access_token);
+        localStorage.setItem('lcrpay_refresh_token', data.refresh_token);
         localStorage.setItem('lcrpay_username', data.username);
         
         // Successful login
         onLogin(username, password);
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({ detail: 'Login failed' }));
         setError(errorData.detail || 'Invalid credentials. Please check your username and password.');
         setPassword('');
       }
