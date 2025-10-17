@@ -150,6 +150,9 @@ const Dashboard: React.FC<DashboardProps> = ({ currentUser }) => {
   // ✅ EMPLOYEE MAPPING FOR ASSIGNED LEADS
   const [employeeMap, setEmployeeMap] = useState<Map<number, Employee>>(new Map());
 
+
+  
+
   // ✅ TIME FORMATTING HELPER FUNCTION WITH TYPE SAFETY
   const formatTimeAgo = (dateString: string | undefined | null): string => {
     if (!dateString) return 'Recently';
@@ -178,9 +181,6 @@ const Dashboard: React.FC<DashboardProps> = ({ currentUser }) => {
       return 'Recently';
     }
   };
-
-
-  
 
   // ✅ GET ASSIGNED EMPLOYEE NAME
   const getAssignedEmployeeName = (assignedToId?: number): string => {
