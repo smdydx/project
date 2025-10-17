@@ -552,6 +552,7 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
                       </div>
                     </div>
                   )}
+                </div>
               </div>
             </Card>
           )}
