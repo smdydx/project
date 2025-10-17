@@ -36,6 +36,9 @@ export default function MobileTransactions() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [userDetails, setUserDetails] = useState<any>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   useEffect(() => {
     const loadTransactions = async () => {
@@ -53,6 +56,26 @@ export default function MobileTransactions() {
     };
     loadTransactions();
   }, []); // Empty dependency array means this effect runs once on mount
+
+  const fetchUserDetails = async (userId: number) => {
+    setLoadingDetails(true);
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/api/v1/transactions/user/${userId}/all`);
+      if (!response.ok) throw new Error('Failed to fetch user details');
+      const data = await response.json();
+      setUserDetails(data);
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  const handleViewUser = async (userId: number) => {
+    setSelectedUserId(userId);
+    await fetchUserDetails(userId);
+  };
 
   const filteredTransactions = transactions.filter(txn => {
     const matchesSearch = 
@@ -162,6 +185,7 @@ export default function MobileTransactions() {
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Date & Time</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Reference ID</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -187,6 +211,14 @@ export default function MobileTransactions() {
                         <div className="text-xs text-gray-400">{txn.time}</div>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 font-mono" data-testid={`text-ref-${txn.id}`}>{txn.referenceId}</td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => handleViewUser(txn.id)}
+                          className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs"
+                        >
+                          View
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -201,6 +233,127 @@ export default function MobileTransactions() {
           </div>
         )}
       </Card>
+
+      {/* User Detail Modal */}
+      {selectedUserId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {userDetails?.user?.name || 'User Details'}
+                </h2>
+                <button
+                  onClick={() => {
+                    setSelectedUserId(null);
+                    setUserDetails(null);
+                  }}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {loadingDetails ? (
+                <div className="flex justify-center py-12">
+                  <p className="text-gray-500">Loading details...</p>
+                </div>
+              ) : userDetails ? (
+                <div className="space-y-6">
+                  {/* Service Requests */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Mobile Transactions</h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-50 dark:bg-gray-700">
+                          <tr>
+                            <th className="px-4 py-2 text-left">Ref ID</th>
+                            <th className="px-4 py-2 text-left">Service</th>
+                            <th className="px-4 py-2 text-left">Mobile</th>
+                            <th className="px-4 py-2 text-left">Amount</th>
+                            <th className="px-4 py-2 text-left">Status</th>
+                            <th className="px-4 py-2 text-left">Date</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {userDetails.service_requests?.map((sr: any) => (
+                            <tr key={sr.id} className="border-b dark:border-gray-700">
+                              <td className="px-4 py-2 font-mono">{sr.reference_id}</td>
+                              <td className="px-4 py-2">{sr.service_type}</td>
+                              <td className="px-4 py-2">{sr.mobile}</td>
+                              <td className="px-4 py-2">₹{sr.amount}</td>
+                              <td className="px-4 py-2">{sr.status}</td>
+                              <td className="px-4 py-2">{sr.date} {sr.time}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* LCR Bones */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">LCR Bones</h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-50 dark:bg-gray-700">
+                          <tr>
+                            <th className="px-4 py-2 text-left">Amount</th>
+                            <th className="px-4 py-2 text-left">Type</th>
+                            <th className="px-4 py-2 text-left">From</th>
+                            <th className="px-4 py-2 text-left">Status</th>
+                            <th className="px-4 py-2 text-left">Date</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {userDetails.lcr_bones?.map((lb: any) => (
+                            <tr key={lb.id} className="border-b dark:border-gray-700">
+                              <td className="px-4 py-2">₹{lb.amount}</td>
+                              <td className="px-4 py-2">{lb.type}</td>
+                              <td className="px-4 py-2">{lb.received_from}</td>
+                              <td className="px-4 py-2">{lb.status}</td>
+                              <td className="px-4 py-2">{lb.date} {lb.time}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* LCR Rewards */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">LCR Rewards</h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-50 dark:bg-gray-700">
+                          <tr>
+                            <th className="px-4 py-2 text-left">Amount</th>
+                            <th className="px-4 py-2 text-left">Type</th>
+                            <th className="px-4 py-2 text-left">From</th>
+                            <th className="px-4 py-2 text-left">Status</th>
+                            <th className="px-4 py-2 text-left">Date</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {userDetails.lcr_rewards?.map((lr: any) => (
+                            <tr key={lr.id} className="border-b dark:border-gray-700">
+                              <td className="px-4 py-2">₹{lr.amount}</td>
+                              <td className="px-4 py-2">{lr.type}</td>
+                              <td className="px-4 py-2">{lr.received_from}</td>
+                              <td className="px-4 py-2">{lr.status}</td>
+                              <td className="px-4 py-2">{lr.date} {lr.time}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

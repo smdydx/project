@@ -59,6 +59,96 @@ async def get_dth_transactions(
             Payment_Gateway.purpose.ilike('%dth%')
         ).order_by(desc(Payment_Gateway.created_at)).limit(limit).all()
 
+
+
+@router.get("/user/{user_id}/all")
+async def get_user_all_transactions(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    """Get all transactions for a specific user - Service Requests + LCR Money"""
+    try:
+        from models.service_request import Service_Request
+        from models.models import LcrMoney, User
+        
+        # Get user details
+        user = db.query(User).filter(User.UserID == user_id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Service Requests (excluding pending)
+        service_requests = db.query(Service_Request).filter(
+            Service_Request.user_id == user_id,
+            Service_Request.status != 'pending'
+        ).order_by(desc(Service_Request.created_at)).all()
+        
+        # LCR Bones
+        lcr_bones = db.query(LcrMoney).filter(
+            LcrMoney.received_by == user.member_id,
+            LcrMoney.received_for == 'bones'
+        ).order_by(desc(LcrMoney.transactiondate)).all()
+        
+        # LCR Reward
+        lcr_rewards = db.query(LcrMoney).filter(
+            LcrMoney.received_by == user.member_id,
+            LcrMoney.received_for == 'reward'
+        ).order_by(desc(LcrMoney.transactiondate)).all()
+        
+        return {
+            "user": {
+                "id": user.UserID,
+                "name": user.fullname,
+                "member_id": user.member_id,
+                "mobile": user.MobileNumber
+            },
+            "service_requests": [
+                {
+                    "id": sr.id,
+                    "reference_id": sr.reference_id,
+                    "service_type": sr.service_type,
+                    "operator": sr.operator_code,
+                    "mobile": sr.mobile_number,
+                    "amount": float(sr.amount),
+                    "status": sr.status,
+                    "payment_txn_id": sr.payment_txn_id,
+                    "utr_no": sr.utr_no,
+                    "date": sr.created_at.strftime('%Y-%m-%d'),
+                    "time": sr.created_at.strftime('%H:%M:%S')
+                }
+                for sr in service_requests
+            ],
+            "lcr_bones": [
+                {
+                    "id": lb.srno,
+                    "amount": float(lb.amount),
+                    "type": lb.transactiontype,
+                    "received_from": lb.received_from,
+                    "status": "Active" if lb.status == 1 else "Inactive",
+                    "date": lb.transactiondate.strftime('%Y-%m-%d') if lb.transactiondate else "",
+                    "time": lb.transactiondate.strftime('%H:%M:%S') if lb.transactiondate else "",
+                    "remark": lb.remark
+                }
+                for lb in lcr_bones
+            ],
+            "lcr_rewards": [
+                {
+                    "id": lr.srno,
+                    "amount": float(lr.amount),
+                    "type": lr.transactiontype,
+                    "received_from": lr.received_from,
+                    "status": "Active" if lr.status == 1 else "Inactive",
+                    "date": lr.transactiondate.strftime('%Y-%m-%d') if lr.transactiondate else "",
+                    "time": lr.transactiondate.strftime('%H:%M:%S') if lr.transactiondate else "",
+                    "remark": lr.remark
+                }
+                for lr in lcr_rewards
+            ]
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
         result = []
         for txn in transactions:
             user = db.query(User).filter(User.MobileNumber == txn.payer_mobile).first()
