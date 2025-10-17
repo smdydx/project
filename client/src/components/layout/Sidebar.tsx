@@ -103,7 +103,7 @@ export default function Sidebar({
       )}
 
       {/* Sidebar */}
-      <div className={`fixed left-0 top-0 h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-lg z-50 transform transition-all duration-300 ease-in-out ${
+      <div className={`fixed left-0 top-0 h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-lg z-50 transform transition-all duration-300 ease-in-out flex flex-col ${
         isMobileOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0 ${
         isCollapsed ? 'lg:w-20' : 'lg:w-64'
@@ -151,7 +151,7 @@ export default function Sidebar({
         </div>
 
         {/* Navigation */}
-        <nav className={`mt-6 flex-1 overflow-y-auto transition-all duration-300 ${
+        <nav className={`mt-6 flex-1 overflow-y-auto scrollbar-thin transition-all duration-300 ${
           isCollapsed ? 'lg:px-2' : 'px-3'
         }`}>
           {menuItems.map((item) => {
@@ -267,11 +267,16 @@ export default function Sidebar({
         </nav>
 
         {/* Logout Button */}
-        <div className={`border-t border-gray-200 dark:border-gray-700 transition-all duration-300 ${
+        <div className={`flex-shrink-0 border-t border-gray-200 dark:border-gray-700 transition-all duration-300 ${
           isCollapsed ? 'lg:p-2' : 'p-3'
         }`}>
           <div className="relative group">
-            <button className={`w-full flex items-center text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-400 transition-all duration-200 rounded-lg ${
+            <button 
+              onClick={() => {
+                localStorage.removeItem('isAuthenticated');
+                window.location.reload();
+              }}
+              className={`w-full flex items-center text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-400 transition-all duration-200 rounded-lg ${
               isCollapsed ? 'lg:justify-center lg:px-3 lg:py-4' : 'space-x-3 px-3 py-3'
             }`}>
               <LogOut className="w-5 h-5 flex-shrink-0" />

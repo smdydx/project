@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Route, Switch } from 'wouter';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
+import Login from './components/pages/Login';
 import Dashboard from './components/pages/Dashboard';
 import UserManagement from './components/pages/UserManagement';
 import AllUsers from './components/pages/AllUsers';
@@ -25,6 +26,30 @@ function AppContent() {
   const [dateFilter, setDateFilter] = useState('today');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const authStatus = localStorage.getItem('isAuthenticated');
+    if (authStatus === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handleLogin = (username: string, password: string) => {
+    if (username === 'admin' && password === 'admin123') {
+      setIsAuthenticated(true);
+      localStorage.setItem('isAuthenticated', 'true');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('isAuthenticated');
+  };
+
+  if (!isAuthenticated) {
+    return <Login onLogin={handleLogin} />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
