@@ -371,20 +371,20 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Stats Cards - Responsive Grid */}
+      {/* Stats Cards - Fully Responsive Grid */}
       <div className="relative" data-testid="stats-carousel">
-        {/* Swipe-enabled Container - All Devices */}
+        {/* Mobile/Tablet: Horizontal Scroll, Desktop: Grid */}
         <div
           id="stats-scroll-container"
-          className="overflow-x-auto scrollbar-hide scroll-smooth px-2 sm:px-4 lg:px-6 touch-pan-x cursor-grab active:cursor-grabbing"
+          className="lg:grid lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 lg:gap-4 xl:gap-6 overflow-x-auto lg:overflow-visible scrollbar-hide scroll-smooth px-2 sm:px-4 lg:px-0 touch-pan-x cursor-grab active:cursor-grabbing lg:cursor-default"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           data-testid="stats-container"
         >
-          <div className="flex space-x-3 sm:space-x-4 lg:space-x-6 pb-4">
+          <div className="flex lg:contents space-x-3 sm:space-x-4 lg:space-x-0 pb-4 lg:pb-0">
             {allStatCards.map((card, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 w-[85vw] sm:w-[45vw] md:w-[45vw] lg:w-[350px] xl:w-[380px]"
+                className="flex-shrink-0 w-[85vw] sm:w-[70vw] md:w-[48%] lg:w-auto"
                 data-testid={`stat-card-${index}`}
               >
                 <AdvancedStatCard
@@ -401,20 +401,20 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Live User Registrations and Live Transactions - Same Row (50-50 Split) */}
+      {/* Live User Registrations and Live Transactions - Responsive Layout */}
       <Card className="p-0 overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-0">
-          {/* Live User Registrations - Takes 50% */}
-          <div className="flex border-r-0 lg:border-r border-gray-200 dark:border-gray-700" data-testid="registrations-section">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-0">
+          {/* Live User Registrations */}
+          <div className="flex border-b xl:border-b-0 xl:border-r border-gray-200 dark:border-gray-700" data-testid="registrations-section">
             <RealtimeUserRegistrations />
           </div>
 
-          {/* Live Transactions Table - Takes 50% */}
+          {/* Live Transactions Table */}
           <div className="flex flex-col" data-testid="transactions-section">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">🔥 Live Transactions</h3>
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">🔥 Live Transactions</h3>
             </div>
-            <div className="flex-1 overflow-hidden p-6">
+            <div className="flex-1 overflow-x-auto p-3 sm:p-6">
               <AdvancedRealtimeTable
                 columns={transactionColumns}
                 data={generateRealtimeTransactions()}

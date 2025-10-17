@@ -24,10 +24,10 @@ interface AdvancedRealtimeTableProps {
   useWebSocket?: boolean; // Enable WebSocket updates
 }
 
-export default function AdvancedRealtimeTable({ 
-  columns, 
-  data: initialData, 
-  searchable = true, 
+export default function AdvancedRealtimeTable({
+  columns,
+  data: initialData,
+  searchable = true,
   searchPlaceholder = "Search...",
   updateInterval = 5000,
   onDataUpdate,
@@ -38,7 +38,7 @@ export default function AdvancedRealtimeTable({
   useWebSocket: useWS = false
 }: AdvancedRealtimeTableProps) {
   const [data, setData] = useState(initialData);
-  
+
   // WebSocket integration
   const { data: wsData, isConnected: wsConnected } = useWebSocket(wsChannel || '');
   const [sortColumn, setSortColumn] = useState<string>('');
@@ -65,7 +65,7 @@ export default function AdvancedRealtimeTable({
         setItemsPerPage(10); // Desktop
       }
     };
-    
+
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -83,22 +83,22 @@ export default function AdvancedRealtimeTable({
     if (useWS && wsData && wsChannel) {
       setData(prevData => {
         const newData = [wsData, ...prevData].slice(0, 100); // Keep last 100 items
-        
+
         // Track changes for animations
         const newRowIds = new Set<string>();
         newRowIds.add(wsData.id);
-        
+
         setNewRows(newRowIds);
         setStats(prev => ({
           ...prev,
           total: newData.length,
           added: prev.added + 1
         }));
-        
+
         setTimeout(() => {
           setNewRows(new Set());
         }, 2000);
-        
+
         prevDataRef.current = newData;
         return newData;
       });
@@ -115,12 +115,12 @@ export default function AdvancedRealtimeTable({
       try {
         const newData = await onDataUpdate();
         const prevData = prevDataRef.current;
-        
+
         // Track changes for animations
         const newRowIds = new Set<string>();
         const updatedRowIds = new Set<string>();
         const deletedRowIds = new Set<string>();
-        
+
         // Find new and updated rows
         newData.forEach(row => {
           const existingRow = prevData.find(p => p.id === row.id);
@@ -130,36 +130,36 @@ export default function AdvancedRealtimeTable({
             updatedRowIds.add(row.id);
           }
         });
-        
+
         // Find deleted rows
         prevData.forEach(row => {
           if (!newData.find(n => n.id === row.id)) {
             deletedRowIds.add(row.id);
           }
         });
-        
+
         setNewRows(newRowIds);
         setUpdatedRows(updatedRowIds);
         setDeletedRows(deletedRowIds);
-        
+
         setStats({
           total: newData.length,
           added: newRowIds.size,
           updated: updatedRowIds.size,
           deleted: deletedRowIds.size
         });
-        
+
         setData(newData);
         setLastUpdate(new Date());
         prevDataRef.current = newData;
-        
+
         // Clear animation states after delay
         setTimeout(() => {
           setNewRows(new Set());
           setUpdatedRows(new Set());
           setDeletedRows(new Set());
         }, 2000);
-        
+
       } catch (error) {
         console.error('Error updating data:', error);
       } finally {
@@ -169,7 +169,7 @@ export default function AdvancedRealtimeTable({
 
     // Initial update
     updateData();
-    
+
     // Set up interval
     const interval = setInterval(updateData, updateInterval);
     return () => clearInterval(interval);
@@ -185,7 +185,7 @@ export default function AdvancedRealtimeTable({
   };
 
   const filteredData = data.filter((item) =>
-    searchTerm === '' || 
+    searchTerm === '' ||
     Object.values(item).some((value) =>
       String(value).toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -193,10 +193,10 @@ export default function AdvancedRealtimeTable({
 
   const sortedData = [...filteredData].sort((a, b) => {
     if (!sortColumn) return 0;
-    
+
     const aValue = a[sortColumn];
     const bValue = b[sortColumn];
-    
+
     if (sortDirection === 'asc') {
       return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
     } else {
@@ -210,7 +210,7 @@ export default function AdvancedRealtimeTable({
 
   const getRowClassName = (rowId: string) => {
     let className = "table-row hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-300";
-    
+
     if (enableAnimations) {
       if (newRows.has(rowId)) {
         className += " table-row-enter border-l-4 border-green-500";
@@ -220,7 +220,7 @@ export default function AdvancedRealtimeTable({
         className += " table-row-exit border-l-4 border-red-500";
       }
     }
-    
+
     return className;
   };
 
@@ -235,7 +235,7 @@ export default function AdvancedRealtimeTable({
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
               <Activity className="w-5 h-5 text-blue-500" />
             </div>
-            
+
             <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-6">
               {showStats && (
                 <div className="flex items-center space-x-4 text-sm">
@@ -253,7 +253,7 @@ export default function AdvancedRealtimeTable({
                   </div>
                 </div>
               )}
-              
+
               <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
                 <RefreshCw className={`w-4 h-4 ${isUpdating ? 'animate-spin text-blue-500' : ''}`} />
                 <span className="hidden sm:inline">Last: {lastUpdate.toLocaleTimeString()}</span>
@@ -263,7 +263,7 @@ export default function AdvancedRealtimeTable({
           </div>
         </div>
       )}
-      
+
       {/* Search and Filters */}
       {searchable && (
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
@@ -285,16 +285,16 @@ export default function AdvancedRealtimeTable({
           </div>
         </div>
       )}
-      
+
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto -mx-3 sm:mx-0">
         <table className="w-full">
           <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 border-b border-gray-200 dark:border-gray-600">
             <tr>
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className={`px-3 lg:px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider ${
+                  className={`px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider ${
                     column.sortable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors' : ''
                   } ${column.width || ''}`}
                   onClick={() => column.sortable && handleSort(column.key)}
@@ -303,19 +303,19 @@ export default function AdvancedRealtimeTable({
                     <span className="truncate">{column.title}</span>
                     {column.sortable && (
                       <div className="flex flex-col">
-                        <ChevronUp 
+                        <ChevronUp
                           className={`w-3 h-3 transition-colors ${
-                            sortColumn === column.key && sortDirection === 'asc' 
-                              ? 'text-blue-600' 
+                            sortColumn === column.key && sortDirection === 'asc'
+                              ? 'text-blue-600'
                               : 'text-gray-300'
-                          }`} 
+                          }`}
                         />
-                        <ChevronDown 
+                        <ChevronDown
                           className={`w-3 h-3 -mt-1 transition-colors ${
-                            sortColumn === column.key && sortDirection === 'desc' 
-                              ? 'text-blue-600' 
+                            sortColumn === column.key && sortDirection === 'desc'
+                              ? 'text-blue-600'
                               : 'text-gray-300'
-                          }`} 
+                          }`}
                         />
                       </div>
                     )}
@@ -328,9 +328,9 @@ export default function AdvancedRealtimeTable({
             {paginatedData.map((row, index) => (
               <tr key={row.id || index} className={getRowClassName(row.id)}>
                 {columns.map((column) => (
-                  <td key={column.key} className="px-3 lg:px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                  <td key={column.key} className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 text-sm text-gray-900 dark:text-gray-100">
                     <div className="truncate">
-                      {column.render 
+                      {column.render
                         ? column.render(row[column.key], row)
                         : row[column.key]
                       }
@@ -342,7 +342,7 @@ export default function AdvancedRealtimeTable({
           </tbody>
         </table>
       </div>
-      
+
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="px-4 lg:px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
@@ -358,7 +358,7 @@ export default function AdvancedRealtimeTable({
               >
                 Previous
               </button>
-              
+
               {/* Page Numbers - Show fewer on mobile */}
               {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                 let page;
@@ -371,7 +371,7 @@ export default function AdvancedRealtimeTable({
                 } else {
                   page = currentPage - 2 + i;
                 }
-                
+
                 return (
                   <button
                     key={page}
@@ -386,7 +386,7 @@ export default function AdvancedRealtimeTable({
                   </button>
                 );
               })}
-              
+
               <button
                 onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}

@@ -281,26 +281,28 @@
     @apply bg-gray-500 dark:bg-gray-400;
   }
 
-  /* Hide scrollbar for carousel */
+  /* Hide scrollbar for carousel on mobile/tablet */
   #stats-scroll-container::-webkit-scrollbar {
     display: none;
   }
 
-  #stats-scroll-container {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    cursor: grab;
-    scroll-snap-type: x proximity;
-    -webkit-overflow-scrolling: touch;
-  }
+  @media (max-width: 1023px) {
+    #stats-scroll-container {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      cursor: grab;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+    }
 
-  #stats-scroll-container:active {
-    cursor: grabbing;
-  }
+    #stats-scroll-container:active {
+      cursor: grabbing;
+    }
 
-  /* Smooth scroll snap for cards on ALL devices */
-  #stats-scroll-container > div > div {
-    scroll-snap-align: center;
+    /* Smooth scroll snap for cards on mobile/tablet */
+    #stats-scroll-container > div > div {
+      scroll-snap-align: center;
+    }
   }
 
 

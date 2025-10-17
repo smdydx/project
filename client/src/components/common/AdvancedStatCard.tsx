@@ -74,15 +74,15 @@ const colorClasses = {
   }
 };
 
-export default function AdvancedStatCard({ 
-  title, 
-  value, 
-  icon: Icon, 
-  trend, 
-  color, 
+export default function AdvancedStatCard({
+  title,
+  value,
+  icon: Icon,
+  trend,
+  color,
   subtitle,
   isLoading = false,
-  onClick 
+  onClick
 }: AdvancedStatCardProps) {
   const formatValue = (val: string | number) => {
     if (typeof val === 'number') {
@@ -115,64 +115,46 @@ export default function AdvancedStatCard({
   }
 
   return (
-    <div 
-      className={`group relative rounded-2xl p-4 sm:p-5 lg:p-6 border hover-lift transition-all duration-300 overflow-hidden w-full flex flex-col ${
-        onClick ? 'cursor-pointer' : ''
-      } ${colorClasses[color].cardBg} ${colorClasses[color].border}`}
+    <div
+      className={`relative overflow-hidden rounded-lg sm:rounded-xl ${colorConfig.cardBg} border ${colorConfig.border} backdrop-blur-sm transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] group h-full`}
+      data-testid={`stat-card-${title.toLowerCase().replace(/\s+/g, '-')}`}
       onClick={onClick}
       style={{ minHeight: '180px', height: 'auto' }}
     >
-      {/* Animated Background Gradient */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${colorClasses[color].gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
-
-      {/* Content */}
-      <div className="relative z-10 flex-1 flex flex-col">
-        {/* Header Section */}
-        <div className="flex items-start justify-between gap-2 sm:gap-3 mb-3">
+      <div className="p-4 sm:p-5 lg:p-6">
+        <div className="flex items-start justify-between mb-3 sm:mb-4">
           <div className="flex-1 min-w-0">
-            {subtitle && (
-              <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 truncate">
-                {subtitle}
-              </p>
-            )}
-            <h3 className="text-xs sm:text-sm md:text-base font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight break-words">
-              {title}
-            </h3>
+            <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 truncate">{title}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-500 truncate">{subtitle}</p>
           </div>
-          <div className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 ${colorClasses[color].icon} rounded-xl flex items-center justify-center flex-shrink-0 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
-            <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white" />
+          <div className={`${colorConfig.icon} rounded-lg p-2 sm:p-2.5 lg:p-3 group-hover:scale-110 transition-transform duration-300 flex-shrink-0 ml-2`}>
+            <Icon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
           </div>
         </div>
 
-        {/* Value and Trend Section */}
-        <div className="mt-auto">
-          <div className="mb-2">
-            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white break-words overflow-hidden">
-              {formatValue(value)}
-            </p>
-          </div>
+        <div className="space-y-2 sm:space-y-3">
+          <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white tracking-tight truncate">{formatValue(value)}</h3>
 
           {trend && (
-            <div className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 rounded-full ${colorClasses[color].light} flex-wrap max-w-full`}>
-              <div className={`flex items-center gap-1 ${trend.isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                {trend.isPositive ? (
-                  <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                ) : (
-                  <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                )}
-                <span className="text-xs sm:text-sm font-bold whitespace-nowrap">
-                  {trend.isPositive ? '+' : ''}{trend.value}%
-                </span>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center space-x-1.5 sm:space-x-2">
+                <div className={`flex items-center space-x-1 ${colorConfig.text} bg-white dark:bg-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md`}>
+                  {trend.isPositive ? (
+                    <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
+                  ) : (
+                    <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4" />
+                  )}
+                  <span className="text-xs sm:text-sm font-semibold">{trend.value}%</span>
+                </div>
+                <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{trend.period}</span>
               </div>
-              {trend.period && (
-                <span className="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline truncate">
-                  {trend.period}
-                </span>
-              )}
             </div>
           )}
         </div>
       </div>
+
+      {/* Animated Background Gradient */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${colorConfig.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
     </div>
   );
 }
