@@ -89,7 +89,7 @@ def authenticate_user(username: str, password: str) -> bool:
     TODO: Replace with database lookup
     """
     # Hardcoded credentials - replace with database lookup in production
-    ADMIN_USERNAME = "admin"
-    ADMIN_PASSWORD = "admin123"
+    ADMIN_USERNAME = "LCRadmin"
+    ADMIN_PASSWORD = "admin123smdydx1216"
     
     return username == ADMIN_USERNAME and password == ADMIN_PASSWORD
