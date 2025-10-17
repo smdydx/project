@@ -63,8 +63,8 @@ author = 48742451
 mode = "parallel"
 
 [[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd backend && pip install -q -r requirements.txt"
+task = "packager.installForLanguage"
+args = "python3"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
