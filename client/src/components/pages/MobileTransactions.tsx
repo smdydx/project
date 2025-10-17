@@ -67,6 +67,8 @@ export default function MobileTransactions() {
   }, []);
 
   const filteredUsers = users.filter(user => {
+    if (!user) return false;
+    
     const matchesSearch = 
       (user.user || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (user.mobile || '').includes(searchTerm) ||
