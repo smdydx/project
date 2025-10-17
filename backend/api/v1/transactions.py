@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, or_
 from datetime import datetime
+from decimal import Decimal
 
 from core.database import get_db
 from models.payment_gateway import Payment_Gateway
-from models.models import User
+from models.models import User, LcrMoney, LcrRewards
+from models.service_request import Service_Request
 
 router = APIRouter(tags=["transactions"])
 
@@ -59,6 +61,26 @@ async def get_dth_transactions(
             Payment_Gateway.purpose.ilike('%dth%')
         ).order_by(desc(Payment_Gateway.created_at)).limit(limit).all()
 
+        result = []
+        for txn in transactions:
+            user = db.query(User).filter(User.MobileNumber == txn.payer_mobile).first()
+            result.append({
+                "id": txn.id,
+                "transactionId": f"DTH{txn.id:06d}",
+                "user": txn.payer_name or (user.fullname if user else "Unknown"),
+                "subscriberId": txn.service_data.get('subscriber_id', f"SUB{txn.id}") if txn.service_data else f"SUB{txn.id}",
+                "operator": txn.service_data.get('operator', 'Unknown') if txn.service_data else 'Unknown',
+                "plan": txn.service_data.get('plan', 'Standard') if txn.service_data else 'Standard',
+                "amount": float(txn.amount) if txn.amount else 0,
+                "status": "Success" if txn.status == "success" else "Pending" if txn.status == "pending" else "Failed",
+                "date": txn.created_at.strftime('%Y-%m-%d') if txn.created_at else "",
+                "time": txn.created_at.strftime('%H:%M:%S') if txn.created_at else "",
+                "referenceId": txn.rrn or f"REF{txn.id}"
+            })
+
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/user/{user_id}/all")
@@ -66,34 +88,33 @@ async def get_user_all_transactions(
     user_id: int,
     db: Session = Depends(get_db)
 ):
-    """Get all transactions for a specific user - Service Requests + LCR Money"""
+    """Get all transactions for a specific user - Service Requests + LCR Money + LCR Rewards (joined by reference_id)"""
     try:
-        from models.service_request import Service_Request
-        from models.models import LcrMoney, User
-        
         # Get user details
         user = db.query(User).filter(User.UserID == user_id).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        
+
         # Service Requests (excluding pending)
         service_requests = db.query(Service_Request).filter(
             Service_Request.user_id == user_id,
             Service_Request.status != 'pending'
         ).order_by(desc(Service_Request.created_at)).all()
-        
-        # LCR Bones
+
+        # LCR Bones - joined by reference_id from service_requests
+        service_reference_ids = [sr.reference_id for sr in service_requests]
+
         lcr_bones = db.query(LcrMoney).filter(
-            LcrMoney.received_by == user.member_id,
+            LcrMoney.reference_id.in_(service_reference_ids),
             LcrMoney.received_for == 'bones'
         ).order_by(desc(LcrMoney.transactiondate)).all()
-        
-        # LCR Reward
-        lcr_rewards = db.query(LcrMoney).filter(
-            LcrMoney.received_by == user.member_id,
-            LcrMoney.received_for == 'reward'
-        ).order_by(desc(LcrMoney.transactiondate)).all()
-        
+
+        # LCR Rewards - joined by reference_id from service_requests (using LcrRewards table)
+        lcr_rewards = db.query(LcrRewards).filter(
+            LcrRewards.reference_id.in_(service_reference_ids),
+            LcrRewards.received_for == 'reward'
+        ).order_by(desc(LcrRewards.transactiondate)).all()
+
         return {
             "user": {
                 "id": user.UserID,
@@ -120,52 +141,39 @@ async def get_user_all_transactions(
             "lcr_bones": [
                 {
                     "id": lb.srno,
-                    "amount": float(lb.amount),
-                    "type": lb.transactiontype,
-                    "received_from": lb.received_from,
+                    "reference_id": lb.reference_id or "",
+                    "amount": float(lb.amount) if lb.amount else 0.0,
+                    "type": lb.transactiontype or "",
+                    "received_by": lb.received_by or "",
+                    "received_from": lb.received_from or "",
                     "status": "Active" if lb.status == 1 else "Inactive",
                     "date": lb.transactiondate.strftime('%Y-%m-%d') if lb.transactiondate else "",
                     "time": lb.transactiondate.strftime('%H:%M:%S') if lb.transactiondate else "",
-                    "remark": lb.remark
+                    "purpose": lb.purpose or "",
+                    "remark": lb.remark or "",
+                    "other": lb.other or ""
                 }
                 for lb in lcr_bones
             ],
             "lcr_rewards": [
                 {
                     "id": lr.srno,
-                    "amount": float(lr.amount),
-                    "type": lr.transactiontype,
-                    "received_from": lr.received_from,
+                    "reference_id": lr.reference_id or "",
+                    "amount": float(lr.amount) if lr.amount else 0.0,
+                    "type": lr.transactiontype or "",
+                    "received_by": lr.received_by or "",
+                    "received_from": lr.received_from or "",
                     "status": "Active" if lr.status == 1 else "Inactive",
                     "date": lr.transactiondate.strftime('%Y-%m-%d') if lr.transactiondate else "",
                     "time": lr.transactiondate.strftime('%H:%M:%S') if lr.transactiondate else "",
-                    "remark": lr.remark
+                    "purpose": lr.purpose or "",
+                    "remark": lr.remark or "",
+                    "other": lr.other or ""
                 }
                 for lr in lcr_rewards
             ]
         }
     except HTTPException:
         raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-        result = []
-        for txn in transactions:
-            user = db.query(User).filter(User.MobileNumber == txn.payer_mobile).first()
-            result.append({
-                "id": txn.id,
-                "transactionId": f"DTH{txn.id:06d}",
-                "user": txn.payer_name or (user.fullname if user else "Unknown"),
-                "subscriberId": txn.service_data.get('subscriber_id', f"SUB{txn.id}") if txn.service_data else f"SUB{txn.id}",
-                "operator": txn.service_data.get('operator', 'Unknown') if txn.service_data else 'Unknown',
-                "plan": txn.service_data.get('plan', 'Standard') if txn.service_data else 'Standard',
-                "amount": float(txn.amount) if txn.amount else 0,
-                "status": "Success" if txn.status == "success" else "Pending" if txn.status == "pending" else "Failed",
-                "date": txn.created_at.strftime('%Y-%m-%d') if txn.created_at else "",
-                "time": txn.created_at.strftime('%H:%M:%S') if txn.created_at else "",
-                "referenceId": txn.rrn or f"REF{txn.id}"
-            })
-
-        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
