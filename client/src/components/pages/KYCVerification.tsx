@@ -6,10 +6,10 @@ import {
 import AdvancedRealtimeTable from '../common/AdvancedRealtimeTable';
 import Card from '../common/Card';
 
-const kycStatusOptions = ['All Users', 'Verified', 'Partially Verified', 'Not Verified'];
+const kycStatusOptions = ['Verified', 'Partially Verified', 'Not Verified'];
 
 export default function KYCVerification() {
-  const [kycStatusFilter, setKycStatusFilter] = useState('All');
+  const [kycStatusFilter, setKycStatusFilter] = useState('Verified');
   const [showUserModal, setShowUserModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
@@ -17,9 +17,7 @@ export default function KYCVerification() {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const params = new URLSearchParams();
-      if (kycStatusFilter !== 'All') {
-        params.append('status', kycStatusFilter.toLowerCase());
-      }
+      params.append('status', kycStatusFilter.toLowerCase());
 
       const response = await fetch(`${API_URL}/api/v1/kyc/verification?${params}`);
       if (!response.ok) throw new Error('Failed to fetch KYC data');
@@ -129,12 +127,6 @@ export default function KYCVerification() {
           <p className="text-xs text-gray-500 dark:text-gray-400">{row.submittedTime}</p>
         </div>
       )
-    },
-    {
-      key: 'kycStatus',
-      title: 'KYC Status',
-      sortable: true,
-      render: (value: string) => getKYCStatusBadge(value)
     },
     {
       key: 'verifiedBy',
