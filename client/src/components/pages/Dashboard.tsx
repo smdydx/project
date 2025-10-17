@@ -11,10 +11,6 @@ import {
   XCircle,
   Smartphone,
   Globe,
-  ChevronLeft,
-  ChevronRight,
-  Play,
-  Pause,
 } from "lucide-react";
 import AdvancedStatCard from "../common/AdvancedStatCard";
 import Card from "../common/Card";
@@ -25,7 +21,6 @@ import { apiService } from "../../services/api";
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [activeServiceSegment, setActiveServiceSegment] = useState<
     number | null
   >(null);
@@ -34,10 +29,9 @@ export default function Dashboard() {
   );
 
   // Initial data from REST API
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<any>({});
   const [transactions, setTransactions] = useState<any[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
-  const [charts, setCharts] = useState<any>(null);
+  const [charts, setCharts] = useState<any>({});
 
   // WebSocket connections for real-time updates
   const { data: wsStats, isConnected: wsConnected } = useWebSocket("dashboard-stats");
@@ -49,20 +43,18 @@ export default function Dashboard() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+
         // Load critical data first
         const statsData = await apiService.getDashboardStats();
         setStats(statsData);
         setLoading(false);
-        
+
         // Then load non-critical data in background
         Promise.all([
           apiService.getLiveTransactions(),
-          apiService.getRecentUsers(),
           apiService.getChartData(),
-        ]).then(([transactionsData, usersData, chartsData]) => {
+        ]).then(([transactionsData, chartsData]) => {
           setTransactions(transactionsData);
-          setUsers(usersData);
           setCharts(chartsData);
         }).catch(error => {
           console.error("Error fetching secondary data:", error);
@@ -89,22 +81,12 @@ export default function Dashboard() {
   // Add new transactions from WebSocket
   useEffect(() => {
     if (wsTransaction) {
-      setTransactions((prev) => {
+      setTransactions((prev: any[]) => {
         const newTransactions = [wsTransaction, ...prev];
         return newTransactions.slice(0, 50); // Keep only last 50
       });
     }
   }, [wsTransaction]);
-
-  // Add new users from WebSocket
-  useEffect(() => {
-    if (wsUser) {
-      setUsers((prev) => {
-        const newUsers = [wsUser, ...prev];
-        return newUsers.slice(0, 20); // Keep only last 20
-      });
-    }
-  }, [wsUser]);
 
   const allStatCards = [
     {
@@ -173,34 +155,36 @@ export default function Dashboard() {
     },
   ];
 
-  useEffect(() => {
-    // Autoplay only on desktop/laptop (lg breakpoint and above)
-    if (!isAutoPlaying || window.innerWidth < 1024) return;
+  // Autoplay functionality removed as it was not explicitly requested to be fixed and used unused state
+  // const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  // useEffect(() => {
+  //   // Autoplay only on desktop/laptop (lg breakpoint and above)
+  //   if (!isAutoPlaying || window.innerWidth < 1024) return;
 
-    const interval = setInterval(() => {
-      const container = document.getElementById("stats-scroll-container");
-      if (container) {
-        const maxScroll = container.scrollWidth - container.clientWidth;
-        const currentScroll = container.scrollLeft;
+  //   const interval = setInterval(() => {
+  //     const container = document.getElementById("stats-scroll-container");
+  //     if (container) {
+  //       const maxScroll = container.scrollWidth - container.clientWidth;
+  //       const currentScroll = container.scrollLeft;
 
-        if (currentScroll >= maxScroll - 10) {
-          container.scrollTo({ left: 0, behavior: "smooth" });
-        } else {
-          container.scrollBy({ left: 400, behavior: "smooth" });
-        }
-      }
-    }, 4000);
+  //       if (currentScroll >= maxScroll - 10) {
+  //         container.scrollTo({ left: 0, behavior: "smooth" });
+  //       } else {
+  //         container.scrollBy({ left: 400, behavior: "smooth" });
+  //       }
+  //     }
+  //   }, 4000);
 
-    return () => clearInterval(interval);
-  }, [isAutoPlaying]);
+  //   return () => clearInterval(interval);
+  // }, [isAutoPlaying]);
 
-  const scrollStats = (direction: "left" | "right") => {
-    const container = document.getElementById("stats-scroll-container");
-    if (container) {
-      const scrollAmount = direction === "left" ? -400 : 400;
-      container.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    }
-  };
+  // const scrollStats = (direction: "left" | "right") => {
+  //   const container = document.getElementById("stats-scroll-container");
+  //   if (container) {
+  //     const scrollAmount = direction === "left" ? -400 : 400;
+  //     container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+  //   }
+  // };
 
   const generateRealtimeTransactions = () => {
     if (!transactions || !Array.isArray(transactions) || transactions.length === 0) {
