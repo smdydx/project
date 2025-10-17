@@ -195,7 +195,7 @@ class DashboardService:
                 print(f"Error fetching Transactions: {e}")
         
         print(f"📊 Total transactions to return: {len(result)}")
-        return resultesult
+        return result
 
     @staticmethod
     def get_recent_users(db: Session, limit: int = 20):

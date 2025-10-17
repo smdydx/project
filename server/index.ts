@@ -20,6 +20,16 @@ app.use('/api/v1', createProxyMiddleware({
   }
 }));
 
+// Proxy WebSocket connections to FastAPI backend
+app.use('/ws', createProxyMiddleware({
+  target: 'http://localhost:8000',
+  changeOrigin: true,
+  ws: true,
+  onProxyReq: (proxyReq, req, res) => {
+    console.log(`Proxying WebSocket: ${req.method} ${req.originalUrl} -> http://localhost:8000${req.url}`);
+  }
+}));
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

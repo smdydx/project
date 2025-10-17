@@ -19,8 +19,8 @@ export function useWebSocket(channel: string) {
     const connectWebSocket = () => {
       try {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const host = window.location.hostname;
-        const wsUrl = `${protocol}//${host}:8000/ws`;
+        const host = window.location.host;
+        const wsUrl = `${protocol}//${host}/ws`;
 
         console.log('Connecting to WebSocket:', wsUrl);
         ws = new WebSocket(wsUrl);

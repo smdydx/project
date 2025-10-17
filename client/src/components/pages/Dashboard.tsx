@@ -40,7 +40,7 @@ export default function Dashboard() {
   const [charts, setCharts] = useState<any>(null);
 
   // WebSocket connections for real-time updates
-  const { data: wsStats } = useWebSocket("dashboard-stats");
+  const { data: wsStats, isConnected: wsConnected } = useWebSocket("dashboard-stats");
   const { data: wsTransaction } = useWebSocket("transactions");
   const { data: wsUser } = useWebSocket("user-registrations");
 
