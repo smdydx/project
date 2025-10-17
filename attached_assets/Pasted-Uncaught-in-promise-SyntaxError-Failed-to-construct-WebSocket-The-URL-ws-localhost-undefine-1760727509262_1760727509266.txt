@@ -1,0 +1,33 @@
+Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'ws://localhost:undefined/' is invalid.
+    at setupWebSocket (client:535:19)
+    at fallback (client:508:16)
+    at WebSocket.<anonymous> (client:551:7)Understand this error
+react-dom_client.js?v=9c2f385a:21549 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+2MobileTransactions.tsx:58 Uncaught TypeError: Cannot read properties of null (reading 'toLowerCase')
+    at MobileTransactions.tsx:58:17
+    at Array.filter (<anonymous>)
+    at MobileTransactions (MobileTransactions.tsx:56:31)
+    at renderWithHooks (react-dom_client.js?v=9c2f385a:11546:26)
+    at updateFunctionComponent (react-dom_client.js?v=9c2f385a:14580:28)
+    at beginWork (react-dom_client.js?v=9c2f385a:15922:22)
+    at HTMLUnknownElement.callCallback2 (react-dom_client.js?v=9c2f385a:3672:22)
+    at Object.invokeGuardedCallbackDev (react-dom_client.js?v=9c2f385a:3697:24)
+    at invokeGuardedCallback (react-dom_client.js?v=9c2f385a:3731:39)
+    at beginWork$1 (react-dom_client.js?v=9c2f385a:19763:15)Understand this error
+react-dom_client.js?v=9c2f385a:14030 The above error occurred in the <MobileTransactions> component:
+
+    at MobileTransactions (http://localhost:5000/src/components/pages/MobileTransactions.tsx:36:27)
+    at Route (http://localhost:5000/@fs/home/smdydx/Downloads/LCRAdmin/project/node_modules/.vite/deps/wouter.js?v=552a322f:278:16)
+    at Switch (http://localhost:5000/@fs/home/smdydx/Downloads/LCRAdmin/project/node_modules/.vite/deps/wouter.js?v=552a322f:334:17)
+    at div
+    at main
+    at div
+    at AppContent (http://localhost:5000/src/App.tsx:45:39)
+    at ThemeProvider (http://localhost:5000/src/contexts/ThemeContext.tsx:29:33)
+    at App
+    at QueryClientProvider (http://localhost:5000/@fs/home/smdydx/Downloads/LCRAdmin/project/node_modules/.vite/deps/@tanstack_react-query.js?v=94e8ba46:3081:3)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ react-dom_client.js?v=9c2f385a:14030Understand this error
+react-dom_client.js?v=9c2f385a:19411 Uncaught 
