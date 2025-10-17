@@ -14,6 +14,7 @@ router = APIRouter(tags=["users"])
 async def get_all_users(
     user_type: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
+    verification_status: Optional[str] = Query(None),
     limit: int = Query(100, le=500),
     db: Session = Depends(get_db)
 ):
@@ -33,6 +34,28 @@ async def get_all_users(
             elif status == 'Blocked':
                 query = query.filter(User.activation_status == False)
 
+        # Verification Status Filter
+        if verification_status and verification_status != 'All':
+            if verification_status == 'Verified':
+                # Both Aadhaar and PAN verified
+                query = query.filter(
+                    User.aadhar_verification_status == True,
+                    User.pan_verification_status == True
+                )
+            elif verification_status == 'Partial Verified':
+                # Only one verified (either Aadhaar OR PAN, but not both)
+                query = query.filter(
+                    (User.aadhar_verification_status == True) | (User.pan_verification_status == True)
+                ).filter(
+                    ~((User.aadhar_verification_status == True) & (User.pan_verification_status == True))
+                )
+            elif verification_status == 'Not Verified':
+                # Neither Aadhaar nor PAN verified
+                query = query.filter(
+                    User.aadhar_verification_status == False,
+                    User.pan_verification_status == False
+                )
+
         users = query.order_by(desc(User.CreatedAt)).limit(limit).all()
 
         result = []
@@ -41,6 +64,17 @@ async def get_all_users(
             txn_count = db.query(func.count(Payment_Gateway.id)).filter(
                 Payment_Gateway.payer_mobile == user.MobileNumber
             ).scalar() or 0
+
+            # Determine verification status
+            aadhaar_verified = user.aadhar_verification_status or False
+            pan_verified = user.pan_verification_status or False
+            
+            if aadhaar_verified and pan_verified:
+                verification_status = "Verified"
+            elif aadhaar_verified or pan_verified:
+                verification_status = "Partial Verified"
+            else:
+                verification_status = "Not Verified"
 
             result.append({
                 "id": str(user.UserID),
@@ -63,7 +97,10 @@ async def get_all_users(
                 "IsDeleted": user.IsDeleted,
                 "activation_status": user.activation_status,
                 "userType": "Prime User" if user.prime_status else "Normal User",
-                "totalTransactions": txn_count
+                "totalTransactions": txn_count,
+                "verification_status": verification_status,
+                "aadhar_verified": aadhaar_verified,
+                "pan_verified": pan_verified
             })
 
         return result

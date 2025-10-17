@@ -9,10 +9,12 @@ import Card from '../common/Card';
 
 const userTypeOptions = ['All', 'Prime User', 'Normal User'];
 const statusOptions = ['All', 'Active', 'Blocked'];
+const verificationOptions = ['All', 'Verified', 'Partial Verified', 'Not Verified'];
 
 export default function AllUsers() {
   const [userTypeFilter, setUserTypeFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [verificationFilter, setVerificationFilter] = useState('All');
   const [, setLocation] = useLocation();
   const [data, setData] = useState<any[]>([]);
   const [showUserModal, setShowUserModal] = useState(false);
@@ -29,6 +31,9 @@ export default function AllUsers() {
       }
       if (statusFilter !== 'All') {
         params.append('status', statusFilter);
+      }
+      if (verificationFilter !== 'All') {
+        params.append('verification_status', verificationFilter);
       }
       params.append('limit', '100');
 
@@ -49,7 +54,7 @@ export default function AllUsers() {
 
   useEffect(() => {
     generateRealtimeUsers();
-  }, [userTypeFilter, statusFilter]);
+  }, [userTypeFilter, statusFilter, verificationFilter]);
 
   const getStatusBadge = (status: string) => {
     const baseClasses = "px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 shadow-lg";
@@ -89,6 +94,35 @@ export default function AllUsers() {
         <span>Normal</span>
       </span>
     );
+  };
+
+  const getVerificationBadge = (status: string) => {
+    const baseClasses = "px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 shadow-lg";
+    switch (status) {
+      case 'Verified':
+        return (
+          <span className={`${baseClasses} bg-gradient-to-r from-green-500 to-emerald-600 text-white`}>
+            <Shield className="w-3 h-3" />
+            <span>Verified</span>
+          </span>
+        );
+      case 'Partial Verified':
+        return (
+          <span className={`${baseClasses} bg-gradient-to-r from-yellow-500 to-orange-600 text-white`}>
+            <Shield className="w-3 h-3" />
+            <span>Partial</span>
+          </span>
+        );
+      case 'Not Verified':
+        return (
+          <span className={`${baseClasses} bg-gradient-to-r from-red-500 to-pink-600 text-white`}>
+            <Ban className="w-3 h-3" />
+            <span>Not Verified</span>
+          </span>
+        );
+      default:
+        return <span className={`${baseClasses} bg-gray-500 text-white`}>{status}</span>;
+    }
   };
 
   const columns = [
@@ -167,6 +201,12 @@ export default function AllUsers() {
       )
     },
     {
+      key: 'verification_status',
+      title: 'KYC Verification',
+      sortable: true,
+      render: (value: string) => getVerificationBadge(value)
+    },
+    {
       key: 'DeviceVerified',
       title: 'Device',
       sortable: true,
@@ -243,7 +283,7 @@ export default function AllUsers() {
       </div>
 
       <Card className="hover-lift">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">User Type Filter</label>
             <select
@@ -266,6 +306,19 @@ export default function AllUsers() {
             >
               {statusOptions.map(status => (
                 <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Verification Filter</label>
+            <select
+              value={verificationFilter}
+              onChange={(e) => setVerificationFilter(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+            >
+              {verificationOptions.map(option => (
+                <option key={option} value={option}>{option}</option>
               ))}
             </select>
           </div>
