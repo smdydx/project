@@ -65,13 +65,13 @@ args = "npm run dev"
 name = "FastAPI Backend"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd backend && python main.py"
-waitForPort = 8000
-
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python backend/run.py"
+waitForPort = 8000
 
 [[ports]]
 localPort = 5000
