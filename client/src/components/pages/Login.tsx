@@ -37,24 +37,39 @@ export default function Login({ onLogin }: LoginProps) {
       return;
     }
 
-    // Simulate API call with security delay
-    setTimeout(() => {
-      // Secure credential check
-      const validUsername = 'admin';
-      const validPassword = 'admin123';
-      
-      if (username.trim() === validUsername && password === validPassword) {
+    try {
+      // Call JWT authentication API
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username.trim(),
+          password: password
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Store JWT token
+        localStorage.setItem('lcrpay_auth_token', data.access_token);
+        localStorage.setItem('lcrpay_username', data.username);
+        
         // Successful login
         onLogin(username, password);
       } else {
-        // Generic error message for security
-        setError('Invalid credentials. Please check your username and password.');
-        
-        // Clear password field for security
+        const errorData = await response.json();
+        setError(errorData.detail || 'Invalid credentials. Please check your username and password.');
         setPassword('');
       }
+    } catch (err) {
+      setError('Connection error. Please try again.');
+      console.error('Login error:', err);
+    } finally {
       setIsLoading(false);
-    }, 1200); // Increased delay to prevent brute force
+    }
   };
 
   return (

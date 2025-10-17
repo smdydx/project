@@ -23,12 +23,15 @@ import { BannersPage } from './pages/BannersPage';
 import { DevicesPage } from './pages/DevicesPage';
 import ModelBrowser from './pages/ModelBrowser';
 import UserTransactionDetail from './components/pages/UserTransactionDetail';
+import { authStorage } from './lib/api';
 
 function AppContent() {
   const [dateFilter, setDateFilter] = useState('today');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return authStorage.isAuthenticated();
+  });
 
   useEffect(() => {
     const authStatus = localStorage.getItem('isAuthenticated');
@@ -38,15 +41,23 @@ function AppContent() {
   }, []);
 
   const handleLogin = (username: string, password: string) => {
+    // In a real application, you would make an API call here to authenticate
+    // and receive a JWT token. For demonstration purposes, we'll simulate a successful login.
     if (username === 'admin' && password === 'admin123') {
+      const token = 'fake-jwt-token'; // Replace with actual token from API
+      authStorage.setToken(token);
+      localStorage.setItem('isAuthenticated', 'true'); // Keep this for initial render check if needed
       setIsAuthenticated(true);
-      localStorage.setItem('isAuthenticated', 'true');
+    } else {
+      alert('Invalid username or password');
     }
   };
 
   const handleLogout = () => {
+    authStorage.removeToken();
+    localStorage.removeItem('lcrpay_username');
+    localStorage.removeItem('isAuthenticated'); // Remove this if authStorage.isAuthenticated() is the sole source
     setIsAuthenticated(false);
-    localStorage.removeItem('isAuthenticated');
   };
 
   if (!isAuthenticated) {
@@ -103,6 +114,21 @@ function AppContent() {
 }
 
 function App() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+  }, [isDarkMode]);
+
   return (
     <ThemeProvider>
       <AppContent />

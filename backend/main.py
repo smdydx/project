@@ -41,9 +41,10 @@ os.makedirs(settings.UPLOAD_FOLDER, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_FOLDER), name="uploads")
 
 # Include API routes
-from api.v1 import dashboard, users, kyc, test, transactions, websocket
+from api.v1 import dashboard, users, kyc, test, transactions, websocket, auth
 from api.v1.auto_crud import create_auto_crud_routers, get_models_list
 
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["authentication"])
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
 app.include_router(kyc.router, prefix="/api/v1/kyc", tags=["kyc"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
