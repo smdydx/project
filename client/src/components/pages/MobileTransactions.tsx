@@ -1,63 +1,63 @@
 import { useState, useEffect } from 'react';
-import { Search, Smartphone, Filter, ChevronDown, Eye } from 'lucide-react';
-import { useLocation } from 'wouter';
+import { Search, Smartphone, Filter, ChevronDown, Download } from 'lucide-react';
 import Card from '@/components/common/Card';
 
-interface UserTransaction {
+interface ServiceRequestTransaction {
   id: number;
-  userId: number;
-  user: string;
-  mobile: string;
-  memberId: string;
-  transactionCount: number;
-  totalAmount: number;
-  lastTransaction: string;
-  primeStatus: boolean;
-  kycStatus: string;
+  user_id: number;
+  service_type: string;
+  operator_code: string | null;
+  mobile_number: string | null;
+  amount: string;
+  reference_id: string;
+  status: string;
+  payment_txn_id: string | null;
+  utr_no: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
-const fetchUserTransactions = async (): Promise<UserTransaction[]> => {
+const fetchServiceRequests = async (): Promise<ServiceRequestTransaction[]> => {
   try {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-    console.log('Fetching from API:', `${API_URL}/api/v1/transactions/mobile?limit=100`);
-    const response = await fetch(`${API_URL}/api/v1/transactions/mobile?limit=100`);
+    console.log('Fetching from API:', `${API_URL}/api/v1/service-requests?limit=100`);
+    const response = await fetch(`${API_URL}/api/v1/service-requests?limit=100`);
     
     if (!response.ok) {
       const errorText = await response.text();
       console.error('API Error Response:', errorText);
-      throw new Error(`Failed to fetch transactions: ${response.status}`);
+      throw new Error(`Failed to fetch service requests: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('Fetched user transactions:', data.length);
+    console.log('Fetched service requests:', data.length);
     return data;
   } catch (error) {
-    console.error('Error fetching mobile transactions:', error);
+    console.error('Error fetching service requests:', error);
     throw error;
   }
 };
 
 export default function MobileTransactions() {
-  const [, setLocation] = useLocation();
-  const [users, setUsers] = useState<UserTransaction[]>([]);
+  const [transactions, setTransactions] = useState<ServiceRequestTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterStatus, setFilterStatus] = useState<string>('non-pending');
 
   useEffect(() => {
     const loadTransactions = async () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await fetchUserTransactions();
+        const data = await fetchServiceRequests();
         if (data.length === 0) {
-          setError('No users found with transactions.');
+          setError('No service requests found.');
         } else {
-          setUsers(data);
+          setTransactions(data);
         }
       } catch (err: any) {
-        console.error('Failed to load transactions:', err);
+        console.error('Failed to load service requests:', err);
         setError(err.message || 'Failed to connect to backend. Please ensure the backend server is running on port 8000.');
       } finally {
         setLoading(false);
@@ -66,60 +66,90 @@ export default function MobileTransactions() {
     loadTransactions();
   }, []);
 
-  const filteredUsers = users.filter(user => {
-    if (!user) return false;
+  const filteredTransactions = transactions.filter(txn => {
+    if (!txn) return false;
     
     const matchesSearch = 
-      (user.user || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.mobile || '').includes(searchTerm) ||
-      (user.memberId || '').toLowerCase().includes(searchTerm.toLowerCase());
+      txn.reference_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (txn.mobile_number || '').includes(searchTerm) ||
+      (txn.payment_txn_id || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (txn.utr_no || '').toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesFilter = 
       filterStatus === 'all' || 
-      (filterStatus === 'prime' && user.primeStatus) ||
-      (filterStatus === 'normal' && !user.primeStatus);
+      (filterStatus === 'non-pending' && txn.status.toLowerCase() !== 'pending') ||
+      txn.status.toLowerCase() === filterStatus.toLowerCase();
 
     return matchesSearch && matchesFilter;
   });
 
-  const handleViewDetails = (userId: number) => {
-    setLocation(`/transactions/user/${userId}`);
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+      case 'paid': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+      case 'pending': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
+      case 'failed': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+      case 'processing': return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400';
+      default: return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3" data-testid="page-title">
             <Smartphone className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-            Mobile Transactions - Users
+            Mobile Transactions - Service Requests
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">View all users with transaction history</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">View all service request transactions</p>
         </div>
+        <button
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          data-testid="button-export"
+        >
+          <Download className="w-5 h-5" />
+          Export
+        </button>
       </div>
 
       <Card>
         {loading && (
           <div className="flex justify-center items-center py-12">
-            <p className="text-gray-500 dark:text-gray-400">Loading users...</p>
+            <p className="text-gray-500 dark:text-gray-400" data-testid="text-loading">Loading service requests...</p>
           </div>
         )}
         {error && !loading && (
           <div className="flex flex-col justify-center items-center py-12 space-y-4">
-            <p className="text-red-500 dark:text-red-400">{error}</p>
+            <p className="text-red-500 dark:text-red-400" data-testid="text-error">{error}</p>
             <button 
               onClick={async () => {
                 setLoading(true);
                 setError(null);
-                const data = await fetchUserTransactions();
-                if (data.length === 0) {
-                  setError('Failed to load users. Please try again.');
-                } else {
-                  setUsers(data);
+                try {
+                  const data = await fetchServiceRequests();
+                  if (data.length === 0) {
+                    setError('Failed to load service requests. Please try again.');
+                  } else {
+                    setTransactions(data);
+                  }
+                } catch {
+                  setError('Failed to load service requests. Please try again.');
                 }
                 setLoading(false);
               }}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              data-testid="button-retry"
             >
               Retry
             </button>
@@ -132,10 +162,11 @@ export default function MobileTransactions() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Search by name, mobile, or member ID..."
+                  placeholder="Search by reference ID, mobile, payment txn ID, or UTR..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  data-testid="input-search"
                 />
               </div>
               <div className="relative">
@@ -144,67 +175,78 @@ export default function MobileTransactions() {
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
                   className="pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white appearance-none cursor-pointer"
+                  data-testid="select-filter"
                 >
-                  <option value="all">All Users</option>
-                  <option value="prime">Prime Members</option>
-                  <option value="normal">Normal Users</option>
+                  <option value="non-pending">Non-Pending (Default)</option>
+                  <option value="all">All Status</option>
+                  <option value="completed">Completed</option>
+                  <option value="paid">Paid</option>
+                  <option value="processing">Processing</option>
+                  <option value="failed">Failed</option>
+                  <option value="pending">Pending</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
               </div>
+            </div>
+
+            <div className="mb-3 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300" data-testid="text-current-filter">
+                <strong>Current Filter:</strong> {filterStatus === 'non-pending' ? 'Non-Pending (Excluding Pending Status)' : filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)}
+                <span className="ml-2">|</span>
+                <span className="ml-2"><strong>Total Results:</strong> {filteredTransactions.length}</span>
+              </p>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">User</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Mobile</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Member ID</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Transactions</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Total Amount</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Last Transaction</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">ID</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">User ID</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Service Type</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Operator Code</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Mobile Number</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Amount</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Reference ID</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Payment Txn ID</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">UTR No</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Created At</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Updated At</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.map((user) => (
+                  {filteredTransactions.map((txn) => (
                     <tr 
-                      key={user.id} 
+                      key={txn.id} 
                       className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                      data-testid={`row-transaction-${txn.id}`}
                     >
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">{user.user}</span>
-                          {user.primeStatus && (
-                            <span className="px-2 py-0.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs rounded-full">
-                              Prime
-                            </span>
-                          )}
-                        </div>
+                      <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-gray-300" data-testid={`text-id-${txn.id}`}>{txn.id}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300" data-testid={`text-userid-${txn.id}`}>{txn.user_id}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900 dark:text-white" data-testid={`text-service-${txn.id}`}>{txn.service_type}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300" data-testid={`text-operator-${txn.id}`}>{txn.operator_code || '-'}</td>
+                      <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-gray-300" data-testid={`text-mobile-${txn.id}`}>{txn.mobile_number || '-'}</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white" data-testid={`text-amount-${txn.id}`}>₹{parseFloat(txn.amount).toLocaleString()}</td>
+                      <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-gray-300" data-testid={`text-reference-${txn.id}`}>{txn.reference_id}</td>
+                      <td className="px-4 py-3" data-testid={`text-status-${txn.id}`}>
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(txn.status)}`}>
+                          {txn.status}
+                        </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{user.mobile}</td>
-                      <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-gray-300">{user.memberId}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-blue-600 dark:text-blue-400">{user.transactionCount}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white">₹{user.totalAmount.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{user.lastTransaction}</td>
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => handleViewDetails(user.userId)}
-                          className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition-colors"
-                        >
-                          <Eye className="w-4 h-4" />
-                          View Details
-                        </button>
-                      </td>
+                      <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-gray-300" data-testid={`text-paymenttxn-${txn.id}`}>{txn.payment_txn_id || '-'}</td>
+                      <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-gray-300" data-testid={`text-utr-${txn.id}`}>{txn.utr_no || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300" data-testid={`text-created-${txn.id}`}>{formatDate(txn.created_at)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300" data-testid={`text-updated-${txn.id}`}>{formatDate(txn.updated_at)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
 
-            {filteredUsers.length === 0 && (
+            {filteredTransactions.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-gray-500 dark:text-gray-400">No users found</p>
+                <p className="text-gray-500 dark:text-gray-400" data-testid="text-no-results">No service requests found</p>
               </div>
             )}
           </div>
