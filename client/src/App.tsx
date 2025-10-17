@@ -66,6 +66,7 @@ function AppContent() {
         setDateFilter={setDateFilter}
         onMobileMenuToggle={() => setIsMobileSidebarOpen(true)}
         isCollapsed={isSidebarCollapsed}
+        onLogout={handleLogout}
       />
 
       <main className={`pt-24 px-3 sm:px-4 lg:px-6 pb-6 transition-all duration-300 ${

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Search, Bell, ChevronDown, User, Settings, LogOut, Sun, Moon, Menu } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 
@@ -7,9 +7,10 @@ interface HeaderProps {
   setDateFilter: (filter: string) => void;
   onMobileMenuToggle?: () => void;
   isCollapsed?: boolean;
+  onLogout?: () => void;
 }
 
-export default function Header({ dateFilter, setDateFilter, onMobileMenuToggle, isCollapsed = false }: HeaderProps) {
+export default function Header({ dateFilter, setDateFilter, onMobileMenuToggle, isCollapsed = false, onLogout }: HeaderProps) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const { isDark, toggleTheme } = useTheme();
@@ -133,7 +134,11 @@ export default function Header({ dateFilter, setDateFilter, onMobileMenuToggle, 
                     <span>Settings</span>
                   </button>
                   <hr className="my-2 border-gray-200 dark:border-gray-700" />
-                  <button className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center space-x-2">
+                  <button 
+                    onClick={onLogout}
+                    data-testid="button-logout"
+                    className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center space-x-2"
+                  >
                     <LogOut className="w-4 h-4" />
                     <span>Logout</span>
                   </button>

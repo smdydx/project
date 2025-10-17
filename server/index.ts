@@ -8,27 +8,23 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Proxy /api/v1 requests to FastAPI backend on port 8000
+// Note: Python backend proxy disabled - using Node.js backend only
+// Uncomment below if you need to proxy to FastAPI backend on port 8000
+/*
 app.use('/api/v1', createProxyMiddleware({
   target: 'http://localhost:8000',
   changeOrigin: true,
   pathRewrite: {
-    '^/': '/api/v1/'  // Add /api/v1 back since Express strips it
-  },
-  onProxyReq: (proxyReq, req, res) => {
-    console.log(`Proxying: ${req.method} ${req.originalUrl} -> http://localhost:8000/api/v1${req.url}`);
+    '^/': '/api/v1/'
   }
 }));
 
-// Proxy WebSocket connections to FastAPI backend
 app.use('/ws', createProxyMiddleware({
   target: 'http://localhost:8000',
   changeOrigin: true,
-  ws: true,
-  onProxyReq: (proxyReq, req, res) => {
-    console.log(`Proxying WebSocket: ${req.method} ${req.originalUrl} -> http://localhost:8000${req.url}`);
-  }
+  ws: true
 }));
+*/
 
 app.use((req, res, next) => {
   const start = Date.now();

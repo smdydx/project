@@ -4,12 +4,14 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 
 export async function setupVite(app: Express, server: any) {
+  // HMR disabled for Replit environment - users need to refresh manually to see changes
   const vite = await createViteServer({
     server: {
       middlewareMode: true,
-      hmr: { server },
+      hmr: false,
     },
     appType: "spa",
+    clearScreen: false,
   });
 
   app.use(vite.middlewares);
