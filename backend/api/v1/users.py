@@ -57,13 +57,23 @@ async def get_all_users(
                 )
 
         users = query.order_by(desc(User.CreatedAt)).limit(limit).all()
+        
+        # Get all transaction counts in a single query (optimized)
+        user_mobiles = [u.MobileNumber for u in users]
+        txn_counts_query = db.query(
+            Payment_Gateway.payer_mobile,
+            func.count(Payment_Gateway.id).label('count')
+        ).filter(
+            Payment_Gateway.payer_mobile.in_(user_mobiles)
+        ).group_by(Payment_Gateway.payer_mobile).all()
+        
+        # Create a dictionary for quick lookup
+        txn_counts = {mobile: count for mobile, count in txn_counts_query}
 
         result = []
         for user in users:
-            # Get transaction count for this user
-            txn_count = db.query(func.count(Payment_Gateway.id)).filter(
-                Payment_Gateway.payer_mobile == user.MobileNumber
-            ).scalar() or 0
+            # Get transaction count from dictionary (O(1) lookup)
+            txn_count = txn_counts.get(user.MobileNumber, 0)
 
             # Determine verification status
             aadhaar_verified = user.aadhar_verification_status or False
