@@ -56,8 +56,8 @@ async def get_kyc_verification(
                 "submittedTime": user.CreatedAt.strftime('%H:%M:%S') if user.CreatedAt else "",
                 "kycStatus": kyc_status,
                 "verifiedBy": "Admin" if user.IsKYCCompleted else "",
-                "aadhaarFront": kyc.aadhar_front if kyc and hasattr(kyc, 'aadhar_front') else None,
-                "aadhaarBack": kyc.aadhar_back if kyc and hasattr(kyc, 'aadhar_back') else None,
+                "aadhaarFront": kyc.aadhar_front_filename if kyc else None,
+                "aadhaarBack": kyc.aadhar_back_filename if kyc else None,
                 "panImage": pan_data.pan_front if pan_data else None,
                 "panNumber": pan_data.pan_no if pan_data else None,
                 "panName": pan_data.pan_name if pan_data else None
