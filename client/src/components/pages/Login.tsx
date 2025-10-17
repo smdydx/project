@@ -279,13 +279,6 @@ export default function Login({ onLogin }: LoginProps) {
             <p className="mt-1 text-xs">Your credentials are encrypted</p>
           </div>
         </div>
-
-        {/* Credentials Helper (Remove in production) */}
-        <div className="mt-4 p-4 bg-white/80 dark:bg-purple-900/30 backdrop-blur-sm rounded-lg text-center border border-white/20">
-          <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">
-            Demo Credentials: LCRadmin / admin123smdydx1216
-          </p>
-        </div>
       </div>
     </div>
   );
