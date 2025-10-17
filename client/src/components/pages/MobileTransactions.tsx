@@ -176,11 +176,9 @@ export default function MobileTransactions() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Transaction ID</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">User</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Mobile Number</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Operator</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Circle</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Amount</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Date & Time</th>
@@ -195,11 +193,9 @@ export default function MobileTransactions() {
                       className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                       data-testid={`row-transaction-${txn.id}`}
                     >
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white" data-testid={`text-txn-id-${txn.id}`}>{txn.transactionId}</td>
                       <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300" data-testid={`text-user-${txn.id}`}>{txn.user}</td>
                       <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300" data-testid={`text-mobile-${txn.id}`}>{txn.mobileNumber}</td>
                       <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300" data-testid={`text-operator-${txn.id}`}>{txn.operator}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300" data-testid={`text-circle-${txn.id}`}>{txn.circle}</td>
                       <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white" data-testid={`text-amount-${txn.id}`}>₹{txn.amount}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(txn.status)}`} data-testid={`status-${txn.id}`}>
@@ -267,9 +263,10 @@ export default function MobileTransactions() {
                       <table className="w-full text-sm">
                         <thead className="bg-gray-50 dark:bg-gray-700">
                           <tr>
-                            <th className="px-4 py-2 text-left">Ref ID</th>
+                            <th className="px-4 py-2 text-left">Reference ID</th>
                             <th className="px-4 py-2 text-left">Service</th>
                             <th className="px-4 py-2 text-left">Mobile</th>
+                            <th className="px-4 py-2 text-left">Operator</th>
                             <th className="px-4 py-2 text-left">Amount</th>
                             <th className="px-4 py-2 text-left">Status</th>
                             <th className="px-4 py-2 text-left">Date</th>
@@ -278,11 +275,22 @@ export default function MobileTransactions() {
                         <tbody>
                           {userDetails.service_requests?.map((sr: any) => (
                             <tr key={sr.id} className="border-b dark:border-gray-700">
-                              <td className="px-4 py-2 font-mono">{sr.reference_id}</td>
+                              <td className="px-4 py-2 font-mono text-xs">{sr.reference_id}</td>
                               <td className="px-4 py-2">{sr.service_type}</td>
                               <td className="px-4 py-2">{sr.mobile}</td>
-                              <td className="px-4 py-2">₹{sr.amount}</td>
-                              <td className="px-4 py-2">{sr.status}</td>
+                              <td className="px-4 py-2">{sr.operator}</td>
+                              <td className="px-4 py-2 font-semibold">₹{sr.amount}</td>
+                              <td className="px-4 py-2">
+                                <span className={`px-2 py-1 rounded-full text-xs ${
+                                  sr.status === 'Paid' || sr.status === 'Completed' 
+                                    ? 'bg-green-100 text-green-700' 
+                                    : sr.status === 'Failed' 
+                                    ? 'bg-red-100 text-red-700'
+                                    : 'bg-yellow-100 text-yellow-700'
+                                }`}>
+                                  {sr.status}
+                                </span>
+                              </td>
                               <td className="px-4 py-2">{sr.date} {sr.time}</td>
                             </tr>
                           ))}
@@ -293,28 +301,42 @@ export default function MobileTransactions() {
 
                   {/* LCR Bones */}
                   <div>
-                    <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">LCR Bones</h3>
+                    <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">LCR Bones (Debited/Credited)</h3>
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead className="bg-gray-50 dark:bg-gray-700">
                           <tr>
+                            <th className="px-4 py-2 text-left">Reference ID</th>
                             <th className="px-4 py-2 text-left">Amount</th>
                             <th className="px-4 py-2 text-left">Type</th>
                             <th className="px-4 py-2 text-left">From</th>
+                            <th className="px-4 py-2 text-left">Purpose</th>
                             <th className="px-4 py-2 text-left">Status</th>
                             <th className="px-4 py-2 text-left">Date</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {userDetails.lcr_bones?.map((lb: any) => (
+                          {userDetails.lcr_bones?.length > 0 ? userDetails.lcr_bones.map((lb: any) => (
                             <tr key={lb.id} className="border-b dark:border-gray-700">
-                              <td className="px-4 py-2">₹{lb.amount}</td>
+                              <td className="px-4 py-2 font-mono text-xs">{lb.reference_id}</td>
+                              <td className="px-4 py-2 font-semibold">₹{lb.amount}</td>
                               <td className="px-4 py-2">{lb.type}</td>
                               <td className="px-4 py-2">{lb.received_from}</td>
-                              <td className="px-4 py-2">{lb.status}</td>
+                              <td className="px-4 py-2">{lb.purpose}</td>
+                              <td className="px-4 py-2">
+                                <span className={`px-2 py-1 rounded-full text-xs ${
+                                  lb.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                                }`}>
+                                  {lb.status}
+                                </span>
+                              </td>
                               <td className="px-4 py-2">{lb.date} {lb.time}</td>
                             </tr>
-                          ))}
+                          )) : (
+                            <tr>
+                              <td colSpan={7} className="px-4 py-4 text-center text-gray-500">No LCR Bones transactions found</td>
+                            </tr>
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -322,28 +344,42 @@ export default function MobileTransactions() {
 
                   {/* LCR Rewards */}
                   <div>
-                    <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">LCR Rewards</h3>
+                    <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">LCR Rewards (Debited/Credited)</h3>
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead className="bg-gray-50 dark:bg-gray-700">
                           <tr>
+                            <th className="px-4 py-2 text-left">Reference ID</th>
                             <th className="px-4 py-2 text-left">Amount</th>
                             <th className="px-4 py-2 text-left">Type</th>
                             <th className="px-4 py-2 text-left">From</th>
+                            <th className="px-4 py-2 text-left">Purpose</th>
                             <th className="px-4 py-2 text-left">Status</th>
                             <th className="px-4 py-2 text-left">Date</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {userDetails.lcr_rewards?.map((lr: any) => (
+                          {userDetails.lcr_rewards?.length > 0 ? userDetails.lcr_rewards.map((lr: any) => (
                             <tr key={lr.id} className="border-b dark:border-gray-700">
-                              <td className="px-4 py-2">₹{lr.amount}</td>
+                              <td className="px-4 py-2 font-mono text-xs">{lr.reference_id}</td>
+                              <td className="px-4 py-2 font-semibold">₹{lr.amount}</td>
                               <td className="px-4 py-2">{lr.type}</td>
                               <td className="px-4 py-2">{lr.received_from}</td>
-                              <td className="px-4 py-2">{lr.status}</td>
+                              <td className="px-4 py-2">{lr.purpose}</td>
+                              <td className="px-4 py-2">
+                                <span className={`px-2 py-1 rounded-full text-xs ${
+                                  lr.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                                }`}>
+                                  {lr.status}
+                                </span>
+                              </td>
                               <td className="px-4 py-2">{lr.date} {lr.time}</td>
                             </tr>
-                          ))}
+                          )) : (
+                            <tr>
+                              <td colSpan={7} className="px-4 py-4 text-center text-gray-500">No LCR Rewards transactions found</td>
+                            </tr>
+                          )}
                         </tbody>
                       </table>
                     </div>
