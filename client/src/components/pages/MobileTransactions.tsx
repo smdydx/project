@@ -19,14 +19,21 @@ interface UserTransaction {
 const fetchUserTransactions = async (): Promise<UserTransaction[]> => {
   try {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    console.log('Fetching from API:', `${API_URL}/api/v1/transactions/mobile?limit=100`);
     const response = await fetch(`${API_URL}/api/v1/transactions/mobile?limit=100`);
-    if (!response.ok) throw new Error('Failed to fetch transactions');
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', errorText);
+      throw new Error(`Failed to fetch transactions: ${response.status}`);
+    }
 
     const data = await response.json();
+    console.log('Fetched user transactions:', data.length);
     return data;
   } catch (error) {
     console.error('Error fetching mobile transactions:', error);
-    return [];
+    throw error;
   }
 };
 
@@ -42,13 +49,19 @@ export default function MobileTransactions() {
     const loadTransactions = async () => {
       setLoading(true);
       setError(null);
-      const data = await fetchUserTransactions();
-      if (data.length === 0) {
-        setError('No users found with transactions.');
-      } else {
-        setUsers(data);
+      try {
+        const data = await fetchUserTransactions();
+        if (data.length === 0) {
+          setError('No users found with transactions.');
+        } else {
+          setUsers(data);
+        }
+      } catch (err: any) {
+        console.error('Failed to load transactions:', err);
+        setError(err.message || 'Failed to connect to backend. Please ensure the backend server is running on port 8000.');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     loadTransactions();
   }, []);
