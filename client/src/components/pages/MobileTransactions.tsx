@@ -77,9 +77,7 @@ export default function MobileTransactions() {
     const matchesFilter = 
       filterStatus === 'all' || 
       (filterStatus === 'prime' && user.primeStatus) ||
-      (filterStatus === 'normal' && !user.primeStatus) ||
-      (filterStatus === 'verified' && user.kycStatus === 'Verified') ||
-      (filterStatus === 'pending' && user.kycStatus === 'Pending');
+      (filterStatus === 'normal' && !user.primeStatus);
 
     return matchesSearch && matchesFilter;
   });
@@ -150,8 +148,6 @@ export default function MobileTransactions() {
                   <option value="all">All Users</option>
                   <option value="prime">Prime Members</option>
                   <option value="normal">Normal Users</option>
-                  <option value="verified">KYC Verified</option>
-                  <option value="pending">KYC Pending</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
               </div>
@@ -167,7 +163,6 @@ export default function MobileTransactions() {
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Transactions</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Total Amount</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Last Transaction</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
@@ -192,15 +187,6 @@ export default function MobileTransactions() {
                       <td className="px-4 py-3 text-sm font-semibold text-blue-600 dark:text-blue-400">{user.transactionCount}</td>
                       <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white">₹{user.totalAmount.toLocaleString()}</td>
                       <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{user.lastTransaction}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          user.kycStatus === 'Verified' 
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                            : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                        }`}>
-                          {user.kycStatus}
-                        </span>
-                      </td>
                       <td className="px-4 py-3">
                         <button
                           onClick={() => handleViewDetails(user.userId)}
