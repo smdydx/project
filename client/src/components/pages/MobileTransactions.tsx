@@ -68,9 +68,9 @@ export default function MobileTransactions() {
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = 
-      user.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.mobile.includes(searchTerm) ||
-      user.memberId.toLowerCase().includes(searchTerm.toLowerCase());
+      (user.user || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.mobile || '').includes(searchTerm) ||
+      (user.memberId || '').toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesFilter = 
       filterStatus === 'all' || 
