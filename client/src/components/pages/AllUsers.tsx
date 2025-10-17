@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { 
   Eye, Ban, CheckCircle, MessageSquare, Phone, Mail, UserCheck, 
-  Shield, Crown, Star, Filter, Download, Search
+  Shield, Crown, Star, Filter, Download, Search, X, FileText, CreditCard, MapPin
 } from 'lucide-react';
 import AdvancedRealtimeTable from '../common/AdvancedRealtimeTable';
 import Card from '../common/Card';
@@ -14,6 +14,9 @@ export default function AllUsers() {
   const [userTypeFilter, setUserTypeFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [, setLocation] = useLocation();
+  const [data, setData] = useState<any[]>([]);
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
   const generateRealtimeUsers = async () => {
     try {
@@ -30,8 +33,9 @@ export default function AllUsers() {
       const response = await fetch(`${API_URL}/api/v1/users/all?${params}`);
       if (!response.ok) throw new Error('Failed to fetch users');
 
-      const data = await response.json();
-      return data;
+      const fetchedData = await response.json();
+      setData(fetchedData);
+      return fetchedData;
     } catch (error) {
       console.error('Error fetching all users:', error);
       return [];
@@ -95,7 +99,10 @@ export default function AllUsers() {
         return (
           <div 
             className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-all"
-            onClick={() => setLocation(`/user/${row.id}`)}
+            onClick={() => {
+              setSelectedUserId(row.UserID);
+              setShowUserModal(true);
+            }}
           >
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-sm">
@@ -260,13 +267,190 @@ export default function AllUsers() {
       <AdvancedRealtimeTable
         title="Live Users List"
         columns={columns}
-        data={[]}
+        data={data}
         onDataUpdate={generateRealtimeUsers}
         updateInterval={10000}
         searchPlaceholder="Search by name, email, or mobile..."
         showStats={true}
         enableAnimations={true}
       />
+
+      {/* User Detail Modal */}
+      {showUserModal && selectedUserId && (
+        <UserDetailModal 
+          userId={selectedUserId} 
+          onClose={() => {
+            setShowUserModal(false);
+            setSelectedUserId(null);
+          }} 
+        />
+      )}
+    </div>
+  );
+}
+
+// User Detail Modal Component
+function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => void }) {
+  const [userDetail, setUserDetail] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserDetail = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        const response = await fetch(`${API_URL}/api/v1/users/detail/${userId}`);
+        if (!response.ok) throw new Error('Failed to fetch user details');
+        const data = await response.json();
+        setUserDetail(data);
+      } catch (error) {
+        console.error('Error fetching user detail:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUserDetail();
+  }, [userId]);
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!userDetail) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Modal Header */}
+        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between z-10">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{userDetail.fullname}</h2>
+            <p className="text-gray-600 dark:text-gray-400">Member ID: {userDetail.member_id}</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+            <X className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+          </button>
+        </div>
+
+        {/* Modal Content */}
+        <div className="p-6 space-y-6">
+          {/* Personal Info */}
+          <Card>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+              <UserCheck className="w-5 h-5 mr-2" />
+              Personal Information
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Mobile</label>
+                <p className="text-gray-900 dark:text-white font-medium mt-1 flex items-center">
+                  <Phone className="w-4 h-4 mr-2 text-blue-500" />
+                  {userDetail.MobileNumber}
+                </p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Email</label>
+                <p className="text-gray-900 dark:text-white font-medium mt-1 flex items-center">
+                  <Mail className="w-4 h-4 mr-2 text-blue-500" />
+                  {userDetail.Email || 'N/A'}
+                </p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Wallet Balance</label>
+                <p className="text-xl font-bold text-green-600 dark:text-green-400 mt-1">
+                  ₹{userDetail.INRWalletBalance?.toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          {/* Aadhaar Details with Image */}
+          {userDetail.aadhaar && (
+            <Card>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                <CreditCard className="w-5 h-5 mr-2" />
+                Aadhaar Details
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Aadhaar Number</label>
+                    <p className="text-gray-900 dark:text-white font-mono mt-1">{userDetail.aadhaar.aadharNumber}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Date of Birth</label>
+                    <p className="text-gray-900 dark:text-white font-medium mt-1">{userDetail.aadhaar.dateOfBirth}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Gender</label>
+                    <p className="text-gray-900 dark:text-white font-medium mt-1">{userDetail.aadhaar.gender}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Address</label>
+                    <p className="text-gray-900 dark:text-white font-medium mt-1 flex items-start">
+                      <MapPin className="w-4 h-4 mr-2 text-blue-500 mt-1 flex-shrink-0" />
+                      <span>{`${userDetail.aadhaar.address.house}, ${userDetail.aadhaar.address.street}, ${userDetail.aadhaar.address.locality}, ${userDetail.aadhaar.address.district}, ${userDetail.aadhaar.address.state} - ${userDetail.aadhaar.address.pin}`}</span>
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 block">Aadhaar Photo</label>
+                  <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                    <img 
+                      src={userDetail.aadhaar.photo} 
+                      alt="Aadhaar Photo" 
+                      className="w-full h-64 object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://via.placeholder.com/400x300?text=Image+Not+Available';
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* PAN Details */}
+          {userDetail.pan && (
+            <Card>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                <FileText className="w-5 h-5 mr-2" />
+                PAN Details
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">PAN Number</label>
+                    <p className="text-gray-900 dark:text-white font-mono mt-1">{userDetail.pan.pan_number}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">PAN Holder Name</label>
+                    <p className="text-gray-900 dark:text-white font-medium mt-1">{userDetail.pan.pan_holder_name}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Category</label>
+                    <p className="text-gray-900 dark:text-white font-medium mt-1">{userDetail.pan.category}</p>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 block">PAN Card</label>
+                  <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center h-64">
+                    <div className="text-center">
+                      <FileText className="w-16 h-16 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-500">PAN: {userDetail.pan.pan_number}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
