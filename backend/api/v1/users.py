@@ -168,7 +168,7 @@ async def get_user_detail(
 ):
     """Get complete user details with PAN and Aadhaar information"""
     try:
-        from models.models import User, Aadhar_User, User_Aadhar_Address, PanVerification
+        from models.models import User, Aadhar_User, User_Aadhar_Address, PanVerification, PanOfflineKYC, OfflineKYC
         from models.payment_gateway import Payment_Gateway
         
         # Get user with joins
@@ -191,6 +191,19 @@ async def get_user_detail(
         pan = db.query(PanVerification).filter(
             PanVerification.user_id == user_id
         ).first()
+        
+        # Get PAN image from offline KYC
+        pan_image = None
+        offline_kyc = db.query(OfflineKYC).filter(
+            OfflineKYC.user_id == user_id
+        ).first()
+        
+        if offline_kyc:
+            pan_offline = db.query(PanOfflineKYC).filter(
+                PanOfflineKYC.offline_kyc_id == offline_kyc.id
+            ).first()
+            if pan_offline:
+                pan_image = pan_offline.pan_front
         
         # Get transaction counts
         total_txns = db.query(func.count(Payment_Gateway.id)).filter(
@@ -261,7 +274,8 @@ async def get_user_detail(
                 "pan_holder_name": pan.pan_holder_name,
                 "status": pan.status,
                 "category": pan.category,
-                "date_of_issue": pan.date_of_issue.strftime('%Y-%m-%d') if pan.date_of_issue else None
+                "date_of_issue": pan.date_of_issue.strftime('%Y-%m-%d') if pan.date_of_issue else None,
+                "pan_image": pan_image  # Base64 image
             }
         
         return result

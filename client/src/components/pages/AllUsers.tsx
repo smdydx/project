@@ -527,13 +527,31 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 block">PAN Card</label>
-                  <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center h-64">
-                    <div className="text-center">
-                      <FileText className="w-16 h-16 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-500">PAN: {userDetail.pan.pan_number}</p>
+                  {userDetail.pan.pan_image ? (
+                    <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                      <img 
+                        src={
+                          userDetail.pan.pan_image.startsWith('data:image') 
+                            ? userDetail.pan.pan_image 
+                            : userDetail.pan.pan_image.startsWith('http')
+                            ? userDetail.pan.pan_image
+                            : `data:image/jpeg;base64,${userDetail.pan.pan_image}`
+                        }
+                        alt="PAN Card" 
+                        className="w-full h-64 object-contain"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://via.placeholder.com/400x300?text=Image+Not+Available';
+                        }}
+                      />
                     </div>
-                  </div>
-                </div>
+                  ) : (
+                    <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center h-64">
+                      <div className="text-center">
+                        <FileText className="w-16 h-16 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-500">PAN: {userDetail.pan.pan_number}</p>
+                      </div>
+                    </div>
+                  )}
               </div>
             </Card>
           )}
