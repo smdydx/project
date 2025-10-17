@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { 
   Eye, CheckCircle, XCircle, Shield, FileText, Upload, Download, AlertTriangle
@@ -12,6 +11,8 @@ export default function KYCVerification() {
   const [kycStatusFilter, setKycStatusFilter] = useState('All');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [imageLoading, setImageLoading] = useState<{[key: string]: boolean}>({});
+  const [imageError, setImageError] = useState<{[key: string]: boolean}>({});
 
   const generateKYCData = async () => {
     try {
@@ -20,10 +21,10 @@ export default function KYCVerification() {
       if (kycStatusFilter !== 'All') {
         params.append('status', kycStatusFilter.toLowerCase());
       }
-      
+
       const response = await fetch(`${API_URL}/api/v1/kyc/verification?${params}`);
       if (!response.ok) throw new Error('Failed to fetch KYC data');
-      
+
       const data = await response.json();
       return data;
     } catch (error) {
@@ -184,7 +185,7 @@ export default function KYCVerification() {
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">Verify and manage user KYC documents</p>
         </div>
-        
+
         <div className="flex items-center space-x-3">
           <button className="btn-success text-white px-4 py-2 rounded-xl font-medium flex items-center space-x-2">
             <Download className="w-4 h-4" />
@@ -292,11 +293,23 @@ export default function KYCVerification() {
                             src={selectedUser.aadhaarFront} 
                             alt="Aadhaar Front" 
                             className="w-full h-48 object-cover"
+                            onLoad={() => setImageLoading({...imageLoading, aadhaarFront: false})}
+                            onError={() => {setImageError({...imageError, aadhaarFront: true}); setImageLoading({...imageLoading, aadhaarFront: false});}}
                           />
                         ) : (
                           <div className="w-full h-48 bg-gray-100 dark:bg-gray-700 flex flex-col items-center justify-center">
                             <FileText className="w-12 h-12 text-gray-400" />
                             <p className="mt-2 text-sm text-gray-500">Front Side</p>
+                          </div>
+                        )}
+                        {imageLoading.aadhaarFront && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-600 rounded-lg">
+                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                          </div>
+                        )}
+                        {imageError.aadhaarFront && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-red-100 dark:bg-red-900 rounded-lg">
+                            <AlertTriangle className="w-8 h-8 text-red-500" />
                           </div>
                         )}
                       </div>
@@ -306,6 +319,8 @@ export default function KYCVerification() {
                             src={selectedUser.aadhaarBack} 
                             alt="Aadhaar Back" 
                             className="w-full h-48 object-cover"
+                            onLoad={() => setImageLoading({...imageLoading, aadhaarBack: false})}
+                            onError={() => {setImageError({...imageError, aadhaarBack: true}); setImageLoading({...imageLoading, aadhaarBack: false});}}
                           />
                         ) : (
                           <div className="w-full h-48 bg-gray-100 dark:bg-gray-700 flex flex-col items-center justify-center">
@@ -313,10 +328,20 @@ export default function KYCVerification() {
                             <p className="mt-2 text-sm text-gray-500">Back Side</p>
                           </div>
                         )}
+                         {imageLoading.aadhaarBack && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-600 rounded-lg">
+                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                          </div>
+                        )}
+                        {imageError.aadhaarBack && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-red-100 dark:bg-red-900 rounded-lg">
+                            <AlertTriangle className="w-8 h-8 text-red-500" />
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* PAN Card Image */}
                   <div>
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">PAN Card</p>
@@ -326,6 +351,8 @@ export default function KYCVerification() {
                           src={selectedUser.panImage} 
                           alt="PAN Card" 
                           className="w-full h-48 object-cover"
+                          onLoad={() => setImageLoading({...imageLoading, panImage: false})}
+                          onError={() => {setImageError({...imageError, panImage: true}); setImageLoading({...imageLoading, panImage: false});}}
                         />
                       ) : (
                         <div className="w-full h-48 bg-gray-100 dark:bg-gray-700 flex flex-col items-center justify-center">
@@ -333,6 +360,16 @@ export default function KYCVerification() {
                           <p className="mt-2 text-sm text-gray-500">PAN Card</p>
                         </div>
                       )}
+                       {imageLoading.panImage && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-600 rounded-lg">
+                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                          </div>
+                        )}
+                        {imageError.panImage && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-red-100 dark:bg-red-900 rounded-lg">
+                            <AlertTriangle className="w-8 h-8 text-red-500" />
+                          </div>
+                        )}
                     </div>
                   </div>
                 </div>

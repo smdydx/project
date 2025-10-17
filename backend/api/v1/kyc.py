@@ -49,33 +49,33 @@ async def get_kyc_verification(
 
             # Build full image URLs with proper base URL
             base_url = str(request.base_url).rstrip('/')
-            
+
             # Check if files exist and build URLs accordingly
             import os
             aadhaar_front_url = None
             aadhaar_back_url = None
             pan_image_url = None
-            
+
             if kyc and kyc.aadhar_front_filename:
                 file_path = os.path.join(settings.UPLOAD_FOLDER, kyc.aadhar_front_filename)
                 if os.path.exists(file_path):
                     aadhaar_front_url = f"{base_url}{settings.STATIC_URL_PATH}/{kyc.aadhar_front_filename}"
-                    
+
             if kyc and kyc.aadhar_back_filename:
                 file_path = os.path.join(settings.UPLOAD_FOLDER, kyc.aadhar_back_filename)
                 if os.path.exists(file_path):
                     aadhaar_back_url = f"{base_url}{settings.STATIC_URL_PATH}/{kyc.aadhar_back_filename}"
-                    
+
             if pan_data and pan_data.pan_front:
                 file_path = os.path.join(settings.UPLOAD_FOLDER, pan_data.pan_front)
                 if os.path.exists(file_path):
                     pan_image_url = f"{base_url}{settings.STATIC_URL_PATH}/{pan_data.pan_front}"
-            
+
             # Debug logging
             print(f"🖼️ User {user.UserID} - Aadhaar Front: {aadhaar_front_url or 'Not found'}")
             print(f"🖼️ User {user.UserID} - Aadhaar Back: {aadhaar_back_url or 'Not found'}")
             print(f"🖼️ User {user.UserID} - PAN: {pan_image_url or 'Not found'}")
-            
+
             kyc_data.append({
                 "id": f"KYC{user.UserID:06d}",
                 "name": user.fullname or f"User {user.UserID}",
@@ -88,9 +88,9 @@ async def get_kyc_verification(
                 "submittedTime": user.CreatedAt.strftime('%H:%M:%S') if user.CreatedAt else "",
                 "kycStatus": kyc_status,
                 "verifiedBy": "Admin" if user.IsKYCCompleted else "",
-                "aadhaarFront": aadhaar_front_url,
-                "aadhaarBack": aadhaar_back_url,
-                "panImage": pan_image_url,
+                "aadhaarFront": f"/backend/uploads/{kyc.aadhar_front_filename}" if kyc and kyc.aadhar_front_filename else None,
+                "aadhaarBack": f"/backend/uploads/{kyc.aadhar_back_filename}" if kyc and kyc.aadhar_back_filename else None,
+                "panImage": f"/backend/uploads/{pan_data.pan_front}" if pan_data and pan_data.pan_front else None,
                 "panNumber": pan_data.pan_no if pan_data else None,
                 "panName": pan_data.pan_name if pan_data else None
             })

@@ -44,26 +44,31 @@ export default function Dashboard() {
   const { data: wsTransaction } = useWebSocket("transactions");
   const { data: wsUser } = useWebSocket("user-registrations");
 
-  // Initial data fetch
+  // Initial data fetch - Optimized with sequential loading
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [statsData, transactionsData, usersData, chartsData] =
-          await Promise.all([
-            apiService.getDashboardStats(),
-            apiService.getLiveTransactions(),
-            apiService.getRecentUsers(),
-            apiService.getChartData(),
-          ]);
-
+        
+        // Load critical data first
+        const statsData = await apiService.getDashboardStats();
         setStats(statsData);
-        setTransactions(transactionsData);
-        setUsers(usersData);
-        setCharts(chartsData);
+        setLoading(false);
+        
+        // Then load non-critical data in background
+        Promise.all([
+          apiService.getLiveTransactions(),
+          apiService.getRecentUsers(),
+          apiService.getChartData(),
+        ]).then(([transactionsData, usersData, chartsData]) => {
+          setTransactions(transactionsData);
+          setUsers(usersData);
+          setCharts(chartsData);
+        }).catch(error => {
+          console.error("Error fetching secondary data:", error);
+        });
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
-      } finally {
         setLoading(false);
       }
     };
