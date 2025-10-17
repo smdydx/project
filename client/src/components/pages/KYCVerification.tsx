@@ -254,13 +254,21 @@ export default function KYCVerification() {
                   <p className="mt-1 font-mono text-gray-900 dark:text-white">{selectedUser.userId}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Document Type</label>
-                  <p className="mt-1 text-gray-900 dark:text-white">{selectedUser.documentType}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Document Number</label>
+                  <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Aadhaar Number</label>
                   <p className="mt-1 font-mono text-gray-900 dark:text-white">{selectedUser.documentNumber}</p>
                 </div>
+                {selectedUser.panNumber && (
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 dark:text-gray-300">PAN Number</label>
+                    <p className="mt-1 font-mono text-gray-900 dark:text-white">{selectedUser.panNumber}</p>
+                  </div>
+                )}
+                {selectedUser.panName && (
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 dark:text-gray-300">PAN Name</label>
+                    <p className="mt-1 text-gray-900 dark:text-white">{selectedUser.panName}</p>
+                  </div>
+                )}
                 <div>
                   <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Status</label>
                   <div className="mt-1">{getKYCStatusBadge(selectedUser.kycStatus)}</div>
@@ -273,14 +281,59 @@ export default function KYCVerification() {
 
               <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                 <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Document Images</label>
-                <div className="mt-2 grid grid-cols-2 gap-4">
-                  <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
-                    <FileText className="w-12 h-12 mx-auto text-gray-400" />
-                    <p className="mt-2 text-sm text-gray-500">Front Side</p>
+                <div className="mt-4 space-y-4">
+                  {/* Aadhaar Card Images */}
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Aadhaar Card</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                        {selectedUser.aadhaarFront ? (
+                          <img 
+                            src={selectedUser.aadhaarFront} 
+                            alt="Aadhaar Front" 
+                            className="w-full h-48 object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-48 bg-gray-100 dark:bg-gray-700 flex flex-col items-center justify-center">
+                            <FileText className="w-12 h-12 text-gray-400" />
+                            <p className="mt-2 text-sm text-gray-500">Front Side</p>
+                          </div>
+                        )}
+                      </div>
+                      <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                        {selectedUser.aadhaarBack ? (
+                          <img 
+                            src={selectedUser.aadhaarBack} 
+                            alt="Aadhaar Back" 
+                            className="w-full h-48 object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-48 bg-gray-100 dark:bg-gray-700 flex flex-col items-center justify-center">
+                            <FileText className="w-12 h-12 text-gray-400" />
+                            <p className="mt-2 text-sm text-gray-500">Back Side</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
-                    <FileText className="w-12 h-12 mx-auto text-gray-400" />
-                    <p className="mt-2 text-sm text-gray-500">Back Side</p>
+                  
+                  {/* PAN Card Image */}
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">PAN Card</p>
+                    <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                      {selectedUser.panImage ? (
+                        <img 
+                          src={selectedUser.panImage} 
+                          alt="PAN Card" 
+                          className="w-full h-48 object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-48 bg-gray-100 dark:bg-gray-700 flex flex-col items-center justify-center">
+                          <FileText className="w-12 h-12 text-gray-400" />
+                          <p className="mt-2 text-sm text-gray-500">PAN Card</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

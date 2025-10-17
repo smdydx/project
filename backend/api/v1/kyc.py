@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from typing import Optional
 
 from core.database import get_db
-from models.models import User, OfflineKYC
+from models.models import User, OfflineKYC, PanOfflineKYC
 
 router = APIRouter(tags=["kyc"])
 
@@ -37,6 +37,13 @@ async def get_kyc_verification(
             if kyc and kyc.status == 'rejected':
                 kyc_status = 'Rejected'
 
+            # Fetch PAN card data if exists
+            pan_data = None
+            if kyc:
+                pan_data = db.query(PanOfflineKYC).filter(
+                    PanOfflineKYC.offline_kyc_id == kyc.id
+                ).first()
+
             kyc_data.append({
                 "id": f"KYC{user.UserID:06d}",
                 "name": user.fullname or f"User {user.UserID}",
@@ -48,7 +55,12 @@ async def get_kyc_verification(
                 "submittedOn": kyc.dob.strftime('%Y-%m-%d') if kyc and kyc.dob else user.CreatedAt.strftime('%Y-%m-%d') if user.CreatedAt else "",
                 "submittedTime": user.CreatedAt.strftime('%H:%M:%S') if user.CreatedAt else "",
                 "kycStatus": kyc_status,
-                "verifiedBy": "Admin" if user.IsKYCCompleted else ""
+                "verifiedBy": "Admin" if user.IsKYCCompleted else "",
+                "aadhaarFront": kyc.aadhar_front if kyc and hasattr(kyc, 'aadhar_front') else None,
+                "aadhaarBack": kyc.aadhar_back if kyc and hasattr(kyc, 'aadhar_back') else None,
+                "panImage": pan_data.pan_front if pan_data else None,
+                "panNumber": pan_data.pan_no if pan_data else None,
+                "panName": pan_data.pan_name if pan_data else None
             })
 
         return kyc_data
