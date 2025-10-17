@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { 
@@ -26,10 +25,10 @@ export default function AllUsers() {
         params.append('status', statusFilter);
       }
       params.append('limit', '100');
-      
+
       const response = await fetch(`${API_URL}/api/v1/users/all?${params}`);
       if (!response.ok) throw new Error('Failed to fetch users');
-      
+
       const data = await response.json();
       return data;
     } catch (error) {
@@ -80,7 +79,7 @@ export default function AllUsers() {
 
   const columns = [
     { 
-      key: 'id', 
+      key: 'UserID', 
       title: 'User ID', 
       sortable: true,
       render: (value: string) => (
@@ -88,8 +87,8 @@ export default function AllUsers() {
       )
     },
     { 
-      key: 'name', 
-      title: 'Name', 
+      key: 'fullname', 
+      title: 'Full Name', 
       sortable: true,
       render: (value: string, row: any) => {
         const [, setLocation] = useLocation();
@@ -105,47 +104,79 @@ export default function AllUsers() {
             </div>
             <div>
               <p className="font-medium text-blue-600 dark:text-blue-400 hover:underline">{value}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{row.email}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{row.Email}</p>
             </div>
           </div>
         );
       }
     },
     { 
-      key: 'mobile', 
+      key: 'MobileNumber', 
       title: 'Mobile', 
       sortable: true,
       render: (value: string) => (
         <span className="font-mono text-sm">{value}</span>
       )
     },
-    {
-      key: 'userType',
-      title: 'User Type',
+    { 
+      key: 'member_id', 
+      title: 'Member ID', 
       sortable: true,
-      render: (value: string) => getUserTypeBadge(value)
+      render: (value: string) => (
+        <span className="font-mono text-xs text-gray-600 dark:text-gray-400">{value || 'N/A'}</span>
+      )
+    },
+    { 
+      key: 'introducer_id', 
+      title: 'Referrer', 
+      sortable: true,
+      render: (value: string) => (
+        <span className="text-xs text-gray-600 dark:text-gray-400">{value || 'Direct'}</span>
+      )
     },
     {
-      key: 'balance',
-      title: 'Balance',
+      key: 'INRWalletBalance',
+      title: 'INR Balance',
       sortable: true,
       render: (value: number) => (
         <span className="font-bold text-green-600 dark:text-green-400">₹{value.toLocaleString()}</span>
       )
     },
     {
-      key: 'totalTransactions',
-      title: 'Transactions',
+      key: 'RewardWalletBalance',
+      title: 'Reward Balance',
       sortable: true,
       render: (value: number) => (
-        <span className="text-sm text-gray-700 dark:text-gray-300">{value}</span>
+        <span className="font-bold text-purple-600 dark:text-purple-400">₹{value.toLocaleString()}</span>
       )
     },
     {
-      key: 'status',
+      key: 'DeviceVerified',
+      title: 'Device',
+      sortable: true,
+      render: (value: boolean) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-bold ${value ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}`}>
+          {value ? 'Verified' : 'Not Verified'}
+        </span>
+      )
+    },
+    {
+      key: 'CreatedAt',
+      title: 'Joined Date',
+      sortable: true,
+      render: (value: string) => (
+        <span className="text-sm text-gray-700 dark:text-gray-300">{value ? new Date(value).toLocaleDateString() : 'N/A'}</span>
+      )
+    },
+    {
+      key: 'activation_status',
       title: 'Status',
       sortable: true,
-      render: (value: string) => getStatusBadge(value)
+      render: (value: boolean) => (
+        <span className={`px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 shadow-lg ${value ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' : 'bg-gradient-to-r from-red-500 to-pink-600 text-white'}`}>
+          {value ? <><CheckCircle className="w-3 h-3" /><span>Active</span></> : <><Ban className="w-3 h-3" /><span>Blocked</span></>}
+        </span>
+      )
     },
     {
       key: 'actions',
@@ -175,7 +206,7 @@ export default function AllUsers() {
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">View and manage all registered users</p>
         </div>
-        
+
         <div className="flex items-center space-x-3">
           <button className="btn-success text-white px-4 py-2 rounded-xl font-medium flex items-center space-x-2">
             <Download className="w-4 h-4" />
@@ -198,7 +229,7 @@ export default function AllUsers() {
               ))}
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Status Filter</label>
             <select

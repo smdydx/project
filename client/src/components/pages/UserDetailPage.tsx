@@ -343,6 +343,47 @@ export default function UserDetailPage() {
         </Card>
       )}
 
+      {/* Document Images */}
+      {(userDetail.aadhaar?.photo || userDetail.pan) && (
+        <Card>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+            <CreditCard className="w-5 h-5 mr-2" />
+            Document Images
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Aadhaar Photo */}
+            {userDetail.aadhaar?.photo && (
+              <div>
+                <label className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 block">Aadhaar Photo</label>
+                <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                  <img 
+                    src={userDetail.aadhaar.photo} 
+                    alt="Aadhaar Photo" 
+                    className="w-full h-64 object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://via.placeholder.com/400x300?text=Image+Not+Available';
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+            
+            {/* PAN Image - This will be added when available from backend */}
+            {userDetail.pan && (
+              <div>
+                <label className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 block">PAN Card</label>
+                <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center h-64">
+                  <div className="text-center">
+                    <FileText className="w-16 h-16 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">PAN Number: {userDetail.pan.pan_number}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
+
       {/* Wallet & Transactions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>

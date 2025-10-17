@@ -17,10 +17,19 @@ async def get_kyc_verification(
     limit: int = Query(100, le=500),
     db: Session = Depends(get_db)
 ):
-    """Get KYC verification data"""
+    """Get KYC verification data with PAN and Aadhaar joins"""
     try:
-        query = db.query(User, OfflineKYC).outerjoin(
+        from models.models import Aadhar_User, User_Aadhar_Address
+        
+        # Join User with OfflineKYC, PanOfflineKYC, Aadhar_User, and User_Aadhar_Address
+        query = db.query(User, OfflineKYC, PanOfflineKYC, Aadhar_User, User_Aadhar_Address).outerjoin(
             OfflineKYC, User.UserID == OfflineKYC.user_id
+        ).outerjoin(
+            PanOfflineKYC, OfflineKYC.id == PanOfflineKYC.offline_kyc_id
+        ).outerjoin(
+            Aadhar_User, User.UserID == Aadhar_User.user_id
+        ).outerjoin(
+            User_Aadhar_Address, Aadhar_User.address_id == User_Aadhar_Address.id
         ).filter(User.IsDeleted == False)
 
         if status and status.lower() != 'all':
@@ -34,7 +43,7 @@ async def get_kyc_verification(
         results = query.order_by(desc(User.CreatedAt)).limit(limit).all()
 
         kyc_data = []
-        for user, kyc in results:
+        for user, kyc, pan_data, aadhaar, address in results:
             # Determine KYC status
             kyc_status = 'Verified' if user.IsKYCCompleted else 'Pending'
             if kyc and kyc.status == 'rejected':
@@ -76,14 +85,14 @@ async def get_kyc_verification(
             print(f"🖼️ User {user.UserID} - Aadhaar Back: {aadhaar_back_url or 'Not found'}")
             print(f"🖼️ User {user.UserID} - PAN: {pan_image_url or 'Not found'}")
 
-            kyc_data.append({
+            kyc_record = {
                 "id": f"KYC{user.UserID:06d}",
                 "name": user.fullname or f"User {user.UserID}",
                 "userId": str(user.UserID),
                 "mobile": user.MobileNumber,
                 "email": user.Email or "N/A",
                 "documentType": "Aadhaar" if kyc else "N/A",
-                "documentNumber": kyc.aadhar_no if kyc else "N/A",
+                "documentNumber": kyc.aadhar_no if kyc else (aadhaar.aadharNumber if aadhaar else "N/A"),
                 "submittedOn": kyc.dob.strftime('%Y-%m-%d') if kyc and kyc.dob else user.CreatedAt.strftime('%Y-%m-%d') if user.CreatedAt else "",
                 "submittedTime": user.CreatedAt.strftime('%H:%M:%S') if user.CreatedAt else "",
                 "kycStatus": kyc_status,
@@ -93,7 +102,34 @@ async def get_kyc_verification(
                 "panImage": f"/backend/uploads/{pan_data.pan_front}" if pan_data and pan_data.pan_front else None,
                 "panNumber": pan_data.pan_no if pan_data else None,
                 "panName": pan_data.pan_name if pan_data else None
-            })
+            }
+            
+            # Add Aadhaar details from Aadhar_User table if available
+            if aadhaar:
+                kyc_record["aadhaarDetails"] = {
+                    "name": aadhaar.name,
+                    "aadharNumber": aadhaar.aadharNumber,
+                    "maskedNumber": aadhaar.maskedNumber,
+                    "dateOfBirth": aadhaar.dateOfBirth.strftime('%Y-%m-%d') if aadhaar.dateOfBirth else None,
+                    "gender": aadhaar.gender,
+                    "phone": aadhaar.phone,
+                    "email": aadhaar.email,
+                    "photo": aadhaar.photo
+                }
+                
+                # Add address if available
+                if address:
+                    kyc_record["aadhaarDetails"]["address"] = {
+                        "house": address.house,
+                        "street": address.street,
+                        "locality": address.locality,
+                        "district": address.district,
+                        "state": address.state,
+                        "pin": address.pin,
+                        "country": address.country or "India"
+                    }
+            
+            kyc_data.append(kyc_record)
 
         return kyc_data
     except Exception as e:
