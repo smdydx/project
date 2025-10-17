@@ -9,11 +9,9 @@ import Card from '../common/Card';
 
 const userTypeOptionsForKyc = ['All', 'Verified', 'Partial Verified', 'Not Verified'];
 const userTypeOptionsForUsers = ['All', 'Prime Member', 'Normal User'];
-const statusOptions = ['All', 'Active', 'Blocked', 'With Balance', 'New Users (7 Days)'];
 
 export default function AllUsers() {
   const [userTypeFilter, setUserTypeFilter] = useState('All');
-  const [statusFilter, setStatusFilter] = useState('All');
   const [verificationFilter, setVerificationFilter] = useState('All');
   const [, setLocation] = useLocation();
   const [data, setData] = useState<any[]>([]);
@@ -36,9 +34,6 @@ export default function AllUsers() {
         }
       }
       
-      if (statusFilter !== 'All') {
-        params.append('status', statusFilter);
-      }
       if (verificationFilter !== 'All') {
         params.append('verification_status', verificationFilter);
       }
@@ -61,7 +56,7 @@ export default function AllUsers() {
 
   useEffect(() => {
     generateRealtimeUsers();
-  }, [userTypeFilter, statusFilter, verificationFilter]);
+  }, [userTypeFilter, verificationFilter]);
 
   const getStatusBadge = (status: string) => {
     const baseClasses = "px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 shadow-lg";
@@ -192,6 +187,12 @@ export default function AllUsers() {
       )
     },
     {
+      key: 'userType',
+      title: 'User Type',
+      sortable: true,
+      render: (value: string) => getUserTypeBadge(value)
+    },
+    {
       key: 'INRWalletBalance',
       title: 'INR Balance',
       sortable: true,
@@ -245,16 +246,6 @@ export default function AllUsers() {
       sortable: true,
       render: (value: string) => (
         <span className="text-sm text-gray-700 dark:text-gray-300">{value ? new Date(value).toLocaleDateString() : 'N/A'}</span>
-      )
-    },
-    {
-      key: 'activation_status',
-      title: 'Status',
-      sortable: true,
-      render: (value: boolean) => (
-        <span className={`px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 shadow-lg ${value ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' : 'bg-gradient-to-r from-red-500 to-pink-600 text-white'}`}>
-          {value ? <><CheckCircle className="w-3 h-3" /><span>Active</span></> : <><Ban className="w-3 h-3" /><span>Blocked</span></>}
-        </span>
       )
     },
     {
@@ -322,20 +313,6 @@ export default function AllUsers() {
             >
               {userTypeOptionsForUsers.map(type => (
                 <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Status Filter</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-              data-testid="filter-status"
-            >
-              {statusOptions.map(status => (
-                <option key={status} value={status}>{status}</option>
               ))}
             </select>
           </div>
