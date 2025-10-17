@@ -6,17 +6,15 @@ from decimal import Decimal
 from typing import Optional, List
 import pytz
 
-from sqlalchemy import (
-    Column, Integer, String, Boolean, DateTime, DECIMAL, ForeignKey, Float, Text, UniqueConstraint, Index
-)
+from sqlalchemy import (Column, Integer, String, Boolean, DateTime, DECIMAL,
+                        ForeignKey, Float, Text, UniqueConstraint, Index)
 from sqlalchemy.orm import relationship
 
-from core.base import Base,get_ist_time
+from core.base import Base, get_ist_time
 from sqlalchemy import select, func
 from decimal import Decimal
 # Timezone setup
 IST = pytz.timezone("Asia/Kolkata")
-
 
 
 # ============================= USERS =============================
@@ -54,12 +52,22 @@ class User(Base):
     upi_accounts = relationship("UserUPI", back_populates="user")
     transactions = relationship("Transactions", back_populates="user")
     memberships = relationship("Memberships", back_populates="user")
-    payment_settings = relationship("PaymentSettings", back_populates="user", uselist=False)
-    aadhar_user = relationship("Aadhar_User", back_populates="user", uselist=False)
-    pan_verification = relationship("PanVerification", back_populates="user", uselist=False)
+    payment_settings = relationship("PaymentSettings",
+                                    back_populates="user",
+                                    uselist=False)
+    aadhar_user = relationship("Aadhar_User",
+                               back_populates="user",
+                               uselist=False)
+    pan_verification = relationship("PanVerification",
+                                    back_populates="user",
+                                    uselist=False)
     wallet_transactions = relationship("Wallet", back_populates="user")
-    offlineKYC = relationship("OfflineKYC", back_populates="user", uselist=False)
-    fingerprint = relationship("FingerPrint", back_populates="user", uselist=False)
+    offlineKYC = relationship("OfflineKYC",
+                              back_populates="user",
+                              uselist=False)
+    fingerprint = relationship("FingerPrint",
+                               back_populates="user",
+                               uselist=False)
 
     introducer = relationship(
         "User",
@@ -116,8 +124,7 @@ class User(Base):
         back_populates="receiver",
         foreign_keys="P2PTransaction.transaction_to",
     )
-    
-    
+
     async def get_wallet_balance(self, session) -> Decimal:
         stmt = select(func.sum(Wallet.transaction_amount)) \
             .where(Wallet.transaction_by == self.UserID,
@@ -143,8 +150,7 @@ class IncomeDistribution(Base):
     reward = Column(DECIMAL(10, 5))
     package_amount = Column(DECIMAL(10, 5))
     set_date = Column(DateTime(timezone=True), default=get_ist_time)
-    
-    
+
     async def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
@@ -153,38 +159,57 @@ class DirectIncome(Base):
     __tablename__ = "direct_income"
 
     id = Column(Integer, primary_key=True)
-    receiver_member = Column(String(255), ForeignKey("users.member_id"), nullable=False)
-    prime_activated_by_member = Column(String(255), ForeignKey("users.member_id"), nullable=False)
+    receiver_member = Column(String(255),
+                             ForeignKey("users.member_id"),
+                             nullable=False)
+    prime_activated_by_member = Column(String(255),
+                                       ForeignKey("users.member_id"),
+                                       nullable=False)
     amount = Column(DECIMAL(10, 5))
     package_amount = Column(DECIMAL(10, 5))
     reference_id = Column(String(255))
     received_date = Column(DateTime(timezone=True), default=get_ist_time)
 
-    receiver = relationship("User", back_populates="direct_incomes_received", foreign_keys=[receiver_member])
-    prime_activator = relationship("User", back_populates="direct_incomes_activated", foreign_keys=[prime_activated_by_member])
+    receiver = relationship("User",
+                            back_populates="direct_incomes_received",
+                            foreign_keys=[receiver_member])
+    prime_activator = relationship("User",
+                                   back_populates="direct_incomes_activated",
+                                   foreign_keys=[prime_activated_by_member])
 
 
 class LevelIncome(Base):
     __tablename__ = "level_income"
 
     id = Column(Integer, primary_key=True)
-    receiver_member = Column(String(255), ForeignKey("users.member_id"), nullable=False)
-    prime_activated_by_member = Column(String(255), ForeignKey("users.member_id"), nullable=False)
+    receiver_member = Column(String(255),
+                             ForeignKey("users.member_id"),
+                             nullable=False)
+    prime_activated_by_member = Column(String(255),
+                                       ForeignKey("users.member_id"),
+                                       nullable=False)
     level = Column(Integer)
     amount = Column(DECIMAL(10, 5))
     package_amount = Column(DECIMAL(10, 5))
     reference_id = Column(String(255))
     received_date = Column(DateTime(timezone=True), default=get_ist_time)
 
-    level_receiver = relationship("User", back_populates="level_incomes_received", foreign_keys=[receiver_member])
-    level_prime_activator = relationship("User", back_populates="level_incomes_activated", foreign_keys=[prime_activated_by_member])
+    level_receiver = relationship("User",
+                                  back_populates="level_incomes_received",
+                                  foreign_keys=[receiver_member])
+    level_prime_activator = relationship(
+        "User",
+        back_populates="level_incomes_activated",
+        foreign_keys=[prime_activated_by_member])
 
 
 class MagicIncome(Base):
     __tablename__ = "magic_income"
 
     id = Column(Integer, primary_key=True)
-    receiver_member = Column(String(255), ForeignKey("users.member_id"), nullable=False)
+    receiver_member = Column(String(255),
+                             ForeignKey("users.member_id"),
+                             nullable=False)
     level = Column(Integer)
     amount = Column(DECIMAL(10, 5))
     package_amount = Column(DECIMAL(10, 5))
@@ -195,7 +220,9 @@ class RoyaltyIncome(Base):
     __tablename__ = "royalty_income"
 
     id = Column(Integer, primary_key=True)
-    receiver_member = Column(String(255), ForeignKey("users.member_id"), nullable=False)
+    receiver_member = Column(String(255),
+                             ForeignKey("users.member_id"),
+                             nullable=False)
     total_members = Column(Integer)
     total_income_distribution = Column(DECIMAL(10, 5))
     amount = Column(DECIMAL(10, 5))
@@ -208,13 +235,19 @@ class PrimeActivations(Base):
 
     id = Column(Integer, primary_key=True)
     member = Column(String(255), ForeignKey("users.member_id"), nullable=False)
-    prime_initiated_by = Column(String(255), ForeignKey("users.member_id"), nullable=False)
+    prime_initiated_by = Column(String(255),
+                                ForeignKey("users.member_id"),
+                                nullable=False)
     reference_id = Column(String(255))
     package_amount = Column(DECIMAL(10, 5))
     activation_date = Column(DateTime(timezone=True), default=get_ist_time)
 
-    receiver_member = relationship("User", back_populates="prime_activations_received", foreign_keys=[member])
-    prime_activator = relationship("User", back_populates="prime_incomes_activated", foreign_keys=[prime_initiated_by])
+    receiver_member = relationship("User",
+                                   back_populates="prime_activations_received",
+                                   foreign_keys=[member])
+    prime_activator = relationship("User",
+                                   back_populates="prime_incomes_activated",
+                                   foreign_keys=[prime_initiated_by])
 
 
 # ============================= PROFILE / KYC =============================
@@ -300,8 +333,11 @@ class Vouchers(Base):
     __tablename__ = "vouchers"
 
     id = Column(Integer, primary_key=True)
-    receiver_member = Column(String(255), ForeignKey("users.member_id"), nullable=False)
-    prime_activated_by_member = Column(String(255), ForeignKey("users.member_id"))
+    receiver_member = Column(String(255),
+                             ForeignKey("users.member_id"),
+                             nullable=False)
+    prime_activated_by_member = Column(String(255),
+                                       ForeignKey("users.member_id"))
     amount = Column(DECIMAL(10, 5))
     receivedDate = Column(DateTime(timezone=True), default=get_ist_time)
     redeemedDate = Column(DateTime(timezone=True))
@@ -395,8 +431,8 @@ class OTPStore(Base):
     otp = Column(String(255), nullable=False)
     expiry_time = Column(DateTime(timezone=True))
     created_at = Column(DateTime(timezone=True), default=get_ist_time)
-    
-    
+
+
 # ============================= WALLET & P2P =============================
 class Wallet(Base):
     __tablename__ = "wallet"
@@ -456,7 +492,9 @@ class UserAddedBankDetails(Base):
     __tablename__ = "user_added_bank_details"
 
     id = Column(Integer, primary_key=True)
-    uploaded_by = Column(String(255), ForeignKey("users.member_id"), nullable=False)
+    uploaded_by = Column(String(255),
+                         ForeignKey("users.member_id"),
+                         nullable=False)
     bankACHolder = Column(String(255))
     bankACHolderPhoneNumber = Column(String(15))
     bankName = Column(String(255))
@@ -520,9 +558,11 @@ class RechargeIncentivesLevelWise(Base):
 
     id = Column(Integer, primary_key=True)
     level = Column(Integer, nullable=False)
-    mobile_recharge_incentive = Column(DECIMAL(10, 5), default=Decimal("0.00000"))
+    mobile_recharge_incentive = Column(DECIMAL(10, 5),
+                                       default=Decimal("0.00000"))
     d2h_recharge_incentive = Column(DECIMAL(10, 5), default=Decimal("0.00000"))
-    bbps_all_services_incentive = Column(DECIMAL(10, 5), default=Decimal("0.00000"))
+    bbps_all_services_incentive = Column(DECIMAL(10, 5),
+                                         default=Decimal("0.00000"))
     isPrime = Column(Boolean, default=False)
 
 
@@ -530,8 +570,12 @@ class RechargeIncentivesIncomeDistribution(Base):
     __tablename__ = "recharge_incentives_income_distribution_new"
 
     id = Column(Integer, primary_key=True)
-    receiver_member = Column(String(255), ForeignKey("users.member_id"), nullable=False)
-    recharge_by_member = Column(String(255), ForeignKey("users.member_id"), nullable=False)
+    receiver_member = Column(String(255),
+                             ForeignKey("users.member_id"),
+                             nullable=False)
+    recharge_by_member = Column(String(255),
+                                ForeignKey("users.member_id"),
+                                nullable=False)
     level = Column(Integer, nullable=False)
     amount = Column(DECIMAL(10, 5))
     recharge_amount = Column(DECIMAL(10, 5))
@@ -542,13 +586,15 @@ class RechargeIncentivesIncomeDistribution(Base):
 
     receiver_user = relationship(
         "User",
-        primaryjoin="User.member_id==RechargeIncentivesIncomeDistribution.receiver_member",
+        primaryjoin=
+        "User.member_id==RechargeIncentivesIncomeDistribution.receiver_member",
         foreign_keys=[receiver_member],
         viewonly=True,
     )
     recharged_by_user = relationship(
         "User",
-        primaryjoin="User.member_id==RechargeIncentivesIncomeDistribution.recharge_by_member",
+        primaryjoin=
+        "User.member_id==RechargeIncentivesIncomeDistribution.recharge_by_member",
         foreign_keys=[recharge_by_member],
         viewonly=True,
     )
@@ -558,7 +604,9 @@ class RechargeCoinDistributions(Base):
     __tablename__ = "recharge_coin_distributions"
 
     id = Column(Integer, primary_key=True)
-    receiver_member = Column(String(255), ForeignKey("users.member_id"), nullable=False)
+    receiver_member = Column(String(255),
+                             ForeignKey("users.member_id"),
+                             nullable=False)
     amount = Column(DECIMAL(10, 5))
     recharge_amount = Column(DECIMAL(10, 5))
     reference_id = Column(String(255))
@@ -578,7 +626,9 @@ class BillTransactions(Base):
     __tablename__ = "bbps_bill_payment_transactions"
 
     id = Column(Integer, primary_key=True)
-    payee_member = Column(String(255), ForeignKey("users.member_id"), nullable=False)
+    payee_member = Column(String(255),
+                          ForeignKey("users.member_id"),
+                          nullable=False)
     amount = Column(DECIMAL(10, 5))
     reference_id = Column(String(255))
     bbps_service_name = Column(String(255))
@@ -612,7 +662,9 @@ class AddToWalletQr(Base):
     id = Column(Integer, primary_key=True)
     client_txn_id = Column(String(255), nullable=False)
     amount = Column(DECIMAL(10, 5))
-    member_id = Column(String(255), ForeignKey("users.member_id"), nullable=False)
+    member_id = Column(String(255),
+                       ForeignKey("users.member_id"),
+                       nullable=False)
     status = Column(Boolean, default=False)
     createdAt = Column(DateTime(timezone=True), default=get_ist_time)
 
@@ -655,7 +707,9 @@ class PanOfflineKYC(Base):
     status = Column(String(50), default="pending", nullable=False)
     pan_name = Column(String(255), nullable=False)
     pan_no = Column(String(50), nullable=False)
-    offline_kyc_id = Column(Integer, ForeignKey("offline_kyc.id"), nullable=False)
+    offline_kyc_id = Column(Integer,
+                            ForeignKey("offline_kyc.id"),
+                            nullable=False)
 
     offline_kyc = relationship("OfflineKYC", back_populates="pan_offline_kyc")
 
@@ -667,7 +721,9 @@ class OfflineKYC(Base):
     aadhar_front_filename = Column(Text, nullable=False)
     aadhar_back_filename = Column(Text, nullable=False)
     name = Column(String(255), nullable=False)
-    dob = Column(DateTime, nullable=False)  # original used date; keep as DateTime if you want tz-naive dates
+    dob = Column(
+        DateTime, nullable=False
+    )  # original used date; keep as DateTime if you want tz-naive dates
     aadhar_no = Column(String(50), nullable=False)
     district = Column(String(255), nullable=False)
     address = Column(Text, nullable=False)
@@ -675,7 +731,9 @@ class OfflineKYC(Base):
     user_id = Column(Integer, ForeignKey("users.UserID"), nullable=False)
 
     user = relationship("User", back_populates="offlineKYC")
-    pan_offline_kyc = relationship("PanOfflineKYC", back_populates="offline_kyc", uselist=False)
+    pan_offline_kyc = relationship("PanOfflineKYC",
+                                   back_populates="offline_kyc",
+                                   uselist=False)
 
 
 # ============================= MISC / SUPPORT =============================
@@ -733,14 +791,12 @@ class Emailotp(Base):
     created_at = Column(DateTime(timezone=True), default=get_ist_time)
 
 
-
-
 class LCRPackages(Base):
     __tablename__ = "lcr_packages"
 
     srno = Column(Integer, primary_key=True)
     amount = Column(DECIMAL(10, 5), default=Decimal("0.00000"))
-    package_name=Column(String(50))
+    package_name = Column(String(50))
 
 
 class LcrMoneyDistributionAmount(Base):
@@ -748,9 +804,26 @@ class LcrMoneyDistributionAmount(Base):
 
     srno = Column(Integer, primary_key=True)
     amount = Column(DECIMAL(10, 5), default=Decimal("0.00000"))
-    purpose=Column(String(255))
+    purpose = Column(String(255))
     set_date = Column(DateTime(timezone=True), default=get_ist_time)
 
+
+class LcrRewards(Base):
+    __tablename__ = "lcr_rewards"
+
+    srno = Column(Integer, primary_key=True)
+    amount = Column(DECIMAL(10, 5), default=Decimal("0.00000"))
+    reference_id = Column(String(255))
+    transactiontype = Column(String(255))
+    received_by = Column(String(255))
+    received_from = Column(String(255))
+    transactiondate = Column(DateTime(timezone=True))
+    status = Column(Integer, index=True)
+    received_for = Column(String(255))
+    purpose = Column(String(50))
+    remark = Column(String(255))
+    validity = Column(DateTime(timezone=True))
+    other = Column(String(255))
 
 
 class LcrMoney(Base):
@@ -759,13 +832,13 @@ class LcrMoney(Base):
     srno = Column(Integer, primary_key=True)
     amount = Column(DECIMAL(10, 5), default=Decimal("0.00000"))
     transactiontype = Column(String(255))
+    reference_id = Column(String(255))
     received_by = Column(String(255))
     received_from = Column(String(255))
     transactiondate = Column(DateTime(timezone=True))
     status = Column(Integer, index=True)
     received_for = Column(String(255))
+    purpose = Column(String(50))
     remark = Column(String(255))
     validity = Column(DateTime(timezone=True))
     other = Column(String(255))
-
-
