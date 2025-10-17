@@ -376,9 +376,7 @@ export default function Dashboard() {
                 : "No Transactions"}{" "}
               {stats?.total_mobile_recharge && stats?.total_dth_recharge
                 ? `| ₹${(stats.total_mobile_recharge + stats.total_dth_recharge).toLocaleString()}`
-                : ""sactions
-                ? (stats.total_transactions * 127).toLocaleString()
-                : "8"}
+                : ""}
             </span>
           </div>
         </div>
