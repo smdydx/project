@@ -17,9 +17,11 @@ export default function AllUsers() {
   const [data, setData] = useState<any[]>([]);
   const [showUserModal, setShowUserModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const generateRealtimeUsers = async () => {
     try {
+      setLoading(true);
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const params = new URLSearchParams();
       if (userTypeFilter !== 'All') {
@@ -34,13 +36,20 @@ export default function AllUsers() {
       if (!response.ok) throw new Error('Failed to fetch users');
 
       const fetchedData = await response.json();
+      console.log('Fetched users data:', fetchedData);
       setData(fetchedData);
       return fetchedData;
     } catch (error) {
       console.error('Error fetching all users:', error);
       return [];
+    } finally {
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    generateRealtimeUsers();
+  }, [userTypeFilter, statusFilter]);
 
   const getStatusBadge = (status: string) => {
     const baseClasses = "px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 shadow-lg";
@@ -204,6 +213,17 @@ export default function AllUsers() {
     }
   ];
 
+  if (loading && data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading users...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -264,16 +284,25 @@ export default function AllUsers() {
         </div>
       </Card>
 
-      <AdvancedRealtimeTable
-        title="Live Users List"
-        columns={columns}
-        data={data}
-        onDataUpdate={generateRealtimeUsers}
-        updateInterval={10000}
-        searchPlaceholder="Search by name, email, or mobile..."
-        showStats={true}
-        enableAnimations={true}
-      />
+      {data.length > 0 ? (
+        <AdvancedRealtimeTable
+          title="Live Users List"
+          columns={columns}
+          data={data}
+          onDataUpdate={generateRealtimeUsers}
+          updateInterval={10000}
+          searchPlaceholder="Search by name, email, or mobile..."
+          showStats={true}
+          enableAnimations={true}
+        />
+      ) : (
+        <Card>
+          <div className="text-center py-12">
+            <p className="text-gray-600 dark:text-gray-400 text-lg">No users found</p>
+            <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">Try adjusting your filters</p>
+          </div>
+        </Card>
+      )}
 
       {/* User Detail Modal */}
       {showUserModal && selectedUserId && (
