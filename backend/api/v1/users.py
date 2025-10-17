@@ -87,3 +87,114 @@ async def get_new_signups(
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/detail/{user_id}")
+async def get_user_detail(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    """Get complete user details with PAN and Aadhaar information"""
+    try:
+        from models.models import User, Aadhar_User, User_Aadhar_Address, PanVerification
+        from models.payment_gateway import Payment_Gateway
+        
+        # Get user with joins
+        user = db.query(User).filter(
+            User.UserID == user_id,
+            User.IsDeleted == False
+        ).first()
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Get Aadhaar details
+        aadhaar = db.query(Aadhar_User).join(
+            User_Aadhar_Address, 
+            Aadhar_User.address_id == User_Aadhar_Address.id,
+            isouter=True
+        ).filter(Aadhar_User.user_id == user_id).first()
+        
+        # Get PAN details
+        pan = db.query(PanVerification).filter(
+            PanVerification.user_id == user_id
+        ).first()
+        
+        # Get transaction counts
+        total_txns = db.query(func.count(Payment_Gateway.id)).filter(
+            Payment_Gateway.payer_mobile == user.MobileNumber
+        ).scalar() or 0
+        
+        result = {
+            # Basic Info
+            "UserID": user.UserID,
+            "fullname": user.fullname or f"User {user.UserID}",
+            "MobileNumber": user.MobileNumber,
+            "Email": user.Email or "N/A",
+            "member_id": user.member_id,
+            "introducer_id": user.introducer_id,
+            
+            # Wallet & Balance
+            "INRWalletBalance": float(user.INRWalletBalance) if user.INRWalletBalance else 0,
+            "RewardWalletBalance": float(user.RewardWalletBalance) if user.RewardWalletBalance else 0,
+            "total_packages": float(user.total_packages) if user.total_packages else 0,
+            
+            # Status
+            "activation_status": user.activation_status,
+            "prime_status": user.prime_status,
+            "DeviceVerified": user.DeviceVerified,
+            "IsKYCCompleted": user.IsKYCCompleted,
+            
+            # Verification Status
+            "aadhar_verification_status": user.aadhar_verification_status,
+            "pan_verification_status": user.pan_verification_status,
+            "email_verification_status": user.email_verification_status,
+            
+            # Dates
+            "CreatedAt": user.CreatedAt.isoformat() if user.CreatedAt else None,
+            "prime_activation_date": user.prime_activation_date.isoformat() if user.prime_activation_date else None,
+            
+            # Transaction Summary
+            "totalTransactions": total_txns,
+            "totalRecharges": 0,  # Can be calculated from specific tables
+            "totalWithdrawals": 0  # Can be calculated from withdrawal_history
+        }
+        
+        # Add Aadhaar details if available
+        if aadhaar:
+            result["aadhaar"] = {
+                "name": aadhaar.name,
+                "aadharNumber": aadhaar.aadharNumber,
+                "maskedNumber": aadhaar.maskedNumber,
+                "dateOfBirth": aadhaar.dateOfBirth.strftime('%Y-%m-%d') if aadhaar.dateOfBirth else None,
+                "gender": aadhaar.gender,
+                "phone": aadhaar.phone,
+                "email": aadhaar.email,
+                "photo": aadhaar.photo,
+                "address": {
+                    "house": aadhaar.address.house if aadhaar.address else "",
+                    "street": aadhaar.address.street if aadhaar.address else "",
+                    "locality": aadhaar.address.locality if aadhaar.address else "",
+                    "district": aadhaar.address.district if aadhaar.address else "",
+                    "state": aadhaar.address.state if aadhaar.address else "",
+                    "pin": aadhaar.address.pin if aadhaar.address else "",
+                    "country": aadhaar.address.country if aadhaar.address else "India"
+                } if aadhaar.address else None
+            }
+        
+        # Add PAN details if available
+        if pan:
+            result["pan"] = {
+                "pan_number": pan.pan_number,
+                "pan_holder_name": pan.pan_holder_name,
+                "status": pan.status,
+                "category": pan.category,
+                "date_of_issue": pan.date_of_issue.strftime('%Y-%m-%d') if pan.date_of_issue else None
+            }
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

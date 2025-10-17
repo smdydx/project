@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Eye, Ban, CheckCircle, MessageSquare, Phone, Mail, UserCheck, 
   Shield, Crown, Star, Filter, Download, Search
@@ -90,19 +91,25 @@ export default function AllUsers() {
       key: 'name', 
       title: 'Name', 
       sortable: true,
-      render: (value: string, row: any) => (
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-sm">
-              {value.split(' ').map(n => n[0]).join('')}
-            </span>
+      render: (value: string, row: any) => {
+        const navigate = useNavigate();
+        return (
+          <div 
+            className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-all"
+            onClick={() => navigate(`/user/${row.id}`)}
+          >
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-sm">
+                {value.split(' ').map(n => n[0]).join('')}
+              </span>
+            </div>
+            <div>
+              <p className="font-medium text-blue-600 dark:text-blue-400 hover:underline">{value}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{row.email}</p>
+            </div>
           </div>
-          <div>
-            <p className="font-medium text-gray-900 dark:text-white">{value}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{row.email}</p>
-          </div>
-        </div>
-      )
+        );
+      }
     },
     { 
       key: 'mobile', 

@@ -7,6 +7,7 @@ import Login from './components/pages/Login';
 import Dashboard from './components/pages/Dashboard';
 import UserManagement from './components/pages/UserManagement';
 import AllUsers from './components/pages/AllUsers';
+import UserDetailPage from './components/pages/UserDetailPage';
 import NewSignUp from './components/pages/NewSignUp';
 import KYCVerification from './components/pages/KYCVerification';
 import Transactions from './components/pages/Transactions';
@@ -74,6 +75,7 @@ function AppContent() {
             <Route path="/" component={Dashboard} />
             <Route path="/users" component={UserManagement} />
             <Route path="/users/all" component={AllUsers} />
+            <Route path="/user/:userId" component={UserDetailPage} />
             <Route path="/users/new-signup" component={NewSignUp} />
             <Route path="/users/kyc" component={KYCVerification} />
             <Route path="/transactions" component={Transactions} />
