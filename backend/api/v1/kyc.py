@@ -50,9 +50,31 @@ async def get_kyc_verification(
             # Build full image URLs with proper base URL
             base_url = str(request.base_url).rstrip('/')
             
-            aadhaar_front_url = f"{base_url}{settings.STATIC_URL_PATH}/{kyc.aadhar_front_filename}" if kyc and kyc.aadhar_front_filename else None
-            aadhaar_back_url = f"{base_url}{settings.STATIC_URL_PATH}/{kyc.aadhar_back_filename}" if kyc and kyc.aadhar_back_filename else None
-            pan_image_url = f"{base_url}{settings.STATIC_URL_PATH}/{pan_data.pan_front}" if pan_data and pan_data.pan_front else None
+            # Check if files exist and build URLs accordingly
+            import os
+            aadhaar_front_url = None
+            aadhaar_back_url = None
+            pan_image_url = None
+            
+            if kyc and kyc.aadhar_front_filename:
+                file_path = os.path.join(settings.UPLOAD_FOLDER, kyc.aadhar_front_filename)
+                if os.path.exists(file_path):
+                    aadhaar_front_url = f"{base_url}{settings.STATIC_URL_PATH}/{kyc.aadhar_front_filename}"
+                    
+            if kyc and kyc.aadhar_back_filename:
+                file_path = os.path.join(settings.UPLOAD_FOLDER, kyc.aadhar_back_filename)
+                if os.path.exists(file_path):
+                    aadhaar_back_url = f"{base_url}{settings.STATIC_URL_PATH}/{kyc.aadhar_back_filename}"
+                    
+            if pan_data and pan_data.pan_front:
+                file_path = os.path.join(settings.UPLOAD_FOLDER, pan_data.pan_front)
+                if os.path.exists(file_path):
+                    pan_image_url = f"{base_url}{settings.STATIC_URL_PATH}/{pan_data.pan_front}"
+            
+            # Debug logging
+            print(f"🖼️ User {user.UserID} - Aadhaar Front: {aadhaar_front_url or 'Not found'}")
+            print(f"🖼️ User {user.UserID} - Aadhaar Back: {aadhaar_back_url or 'Not found'}")
+            print(f"🖼️ User {user.UserID} - PAN: {pan_image_url or 'Not found'}")
             
             kyc_data.append({
                 "id": f"KYC{user.UserID:06d}",
