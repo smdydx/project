@@ -29,54 +29,14 @@ function AppContent() {
   const [dateFilter, setDateFilter] = useState('today');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return authStorage.isAuthenticated();
-  });
-
-  useEffect(() => {
-    const authStatus = localStorage.getItem('isAuthenticated');
-    if (authStatus === 'true') {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  const handleLogin = (username: string, password: string) => {
-    // In a real application, you would make an API call here to authenticate
-    // and receive a JWT token. For demonstration purposes, we'll simulate a successful login.
-    if (username === 'admin' && password === 'admin123') {
-      const token = 'fake-jwt-token'; // Replace with actual token from API
-      authStorage.setToken(token);
-      localStorage.setItem('isAuthenticated', 'true'); // Keep this for initial render check if needed
-      setIsAuthenticated(true);
-    } else {
-      alert('Invalid username or password');
-    }
-  };
 
   const handleLogout = async () => {
-    try {
-      // Call logout endpoint
-      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/auth/logout`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('lcrpay_auth_token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      // Clear all auth data
-      localStorage.removeItem('lcrpay_auth_token');
-      localStorage.removeItem('lcrpay_refresh_token');
-      localStorage.removeItem('lcrpay_username');
-      setIsAuthenticated(false);
-    }
+    // Clear all auth data
+    localStorage.removeItem('lcrpay_auth_token');
+    localStorage.removeItem('lcrpay_refresh_token');
+    localStorage.removeItem('lcrpay_username');
+    localStorage.removeItem('isAuthenticated');
   };
-
-  if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} />;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
