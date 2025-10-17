@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import os
 
 from core.config import settings
 from core.database import engine
@@ -31,6 +33,12 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"]
 )
+
+# Create upload directory if not exists
+os.makedirs(settings.UPLOAD_FOLDER, exist_ok=True)
+
+# Mount static files for uploads
+app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_FOLDER), name="uploads")
 
 # Include API routes
 from api.v1 import dashboard, users, kyc, test, transactions, websocket
