@@ -13,6 +13,7 @@ const statusOptions = ['All', 'Active', 'Blocked'];
 export default function AllUsers() {
   const [userTypeFilter, setUserTypeFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [, setLocation] = useLocation();
 
   const generateRealtimeUsers = async () => {
     try {
@@ -91,7 +92,6 @@ export default function AllUsers() {
       title: 'Full Name', 
       sortable: true,
       render: (value: string, row: any) => {
-        const [, setLocation] = useLocation();
         return (
           <div 
             className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-all"
