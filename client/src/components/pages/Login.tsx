@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Lock, Mail, Eye, EyeOff, LogIn, Shield } from 'lucide-react';
+import { Lock, Mail, Eye, EyeOff, LogIn, Shield, CreditCard, ArrowRightLeft, Wallet } from 'lucide-react';
 
 interface LoginProps {
   onLogin: (username: string, password: string) => void;
@@ -58,19 +58,97 @@ export default function Login({ onLogin }: LoginProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-400 to-white flex items-center justify-center p-4">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0 indian-root-leaf"></div>
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+      {/* Animated Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-purple-400 to-indigo-600 animate-gradient-shift"></div>
+      
+      {/* Animated Background Blobs */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 -left-4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+        <div className="absolute top-0 -right-4 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-20 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+      </div>
+
+      {/* Floating Payment Cards Animation */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Card 1 */}
+        <div className="absolute top-20 left-10 animate-float" style={{ animationDelay: '0s' }}>
+          <div className="glass-card-dark rounded-2xl p-4 w-64 transform rotate-12 hover:rotate-0 transition-transform">
+            <div className="flex items-center gap-3">
+              <CreditCard className="w-8 h-8 text-purple-300" />
+              <div>
+                <div className="h-2 w-20 bg-purple-300 rounded mb-2"></div>
+                <div className="h-2 w-32 bg-purple-400 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2 */}
+        <div className="absolute top-40 right-20 animate-float" style={{ animationDelay: '1s' }}>
+          <div className="glass-card-dark rounded-2xl p-4 w-64 transform -rotate-12 hover:rotate-0 transition-transform">
+            <div className="flex items-center gap-3">
+              <Wallet className="w-8 h-8 text-indigo-300" />
+              <div>
+                <div className="h-2 w-24 bg-indigo-300 rounded mb-2"></div>
+                <div className="h-2 w-28 bg-indigo-400 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3 */}
+        <div className="absolute bottom-32 left-1/4 animate-float" style={{ animationDelay: '2s' }}>
+          <div className="glass-card-dark rounded-2xl p-4 w-56 transform rotate-6 hover:rotate-0 transition-transform">
+            <div className="flex items-center gap-3">
+              <ArrowRightLeft className="w-8 h-8 text-pink-300" />
+              <div>
+                <div className="h-2 w-20 bg-pink-300 rounded mb-2"></div>
+                <div className="h-2 w-24 bg-pink-400 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 4 */}
+        <div className="absolute bottom-20 right-1/4 animate-float" style={{ animationDelay: '1.5s' }}>
+          <div className="glass-card-dark rounded-2xl p-4 w-60 transform -rotate-6 hover:rotate-0 transition-transform">
+            <div className="flex items-center gap-3">
+              <Shield className="w-8 h-8 text-purple-300" />
+              <div>
+                <div className="h-2 w-28 bg-purple-300 rounded mb-2"></div>
+                <div className="h-2 w-20 bg-purple-400 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Animated Transaction Lines */}
+        <svg className="absolute inset-0 w-full h-full">
+          <line x1="20%" y1="30%" x2="80%" y2="70%" stroke="rgba(255,255,255,0.1)" strokeWidth="2" strokeDasharray="5,5">
+            <animate attributeName="stroke-dashoffset" from="0" to="100" dur="3s" repeatCount="indefinite" />
+          </line>
+          <line x1="80%" y1="30%" x2="20%" y2="70%" stroke="rgba(255,255,255,0.1)" strokeWidth="2" strokeDasharray="5,5">
+            <animate attributeName="stroke-dashoffset" from="0" to="100" dur="4s" repeatCount="indefinite" />
+          </line>
+          <line x1="50%" y1="10%" x2="50%" y2="90%" stroke="rgba(255,255,255,0.08)" strokeWidth="2" strokeDasharray="5,5">
+            <animate attributeName="stroke-dashoffset" from="0" to="100" dur="5s" repeatCount="indefinite" />
+          </line>
+        </svg>
+
+        {/* Floating Particles */}
+        <div className="absolute top-1/4 left-1/3 w-2 h-2 bg-white rounded-full opacity-60 animate-ping"></div>
+        <div className="absolute top-1/2 right-1/3 w-3 h-3 bg-purple-300 rounded-full opacity-60 animate-ping animation-delay-1000"></div>
+        <div className="absolute bottom-1/3 left-1/2 w-2 h-2 bg-indigo-300 rounded-full opacity-60 animate-ping animation-delay-2000"></div>
       </div>
 
       {/* Login Card */}
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full max-w-md z-10">
         {/* Floating Background Elements */}
         <div className="absolute -top-4 -left-4 w-24 h-24 bg-purple-300 rounded-full opacity-30 blur-2xl animate-pulse"></div>
         <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-white rounded-full opacity-40 blur-2xl animate-pulse" style={{ animationDelay: '1s' }}></div>
 
-        <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 backdrop-blur-sm border border-gray-100 dark:border-gray-700">
+        <div className="relative bg-white/95 dark:bg-gray-800/95 rounded-2xl shadow-2xl p-8 backdrop-blur-xl border border-white/20">
           {/* Logo & Header */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl shadow-lg mb-4 animate-fade-in-scale">
@@ -188,7 +266,7 @@ export default function Login({ onLogin }: LoginProps) {
         </div>
 
         {/* Credentials Helper (Remove in production) */}
-        <div className="mt-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
+        <div className="mt-4 p-4 bg-white/80 dark:bg-purple-900/30 backdrop-blur-sm rounded-lg text-center border border-white/20">
           <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">
             Demo Credentials: admin / admin123
           </p>
