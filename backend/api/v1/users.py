@@ -27,12 +27,24 @@ async def get_all_users(
                 query = query.filter(User.prime_status == True)
             elif user_type == 'Normal User':
                 query = query.filter(User.prime_status == False)
+            elif user_type == 'KYC Completed':
+                query = query.filter(User.IsKYCCompleted == True)
+            elif user_type == 'Device Verified':
+                query = query.filter(User.DeviceVerified == True)
+            elif user_type == 'Email Verified':
+                query = query.filter(User.email_verification_status == True)
 
         if status and status != 'All':
             if status == 'Active':
                 query = query.filter(User.activation_status == True)
             elif status == 'Blocked':
                 query = query.filter(User.activation_status == False)
+            elif status == 'With Balance':
+                query = query.filter(User.INRWalletBalance > 0)
+            elif status == 'New Users (7 Days)':
+                from datetime import timedelta
+                seven_days_ago = datetime.now() - timedelta(days=7)
+                query = query.filter(User.CreatedAt >= seven_days_ago)
 
         # Verification Status Filter
         if verification_status and verification_status != 'All':

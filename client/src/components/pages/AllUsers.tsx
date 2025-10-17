@@ -7,8 +7,8 @@ import {
 import AdvancedRealtimeTable from '../common/AdvancedRealtimeTable';
 import Card from '../common/Card';
 
-const userTypeOptions = ['All', 'Prime User', 'Normal User'];
-const statusOptions = ['All', 'Active', 'Blocked'];
+const userTypeOptions = ['All', 'Prime User', 'Normal User', 'KYC Completed', 'Device Verified', 'Email Verified'];
+const statusOptions = ['All', 'Active', 'Blocked', 'With Balance', 'New Users (7 Days)'];
 const verificationOptions = ['All', 'Verified', 'Partial Verified', 'Not Verified'];
 
 export default function AllUsers() {
