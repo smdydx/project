@@ -52,7 +52,24 @@ export default function AdvancedRealtimeTable({
   const [deletedRows, setDeletedRows] = useState<Set<string>>(new Set());
   const [stats, setStats] = useState({ total: 0, added: 0, updated: 0, deleted: 0 });
   const prevDataRef = useRef(data);
-  const itemsPerPage = 8; // Reduced for mobile
+  const [itemsPerPage, setItemsPerPage] = useState(8);
+
+  // Adjust items per page based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setItemsPerPage(5); // Mobile
+      } else if (window.innerWidth < 1024) {
+        setItemsPerPage(8); // Tablet
+      } else {
+        setItemsPerPage(10); // Desktop
+      }
+    };
+    
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Initialize data
   useEffect(() => {

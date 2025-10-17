@@ -284,25 +284,26 @@ export default function AllUsers() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
             All Users
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">View and manage all registered users</p>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">View and manage all registered users</p>
         </div>
 
         <div className="flex items-center space-x-3">
-          <button className="btn-success text-white px-4 py-2 rounded-xl font-medium flex items-center space-x-2">
+          <button className="btn-success text-white px-3 sm:px-4 py-2 rounded-xl font-medium flex items-center space-x-2 text-sm sm:text-base">
             <Download className="w-4 h-4" />
-            <span>Export</span>
+            <span className="hidden sm:inline">Export</span>
+            <span className="sm:hidden">Export</span>
           </button>
         </div>
       </div>
 
       <Card className="hover-lift">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>
             <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">User Type</label>
             <select
@@ -401,28 +402,28 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
   if (!userDetail) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl max-w-6xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         {/* Modal Header */}
-        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between z-10">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{userDetail.fullname}</h2>
-            <p className="text-gray-600 dark:text-gray-400">Member ID: {userDetail.member_id}</p>
+        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 sm:p-6 flex items-center justify-between z-10">
+          <div className="flex-1 mr-2">
+            <h2 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white truncate">{userDetail.fullname}</h2>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 truncate">Member ID: {userDetail.member_id}</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-            <X className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex-shrink-0">
+            <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 dark:text-gray-400" />
           </button>
         </div>
 
         {/* Modal Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
           {/* Personal Info */}
           <Card>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-              <UserCheck className="w-5 h-5 mr-2" />
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center">
+              <UserCheck className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Personal Information
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Mobile</label>
                 <p className="text-gray-900 dark:text-white font-medium mt-1 flex items-center">
@@ -449,11 +450,11 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
           {/* Aadhaar Details with Image */}
           {userDetail.aadhaar && (
             <Card>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-                <CreditCard className="w-5 h-5 mr-2" />
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center">
+                <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Aadhaar Details
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Aadhaar Number</label>
@@ -501,11 +502,11 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
           {/* PAN Details */}
           {userDetail.pan && (
             <Card>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-                <FileText className="w-5 h-5 mr-2" />
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center">
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 PAN Details
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-gray-500 dark:text-gray-400">PAN Number</label>
