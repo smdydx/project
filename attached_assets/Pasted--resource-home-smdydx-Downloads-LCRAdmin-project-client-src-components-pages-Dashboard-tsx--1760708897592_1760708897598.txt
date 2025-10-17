@@ -1,0 +1,130 @@
+[{
+	"resource": "/home/smdydx/Downloads/LCRAdmin/project/client/src/components/pages/Dashboard.tsx",
+	"owner": "typescript",
+	"code": "2345",
+	"severity": 8,
+	"message": "Argument of type 'unknown' is not assignable to parameter of type 'SetStateAction<any[]>'.",
+	"source": "ts",
+	"startLineNumber": 61,
+	"startColumn": 25,
+	"endLineNumber": 61,
+	"endColumn": 41,
+	"origin": "extHost1"
+},{
+	"resource": "/home/smdydx/Downloads/LCRAdmin/project/client/src/components/pages/Dashboard.tsx",
+	"owner": "typescript",
+	"code": "2345",
+	"severity": 8,
+	"message": "Argument of type 'unknown' is not assignable to parameter of type 'SetStateAction<any[]>'.",
+	"source": "ts",
+	"startLineNumber": 62,
+	"startColumn": 18,
+	"endLineNumber": 62,
+	"endColumn": 27,
+	"origin": "extHost1"
+},{
+	"resource": "/home/smdydx/Downloads/LCRAdmin/project/client/src/components/pages/Dashboard.tsx",
+	"owner": "typescript",
+	"code": "6133",
+	"severity": 4,
+	"message": "'ChevronLeft' is declared but its value is never read.",
+	"source": "ts",
+	"startLineNumber": 14,
+	"startColumn": 3,
+	"endLineNumber": 14,
+	"endColumn": 14,
+	"tags": [
+		1
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/home/smdydx/Downloads/LCRAdmin/project/client/src/components/pages/Dashboard.tsx",
+	"owner": "typescript",
+	"code": "6133",
+	"severity": 4,
+	"message": "'ChevronRight' is declared but its value is never read.",
+	"source": "ts",
+	"startLineNumber": 15,
+	"startColumn": 3,
+	"endLineNumber": 15,
+	"endColumn": 15,
+	"tags": [
+		1
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/home/smdydx/Downloads/LCRAdmin/project/client/src/components/pages/Dashboard.tsx",
+	"owner": "typescript",
+	"code": "6133",
+	"severity": 4,
+	"message": "'Play' is declared but its value is never read.",
+	"source": "ts",
+	"startLineNumber": 16,
+	"startColumn": 3,
+	"endLineNumber": 16,
+	"endColumn": 7,
+	"tags": [
+		1
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/home/smdydx/Downloads/LCRAdmin/project/client/src/components/pages/Dashboard.tsx",
+	"owner": "typescript",
+	"code": "6133",
+	"severity": 4,
+	"message": "'Pause' is declared but its value is never read.",
+	"source": "ts",
+	"startLineNumber": 17,
+	"startColumn": 3,
+	"endLineNumber": 17,
+	"endColumn": 8,
+	"tags": [
+		1
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/home/smdydx/Downloads/LCRAdmin/project/client/src/components/pages/Dashboard.tsx",
+	"owner": "typescript",
+	"code": "6133",
+	"severity": 4,
+	"message": "'setIsAutoPlaying' is declared but its value is never read.",
+	"source": "ts",
+	"startLineNumber": 28,
+	"startColumn": 25,
+	"endLineNumber": 28,
+	"endColumn": 41,
+	"tags": [
+		1
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/home/smdydx/Downloads/LCRAdmin/project/client/src/components/pages/Dashboard.tsx",
+	"owner": "typescript",
+	"code": "6133",
+	"severity": 4,
+	"message": "'users' is declared but its value is never read.",
+	"source": "ts",
+	"startLineNumber": 39,
+	"startColumn": 10,
+	"endLineNumber": 39,
+	"endColumn": 15,
+	"tags": [
+		1
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/home/smdydx/Downloads/LCRAdmin/project/client/src/components/pages/Dashboard.tsx",
+	"owner": "typescript",
+	"code": "6133",
+	"severity": 4,
+	"message": "'scrollStats' is declared but its value is never read.",
+	"source": "ts",
+	"startLineNumber": 192,
+	"startColumn": 9,
+	"endLineNumber": 192,
+	"endColumn": 20,
+	"tags": [
+		1
+	],
+	"origin": "extHost1"
+}]
