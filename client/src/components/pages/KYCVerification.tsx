@@ -129,16 +129,6 @@ export default function KYCVerification() {
       )
     },
     {
-      key: 'verifiedBy',
-      title: 'Verified By',
-      sortable: true,
-      render: (value: string) => (
-        <span className="text-sm text-gray-700 dark:text-gray-300">
-          {value || '-'}
-        </span>
-      )
-    },
-    {
       key: 'actions',
       title: 'Actions',
       render: (value: any, row: any) => (
