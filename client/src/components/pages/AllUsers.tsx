@@ -462,7 +462,9 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Aadhaar Number</label>
-                    <p className="text-gray-900 dark:text-white font-mono mt-1">{userDetail.aadhaar.aadharNumber}</p>
+                    <p className="text-gray-900 dark:text-white font-mono mt-1">
+                      {userDetail.aadhaar.aadharNumber ? `XXXX XXXX ${userDetail.aadhaar.aadharNumber.slice(-4)}` : 'N/A'}
+                    </p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Date of Birth</label>
@@ -482,21 +484,12 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 block">Aadhaar Photo</label>
-                  <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-                    <img 
-                      src={
-                        userDetail.aadhaar.photo.startsWith('data:image') 
-                          ? userDetail.aadhaar.photo 
-                          : userDetail.aadhaar.photo.startsWith('http')
-                          ? userDetail.aadhaar.photo
-                          : `data:image/jpeg;base64,${userDetail.aadhaar.photo}`
-                      }
-                      alt="Aadhaar Photo" 
-                      className="w-full h-64 object-contain"
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://via.placeholder.com/400x300?text=Image+Not+Available';
-                      }}
-                    />
+                  <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex items-center justify-center h-64">
+                    <div className="text-center p-4">
+                      <Shield className="w-16 h-16 text-gray-400 mx-auto mb-3" />
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Photo Hidden</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">For privacy and security</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -514,7 +507,9 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-gray-500 dark:text-gray-400">PAN Number</label>
-                    <p className="text-gray-900 dark:text-white font-mono mt-1">{userDetail.pan.pan_number}</p>
+                    <p className="text-gray-900 dark:text-white font-mono mt-1">
+                      {userDetail.pan.pan_number ? `XXXXX${userDetail.pan.pan_number.slice(-4)}` : 'N/A'}
+                    </p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-500 dark:text-gray-400">PAN Holder Name</label>
