@@ -32,22 +32,41 @@ async def get_kyc_verification(
             User_Aadhar_Address, Aadhar_User.address_id == User_Aadhar_Address.id
         ).filter(User.IsDeleted == False)
 
-        if status and status.lower() != 'all':
+        if status and status.lower() not in ['all', 'all users']:
             if status.lower() == 'verified':
-                query = query.filter(User.IsKYCCompleted == True)
-            elif status.lower() == 'pending':
-                query = query.filter(User.IsKYCCompleted == False)
-            elif status.lower() == 'rejected':
-                query = query.filter(OfflineKYC.status == 'rejected')
+                # Both Aadhaar and PAN verified
+                query = query.filter(
+                    User.aadhar_verification_status == True,
+                    User.pan_verification_status == True
+                )
+            elif status.lower() == 'partially verified':
+                # Only one verified (either Aadhaar OR PAN, but not both)
+                query = query.filter(
+                    (User.aadhar_verification_status == True) | (User.pan_verification_status == True)
+                ).filter(
+                    ~((User.aadhar_verification_status == True) & (User.pan_verification_status == True))
+                )
+            elif status.lower() == 'not verified':
+                # Neither Aadhaar nor PAN verified
+                query = query.filter(
+                    User.aadhar_verification_status == False,
+                    User.pan_verification_status == False
+                )
 
         results = query.order_by(desc(User.CreatedAt)).limit(limit).all()
 
         kyc_data = []
         for user, kyc, pan_data, aadhaar, address in results:
-            # Determine KYC status
-            kyc_status = 'Verified' if user.IsKYCCompleted else 'Pending'
-            if kyc and kyc.status == 'rejected':
-                kyc_status = 'Rejected'
+            # Determine KYC/Verification status
+            aadhaar_verified = user.aadhar_verification_status or False
+            pan_verified = user.pan_verification_status or False
+            
+            if aadhaar_verified and pan_verified:
+                kyc_status = 'Verified'
+            elif aadhaar_verified or pan_verified:
+                kyc_status = 'Partially Verified'
+            else:
+                kyc_status = 'Not Verified'
 
             # Fetch PAN card data if exists
             pan_data = None

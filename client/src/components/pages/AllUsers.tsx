@@ -7,9 +7,9 @@ import {
 import AdvancedRealtimeTable from '../common/AdvancedRealtimeTable';
 import Card from '../common/Card';
 
-const userTypeOptions = ['All', 'Prime User', 'Normal User', 'KYC Completed', 'Device Verified', 'Email Verified'];
+const userTypeOptionsForKyc = ['All', 'Verified', 'Partial Verified', 'Not Verified'];
+const userTypeOptionsForUsers = ['All', 'Prime Member', 'Normal User'];
 const statusOptions = ['All', 'Active', 'Blocked', 'With Balance', 'New Users (7 Days)'];
-const verificationOptions = ['All', 'Verified', 'Partial Verified', 'Not Verified'];
 
 export default function AllUsers() {
   const [userTypeFilter, setUserTypeFilter] = useState('All');
@@ -26,9 +26,16 @@ export default function AllUsers() {
       setLoading(true);
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const params = new URLSearchParams();
+      
+      // Filter logic for All Users page
       if (userTypeFilter !== 'All') {
-        params.append('user_type', userTypeFilter);
+        if (userTypeFilter === 'Prime Member' && userTypeOptionsForUsers.includes('Prime Member')) {
+          params.append('user_type', 'Prime User');
+        } else if (userTypeFilter === 'Normal User' && userTypeOptionsForUsers.includes('Normal User')) {
+          params.append('user_type', 'Normal User');
+        }
       }
+      
       if (statusFilter !== 'All') {
         params.append('status', statusFilter);
       }
@@ -204,7 +211,23 @@ export default function AllUsers() {
       key: 'verification_status',
       title: 'KYC Verification',
       sortable: true,
-      render: (value: string) => getVerificationBadge(value)
+      render: (value: string, row: any) => {
+        return (
+          <div className="flex items-center space-x-2">
+            {getVerificationBadge(value)}
+            <button 
+              className="p-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200" 
+              title="View Details"
+              onClick={() => {
+                setSelectedUserId(row.UserID);
+                setShowUserModal(true);
+              }}
+            >
+              <Eye className="w-4 h-4" />
+            </button>
+          </div>
+        );
+      }
     },
     {
       key: 'DeviceVerified',
@@ -239,13 +262,18 @@ export default function AllUsers() {
       title: 'Actions',
       render: (value: any, row: any) => (
         <div className="flex items-center space-x-2">
-          <button className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200" title="View Details">
-            <Eye className="w-4 h-4" />
-          </button>
-          <button className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all duration-200" title="Send SMS">
+          <button 
+            className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200" 
+            title="Send SMS"
+            onClick={() => { /* SMS functionality */ }}
+          >
             <Phone className="w-4 h-4" />
           </button>
-          <button className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-all duration-200" title="Send Email">
+          <button 
+            className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-all duration-200" 
+            title="Send Email"
+            onClick={() => { /* Email functionality */ }}
+          >
             <Mail className="w-4 h-4" />
           </button>
         </div>
@@ -283,26 +311,28 @@ export default function AllUsers() {
       </div>
 
       <Card className="hover-lift">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">User Type Filter</label>
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">User Type</label>
             <select
               value={userTypeFilter}
               onChange={(e) => setUserTypeFilter(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+              data-testid="filter-user-type"
             >
-              {userTypeOptions.map(type => (
+              {userTypeOptionsForUsers.map(type => (
                 <option key={type} value={type}>{type}</option>
               ))}
             </select>
           </div>
-
+          
           <div>
             <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Status Filter</label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+              data-testid="filter-status"
             >
               {statusOptions.map(status => (
                 <option key={status} value={status}>{status}</option>
@@ -310,19 +340,7 @@ export default function AllUsers() {
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Verification Filter</label>
-            <select
-              value={verificationFilter}
-              onChange={(e) => setVerificationFilter(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-            >
-              {verificationOptions.map(option => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          </div>
-
+          {/* Quick Search Filter */}
           <div>
             <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Quick Search</label>
             <div className="relative">

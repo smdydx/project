@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { 
-  Eye, CheckCircle, XCircle, Shield, FileText, Upload, Download, AlertTriangle, 
+  CheckCircle, XCircle, Shield, FileText, Upload, Download, AlertTriangle, 
   UserCheck, Phone, Mail, CreditCard, MapPin, X
 } from 'lucide-react';
 import AdvancedRealtimeTable from '../common/AdvancedRealtimeTable';
 import Card from '../common/Card';
 
-const kycStatusOptions = ['All', 'Pending', 'Verified', 'Rejected'];
+const kycStatusOptions = ['All Users', 'Verified', 'Partially Verified', 'Not Verified'];
 
 export default function KYCVerification() {
   const [kycStatusFilter, setKycStatusFilter] = useState('All');
@@ -61,12 +61,10 @@ export default function KYCVerification() {
     }
   };
 
-  const handleViewDetails = (row: any) => {
-    if (row.userId) {
-      const userIdNum = typeof row.userId === 'string' ? parseInt(row.userId.replace('USR', ''), 10) : row.userId;
-      setSelectedUserId(userIdNum);
-      setShowUserModal(true);
-    }
+  const handleViewDetails = (userId: any) => {
+    const userIdNum = typeof userId === 'string' ? parseInt(userId.replace('USR', ''), 10) : userId;
+    setSelectedUserId(userIdNum);
+    setShowUserModal(true);
   };
 
   const columns = [
@@ -154,12 +152,12 @@ export default function KYCVerification() {
       render: (value: any, row: any) => (
         <div className="flex items-center space-x-2">
           <button 
-            onClick={() => handleViewDetails(row)}
-            className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200" 
+            onClick={() => handleViewDetails(row.userId)}
+            className="px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md" 
             title="View User Details"
             data-testid="button-view-user"
           >
-            <Eye className="w-4 h-4" />
+            View Details
           </button>
           {row.kycStatus === 'Pending' && (
             <>
@@ -200,7 +198,7 @@ export default function KYCVerification() {
       <Card className="hover-lift">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">KYC Status Filter</label>
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Verification Status</label>
             <select
               value={kycStatusFilter}
               onChange={(e) => setKycStatusFilter(e.target.value)}
