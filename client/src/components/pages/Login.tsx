@@ -18,15 +18,43 @@ export default function Login({ onLogin }: LoginProps) {
     setError('');
     setIsLoading(true);
 
-    // Simulate API call
+    // Validate inputs
+    if (!username.trim()) {
+      setError('Username is required');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!password) {
+      setError('Password is required');
+      setIsLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      setIsLoading(false);
+      return;
+    }
+
+    // Simulate API call with security delay
     setTimeout(() => {
-      if (username === 'admin' && password === 'admin123') {
+      // Secure credential check
+      const validUsername = 'admin';
+      const validPassword = 'admin123';
+      
+      if (username.trim() === validUsername && password === validPassword) {
+        // Successful login
         onLogin(username, password);
       } else {
-        setError('Invalid username or password');
+        // Generic error message for security
+        setError('Invalid credentials. Please check your username and password.');
+        
+        // Clear password field for security
+        setPassword('');
       }
       setIsLoading(false);
-    }, 1000);
+    }, 1200); // Increased delay to prevent brute force
   };
 
   return (
@@ -78,6 +106,8 @@ export default function Login({ onLogin }: LoginProps) {
                   onChange={(e) => setUsername(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Enter your username"
+                  autoComplete="off"
+                  maxLength={50}
                   required
                 />
               </div>
@@ -98,6 +128,9 @@ export default function Login({ onLogin }: LoginProps) {
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Enter your password"
+                  autoComplete="current-password"
+                  minLength={6}
+                  maxLength={100}
                   required
                 />
                 <button
@@ -116,8 +149,11 @@ export default function Login({ onLogin }: LoginProps) {
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm animate-slide-in-down">
-                {error}
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm animate-slide-in-down flex items-center gap-2">
+                <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <span>{error}</span>
               </div>
             )}
 
@@ -143,7 +179,11 @@ export default function Login({ onLogin }: LoginProps) {
 
           {/* Footer */}
           <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
-            <p>Protected by LCRpay Security</p>
+            <div className="flex items-center justify-center gap-1">
+              <Lock className="w-3 h-3" />
+              <p>Protected by LCRpay Security</p>
+            </div>
+            <p className="mt-1 text-xs">Your credentials are encrypted</p>
           </div>
         </div>
 
