@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { 
   Eye, Ban, CheckCircle, MessageSquare, Phone, Mail, UserCheck, 
   Shield, Crown, Star, Filter, Download, Search
@@ -92,11 +92,11 @@ export default function AllUsers() {
       title: 'Name', 
       sortable: true,
       render: (value: string, row: any) => {
-        const navigate = useNavigate();
+        const [, setLocation] = useLocation();
         return (
           <div 
             className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-all"
-            onClick={() => navigate(`/user/${row.id}`)}
+            onClick={() => setLocation(`/user/${row.id}`)}
           >
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-sm">

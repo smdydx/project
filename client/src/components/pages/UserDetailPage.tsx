@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useLocation } from 'wouter';
 import { 
   ArrowLeft, User, Phone, Mail, Calendar, MapPin, CreditCard, 
   Wallet, TrendingUp, FileText, CheckCircle, XCircle, Clock,
@@ -74,8 +74,9 @@ interface UserDetail {
 }
 
 export default function UserDetailPage() {
-  const { userId } = useParams<{ userId: string }>();
-  const navigate = useNavigate();
+  const params = useParams();
+  const userId = params.userId;
+  const [, setLocation] = useLocation();
   const [userDetail, setUserDetail] = useState<UserDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -117,7 +118,7 @@ export default function UserDetailPage() {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Error Loading User</h2>
           <p className="text-gray-600 dark:text-gray-400">{error || 'User not found'}</p>
           <button 
-            onClick={() => navigate('/all-users')}
+            onClick={() => setLocation('/users/all')}
             className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             Back to Users
@@ -147,7 +148,7 @@ export default function UserDetailPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <button 
-            onClick={() => navigate('/all-users')}
+            onClick={() => setLocation('/users/all')}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
             <ArrowLeft className="w-6 h-6 text-gray-600 dark:text-gray-400" />
