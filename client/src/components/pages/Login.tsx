@@ -39,7 +39,7 @@ export default function Login({ onLogin }: LoginProps) {
 
     try {
       // Call JWT authentication API
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const API_URL = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${API_URL}/api/v1/auth/login`, {
         method: 'POST',
         headers: {
