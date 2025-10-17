@@ -22,6 +22,7 @@ import { ServicesPage } from './pages/ServicesPage';
 import { BannersPage } from './pages/BannersPage';
 import { DevicesPage } from './pages/DevicesPage';
 import ModelBrowser from './pages/ModelBrowser';
+import UserTransactionDetail from './components/pages/UserTransactionDetail';
 
 function AppContent() {
   const [dateFilter, setDateFilter] = useState('today');
@@ -90,6 +91,8 @@ function AppContent() {
             <Route path="/complaints" component={Complaints} />
             <Route path="/reports" component={Reports} />
             <Route path="/settings" component={Settings} />
+            <Route path="/users/detail/:userId" component={UserDetailPage} />
+            <Route path="/transactions/user/:userId" component={UserTransactionDetail} />
             <Route component={Dashboard} />
           </Switch>
         </div>

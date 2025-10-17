@@ -16,31 +16,39 @@ async def get_mobile_transactions(
     limit: int = Query(100, le=500),
     db: Session = Depends(get_db)
 ):
-    """Get all users from service_request table (excluding pending status)"""
+    """Get grouped users list from service_request (excluding pending status)"""
     try:
-        # Get all service requests excluding pending status
-        service_requests = db.query(Service_Request).filter(
+        # Get distinct users who have transactions (excluding pending)
+        from sqlalchemy import func
+        
+        users_with_txns = db.query(
+            Service_Request.user_id,
+            func.count(Service_Request.id).label('transaction_count'),
+            func.sum(Service_Request.amount).label('total_amount'),
+            func.max(Service_Request.created_at).label('last_transaction')
+        ).filter(
             Service_Request.status != 'pending'
-        ).order_by(desc(Service_Request.created_at)).limit(limit).all()
+        ).group_by(Service_Request.user_id).order_by(
+            desc('last_transaction')
+        ).limit(limit).all()
 
         result = []
-        for sr in service_requests:
-            # Get user details
-            user = db.query(User).filter(User.UserID == sr.user_id).first()
+        for user_data in users_with_txns:
+            user = db.query(User).filter(User.UserID == user_data.user_id).first()
             
-            result.append({
-                "id": sr.user_id,  # Using user_id for View button
-                "transactionId": sr.reference_id,
-                "user": user.fullname if user else "Unknown",
-                "mobileNumber": sr.mobile_number or "",
-                "operator": sr.operator_code or "N/A",
-                "circle": "N/A",  # Can be extracted from service_metadata if needed
-                "amount": float(sr.amount) if sr.amount else 0,
-                "status": sr.status.capitalize(),
-                "date": sr.created_at.strftime('%Y-%m-%d') if sr.created_at else "",
-                "time": sr.created_at.strftime('%H:%M:%S') if sr.created_at else "",
-                "referenceId": sr.reference_id
-            })
+            if user:
+                result.append({
+                    "id": user.UserID,
+                    "userId": user.UserID,
+                    "user": user.fullname,
+                    "mobile": user.MobileNumber,
+                    "memberId": user.member_id,
+                    "transactionCount": user_data.transaction_count,
+                    "totalAmount": float(user_data.total_amount) if user_data.total_amount else 0,
+                    "lastTransaction": user_data.last_transaction.strftime('%Y-%m-%d %H:%M:%S') if user_data.last_transaction else "",
+                    "primeStatus": user.prime_status,
+                    "kycStatus": "Verified" if user.IsKYCCompleted else "Pending"
+                })
 
         return result
     except Exception as e:
