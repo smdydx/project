@@ -355,11 +355,17 @@ export default function UserDetailPage() {
             {userDetail.aadhaar?.photo && (
               <div>
                 <label className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 block">Aadhaar Photo</label>
-                <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                   <img 
-                    src={userDetail.aadhaar.photo} 
+                    src={
+                      userDetail.aadhaar.photo.startsWith('data:image') 
+                        ? userDetail.aadhaar.photo 
+                        : userDetail.aadhaar.photo.startsWith('http')
+                        ? userDetail.aadhaar.photo
+                        : `data:image/jpeg;base64,${userDetail.aadhaar.photo}`
+                    }
                     alt="Aadhaar Photo" 
-                    className="w-full h-64 object-cover"
+                    className="w-full h-64 object-contain"
                     onError={(e) => {
                       e.currentTarget.src = 'https://via.placeholder.com/400x300?text=Image+Not+Available';
                     }}
