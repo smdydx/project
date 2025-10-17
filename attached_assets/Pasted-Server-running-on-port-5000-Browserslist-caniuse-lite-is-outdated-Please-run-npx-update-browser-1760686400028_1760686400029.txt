@@ -1,0 +1,98 @@
+Server running on port 5000
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+1:02:14 PM [vite] Pre-transform error: /home/smdydx/Downloads/LCRAdmin/project/client/src/components/pages/Dashboard.tsx: Unexpected token, expected "}" (379:20)
+
+  377 |               {stats?.total_mobile_recharge && stats?.total_dth_recharge
+  378 |                 ? `| ₹${(stats.total_mobile_recharge + stats.total_dth_recharge).toLocaleString()}`
+> 379 |                 : ""sactions
+      |                     ^
+  380 |                 ? (stats.total_transactions * 127).toLocaleString()
+  381 |                 : "8"}
+  382 |             </span>
+1:02:15 PM [vite] Internal server error: /home/smdydx/Downloads/LCRAdmin/project/client/src/components/pages/Dashboard.tsx: Unexpected token, expected "}" (379:20)
+
+  377 |               {stats?.total_mobile_recharge && stats?.total_dth_recharge
+  378 |                 ? `| ₹${(stats.total_mobile_recharge + stats.total_dth_recharge).toLocaleString()}`
+> 379 |                 : ""sactions
+      |                     ^
+  380 |                 ? (stats.total_transactions * 127).toLocaleString()
+  381 |                 : "8"}
+  382 |             </span>
+  Plugin: vite:react-babel
+  File: /home/smdydx/Downloads/LCRAdmin/project/client/src/components/pages/Dashboard.tsx:379:20
+  377|                {stats?.total_mobile_recharge && stats?.total_dth_recharge
+  378|                  ? `| ₹${(stats.total_mobile_recharge + stats.total_dth_recharge).toLocaleString()}`
+  379|                  : ""sactions
+     |                      ^
+  380|                  ? (stats.total_transactions * 127).toLocaleString()
+  381|                  : "8"}
+      at toParseError (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at TypeScriptParserMixin.raise (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/tokenizer/index.ts:1496:19)
+      at TypeScriptParserMixin.unexpected (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/tokenizer/index.ts:1536:16)
+      at TypeScriptParserMixin.expect (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/util.ts:157:12)
+      at TypeScriptParserMixin.jsxParseExpressionContainer (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/plugins/jsx/index.ts:387:12)
+      at TypeScriptParserMixin.jsxParseElementAt (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/plugins/jsx/index.ts:493:24)
+      at TypeScriptParserMixin.jsxParseElementAt (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/plugins/jsx/index.ts:476:34)
+      at TypeScriptParserMixin.jsxParseElementAt (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/plugins/jsx/index.ts:476:34)
+      at TypeScriptParserMixin.jsxParseElementAt (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/plugins/jsx/index.ts:476:34)
+      at TypeScriptParserMixin.jsxParseElementAt (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/plugins/jsx/index.ts:476:34)
+      at TypeScriptParserMixin.jsxParseElement (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/plugins/jsx/index.ts:552:19)
+      at TypeScriptParserMixin.parseExprAtom (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/plugins/jsx/index.ts:566:21)
+      at TypeScriptParserMixin.parseExprSubscripts (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:708:23)
+      at TypeScriptParserMixin.parseUpdate (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:687:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:649:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/plugins/typescript/index.ts:3595:20)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:388:14)
+      at TypeScriptParserMixin.parseExprOps (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:400:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:355:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:297:21)
+      at fn (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/plugins/typescript/index.ts:3448:23)
+      at TypeScriptParserMixin.tryParse (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/util.ts:174:20)
+      at TypeScriptParserMixin.parseMaybeAssign (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/plugins/typescript/index.ts:3447:20)
+      at callback (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:251:12)
+      at TypeScriptParserMixin.allowInAnd (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:3149:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:250:17)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:1804:16)
+      at TypeScriptParserMixin.parseExprAtom (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:1159:21)
+      at TypeScriptParserMixin.parseExprAtom (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/plugins/jsx/index.ts:576:22)
+      at TypeScriptParserMixin.parseExprSubscripts (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:708:23)
+      at TypeScriptParserMixin.parseUpdate (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:687:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:649:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/plugins/typescript/index.ts:3595:20)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:388:14)
+      at TypeScriptParserMixin.parseExprOps (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:400:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:355:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:297:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/plugins/typescript/index.ts:3467:22)
+      at TypeScriptParserMixin.parseExpressionBase (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:220:23)
+      at callback (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:211:39)
+      at TypeScriptParserMixin.allowInAnd (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:3144:16)
+      at TypeScriptParserMixin.parseExpression (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/expression.ts:211:17)
+      at TypeScriptParserMixin.parseReturnStatement (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/statement.ts:1067:28)
+      at TypeScriptParserMixin.parseStatementContent (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/statement.ts:487:21)
+      at TypeScriptParserMixin.parseStatementContent (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/plugins/typescript/index.ts:2917:20)
+      at TypeScriptParserMixin.parseStatementLike (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/statement.ts:426:17)
+      at TypeScriptParserMixin.parseStatementListItem (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/statement.ts:375:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/statement.ts:1396:16)
+      at TypeScriptParserMixin.parseBlockBody (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/statement.ts:1369:10)
+      at TypeScriptParserMixin.parseBlock (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parser/statement.ts:1337:10)
+1:02:29 PM [vite] Internal server error: /home/smdydx/Downloads/LCRAdmin/project/client/src/components/pages/Dashboard.tsx: Unexpected token, expected "}" (379:20)
+
+  377 |               {stats?.total_mobile_recharge && stats?.total_dth_recharge
+  378 |                 ? `| ₹${(stats.total_mobile_recharge + stats.total_dth_recharge).toLocaleString()}`
+> 379 |                 : ""sactions
+      |                     ^
+  380 |                 ? (stats.total_transactions * 127).toLocaleString()
+  381 |                 : "8"}
+  382 |             </span>
+  Plugin: vite:react-babel
+  File: /home/smdydx/Downloads/LCRAdmin/project/client/src/components/pages/Dashboard.tsx:379:20
+  377|                {stats?.total_mobile_recharge && stats?.total_dth_recharge
+  378|                  ? `| ₹${(stats.total_mobile_recharge + stats.total_dth_recharge).toLocaleString()}`
+  379|                  : ""sactions
+     |                      ^
+  380|                  ? (stats.total_transactions * 127).toLocaleString()
+  381|                  : "8"}
+      at toParseError (/home/smdydx/Downloads/LCRAdmin/project/node_modules/@babel/parser/src/parse-error.ts:95:45)
