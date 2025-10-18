@@ -11,7 +11,7 @@ run = ["npm", "run", "start"]
 build = ["npm", "run", "build"]
 
 [workflows]
-runButton = "Start Full Stack App"
+runButton = "Clean Start"
 
 [[workflows.workflow]]
 name = "Start Full Stack"
@@ -143,6 +143,19 @@ args = "cd backend && pip install -q -r requirements.txt && python -m uvicorn ma
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "sleep 3 && npm run dev"
+
+[[workflows.workflow]]
+name = "Clean Start"
+author = 48755284
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && pip uninstall -y pydantic-settings && pip install -q -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "sleep 5 && npm run dev"
 
 [[ports]]
 localPort = 5000
