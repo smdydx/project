@@ -1,6 +1,7 @@
 """
 JWT Authentication and Authorization - Production Ready
 """
+from typing import Optional
 from fastapi import HTTPException, status, Depends, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel

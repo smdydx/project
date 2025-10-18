@@ -51,13 +51,12 @@ export default function Login() {
       }
 
       // Call API with timeout
-      const API_URL = import.meta.env.VITE_API_URL || '';
-      console.log('🔑 Attempting login to:', `${API_URL}/api/v1/auth/login`);
+      console.log('🔑 Attempting login to:', '/api/v1/auth/login');
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
       
-      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+      const response = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

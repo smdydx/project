@@ -12,11 +12,11 @@ function getAuthHeaders(): HeadersInit {
   const headers: HeadersInit = {
     "Content-Type": "application/json",
   };
-  
+
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
-  
+
   return headers;
 }
 
@@ -29,7 +29,7 @@ export const queryClient = new QueryClient({
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
         }
-        
+
         const response = await fetch(queryKey[0] as string, {
           headers,
         });
@@ -49,21 +49,27 @@ interface ApiRequestOptions {
   headers?: HeadersInit;
 }
 
-export async function apiRequest<T = any>(
-  url: string,
-  options: ApiRequestOptions = {}
-): Promise<T> {
-  const { method = "GET", body, headers: customHeaders } = options;
-  
-  const defaultHeaders = getAuthHeaders();
-  const headers = { ...defaultHeaders, ...customHeaders };
+export async function apiRequest(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<any> {
+  const token = localStorage.getItem("lcrpay_auth_token");
 
-  const response = await fetch(url, {
-    method,
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
+    ...options.headers,
+  };
+
+  const response = await fetch(endpoint, {
+    ...options,
     headers,
-    body: body ? JSON.stringify(body) : undefined,
   });
 
-  await throwIfNotOk(response);
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `API Error: ${response.statusText}`);
+  }
+
   return response.json();
 }
