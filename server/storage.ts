@@ -2,6 +2,8 @@ import type {
   User, 
   Transaction, 
   Wallet,
+  DirectIncome,
+  LevelIncome,
   AutoLoan,
   BusinessLoan,
   HomeLoan,
@@ -21,10 +23,14 @@ export interface DashboardStats {
   total_users: number;
   prime_users: number;
   total_lcr_money: number;
+  total_distributor_lcr_money: number;
+  total_distributor_prime_reward: number;
   mobile_recharges: number;
+  total_mobile_recharge: number;
   new_signups_today: number;
   kyc_verified_users: number;
   dth_recharges: number;
+  total_dth_recharge: number;
 }
 
 export interface ChartData {
@@ -81,6 +87,8 @@ export class MemStorage implements IStorage {
   private users: User[] = [];
   private transactions: Transaction[] = [];
   private walletTransactions: Wallet[] = [];
+  private directIncome: DirectIncome[] = [];
+  private levelIncome: LevelIncome[] = [];
   private autoLoans: AutoLoan[] = [];
   private businessLoans: BusinessLoan[] = [];
   private homeLoans: HomeLoan[] = [];
@@ -160,6 +168,72 @@ export class MemStorage implements IStorage {
         IsDeleted: false,
       });
     }
+
+    // Generate mock wallet transactions
+    for (let i = 1; i <= 150; i++) {
+      const userId = Math.floor(Math.random() * 50) + 1;
+      const types = ['credit', 'debit'];
+      const type = types[Math.floor(Math.random() * types.length)];
+      
+      this.walletTransactions.push({
+        id: i,
+        transaction_by: userId,
+        reference_id: `WTX${String(i).padStart(8, '0')}`,
+        transaction_amount: `${(Math.random() * 5000 + 100).toFixed(5)}`,
+        transaction_type: type,
+        purpose: type === 'credit' ? 'Deposit' : 'Withdrawal',
+        remark: `Transaction ${i}`,
+        transaction_date: new Date(now.getTime() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+        transaction_mode: 'online',
+        utr_no: `UTR${String(i).padStart(12, '0')}`,
+        status: 'completed',
+        payment_screenshot: null,
+      });
+    }
+
+    // Generate mock direct income
+    const primeUsers = this.users.filter(u => u.prime_status);
+    for (let i = 1; i <= 80; i++) {
+      const receiverId = Math.floor(Math.random() * 50) + 1;
+      const activatedById = primeUsers[Math.floor(Math.random() * primeUsers.length)]?.UserID || 1;
+      const packageAmount = (Math.random() * 10000 + 1000);
+      const directIncomeAmount = packageAmount * 0.1; // 10% direct income
+      
+      this.directIncome.push({
+        id: i,
+        receiver_user_id: receiverId,
+        prime_activated_by_user_id: activatedById,
+        receiver_member: this.users.find(u => u.UserID === receiverId)?.member_id || null,
+        prime_activated_by_member: this.users.find(u => u.UserID === activatedById)?.member_id || null,
+        amount: `${directIncomeAmount.toFixed(5)}`,
+        package_amount: `${packageAmount.toFixed(5)}`,
+        reference_id: `DI${String(i).padStart(8, '0')}`,
+        received_date: new Date(now.getTime() - Math.random() * 60 * 24 * 60 * 60 * 1000),
+      });
+    }
+
+    // Generate mock level income
+    for (let i = 1; i <= 200; i++) {
+      const receiverId = Math.floor(Math.random() * 50) + 1;
+      const activatedById = primeUsers[Math.floor(Math.random() * primeUsers.length)]?.UserID || 1;
+      const level = Math.floor(Math.random() * 10) + 1; // Levels 1-10
+      const packageAmount = (Math.random() * 10000 + 1000);
+      const levelIncomePercent = Math.max(0.05, 0.15 - (level * 0.01)); // Decreasing % for higher levels
+      const levelIncomeAmount = packageAmount * levelIncomePercent;
+      
+      this.levelIncome.push({
+        id: i,
+        receiver_user_id: receiverId,
+        prime_activated_by_user_id: activatedById,
+        receiver_member: this.users.find(u => u.UserID === receiverId)?.member_id || null,
+        prime_activated_by_member: this.users.find(u => u.UserID === activatedById)?.member_id || null,
+        level: level,
+        amount: `${levelIncomeAmount.toFixed(5)}`,
+        package_amount: `${packageAmount.toFixed(5)}`,
+        reference_id: `LI${String(i).padStart(8, '0')}`,
+        received_date: new Date(now.getTime() - Math.random() * 60 * 24 * 60 * 60 * 1000),
+      });
+    }
   }
 
   async getDashboardStats(): Promise<DashboardStats> {
@@ -173,10 +247,28 @@ export class MemStorage implements IStorage {
     
     const kycVerified = this.users.filter(u => u.IsKYCCompleted).length;
     
+    // Total LCR Money from all users' INR wallet balance
     const totalLcrMoney = this.users.reduce((sum, u) => {
       return sum + parseFloat(u.INRWalletBalance || "0");
     }, 0);
 
+    // Total Distributor LCR Money from all users' wallets (using proper relationship)
+    const totalDistributorLcrMoney = this.users.reduce((sum, u) => {
+      return sum + parseFloat(u.INRWalletBalance || "0") + parseFloat(u.RewardWalletBalance || "0");
+    }, 0);
+
+    // Total Distributor Prime Reward from direct income and level income (using proper foreign key relationships)
+    const totalDirectIncome = this.directIncome.reduce((sum, income) => {
+      return sum + parseFloat(income.amount || "0");
+    }, 0);
+
+    const totalLevelIncome = this.levelIncome.reduce((sum, income) => {
+      return sum + parseFloat(income.amount || "0");
+    }, 0);
+
+    const totalDistributorPrimeReward = totalDirectIncome + totalLevelIncome;
+
+    // Mobile and DTH recharges count
     const mobileRecharges = this.transactions.filter(t => 
       t.TransactionType === 'Mobile' && t.Status === 'Completed'
     ).length;
@@ -189,10 +281,14 @@ export class MemStorage implements IStorage {
       total_users: totalUsers,
       prime_users: primeUsers,
       total_lcr_money: Math.floor(totalLcrMoney),
+      total_distributor_lcr_money: Math.floor(totalDistributorLcrMoney),
+      total_distributor_prime_reward: Math.floor(totalDistributorPrimeReward),
       mobile_recharges: mobileRecharges,
+      total_mobile_recharge: mobileRecharges,
       new_signups_today: newSignupsToday,
       kyc_verified_users: kycVerified,
       dth_recharges: dthRecharges,
+      total_dth_recharge: dthRecharges,
     };
   }
 

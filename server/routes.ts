@@ -214,6 +214,17 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // Dashboard Statistics (v1 API endpoint)
+  app.get("/api/v1/dashboard/stats", async (_req, res) => {
+    try {
+      const stats = await storage.getDashboardStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+      res.status(500).json({ error: "Failed to fetch dashboard stats" });
+    }
+  });
+
   // Dashboard Charts Data
   app.get("/api/dashboard/charts", async (_req, res) => {
     try {

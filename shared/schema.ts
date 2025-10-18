@@ -87,8 +87,10 @@ export type Wallet = typeof wallet.$inferSelect;
 // ============================= INCOME TABLES =============================
 export const directIncome = pgTable("direct_income", {
   id: serial("id").primaryKey(),
-  receiver_member: varchar("receiver_member", { length: 255 }).notNull(),
-  prime_activated_by_member: varchar("prime_activated_by_member", { length: 255 }).notNull(),
+  receiver_user_id: integer("receiver_user_id").references(() => users.UserID).notNull(),
+  prime_activated_by_user_id: integer("prime_activated_by_user_id").references(() => users.UserID).notNull(),
+  receiver_member: varchar("receiver_member", { length: 255 }),
+  prime_activated_by_member: varchar("prime_activated_by_member", { length: 255 }),
   amount: decimal("amount", { precision: 10, scale: 5 }),
   package_amount: decimal("package_amount", { precision: 10, scale: 5 }),
   reference_id: varchar("reference_id", { length: 255 }),
@@ -99,8 +101,10 @@ export type DirectIncome = typeof directIncome.$inferSelect;
 
 export const levelIncome = pgTable("level_income", {
   id: serial("id").primaryKey(),
-  receiver_member: varchar("receiver_member", { length: 255 }).notNull(),
-  prime_activated_by_member: varchar("prime_activated_by_member", { length: 255 }).notNull(),
+  receiver_user_id: integer("receiver_user_id").references(() => users.UserID).notNull(),
+  prime_activated_by_user_id: integer("prime_activated_by_user_id").references(() => users.UserID).notNull(),
+  receiver_member: varchar("receiver_member", { length: 255 }),
+  prime_activated_by_member: varchar("prime_activated_by_member", { length: 255 }),
   level: integer("level"),
   amount: decimal("amount", { precision: 10, scale: 5 }),
   package_amount: decimal("package_amount", { precision: 10, scale: 5 }),
