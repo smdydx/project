@@ -3,10 +3,12 @@ import { useLocation } from "wouter";
 import { loginSchema, type LoginInput } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/lib/auth";
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<LoginInput>({
     MobileNumber: "",
@@ -33,7 +35,7 @@ export default function Login() {
       const validation = loginSchema.safeParse(formData);
       if (!validation.success) {
         const fieldErrors: Partial<Record<keyof LoginInput, string>> = {};
-        validation.error.errors.forEach(err => {
+        validation.error.issues.forEach((err: any) => {
           if (err.path[0]) {
             fieldErrors[err.path[0] as keyof LoginInput] = err.message;
           }
@@ -52,9 +54,8 @@ export default function Login() {
         }
       );
 
-      // Store token and user data
-      localStorage.setItem("access_token", response.access_token);
-      localStorage.setItem("user", JSON.stringify(response.user));
+      // Store token and user data using auth context
+      login(response.access_token, response.user);
 
       toast({
         title: "Login Successful",
