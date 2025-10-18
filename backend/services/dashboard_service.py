@@ -41,22 +41,30 @@ class DashboardService:
                 or_(User.IsDeleted == False, User.IsDeleted == None)
             ).count()
             
-            # ============ WALLET BALANCES - DIRECT SUM FROM USERS TABLE ============
-            # Total distributor LCR money (sum of INR wallet balance)
-            lcr_money_sum = db.query(
-                func.coalesce(func.sum(cast(User.INRWalletBalance, Numeric)), 0)
-            ).filter(
-                or_(User.IsDeleted == False, User.IsDeleted == None)
-            ).scalar()
-            total_lcr_money = float(lcr_money_sum) if lcr_money_sum else 0.0
+            # ============ INCOME STATS - COUNT FROM INCOME TABLES ============
+            # Total LCR Money - count of users who have received LCR money
+            from models.models import DirectIncome, LevelIncome
             
-            # Total distributor prime reward (sum of reward wallet balance)
-            prime_reward_sum = db.query(
-                func.coalesce(func.sum(cast(User.RewardWalletBalance, Numeric)), 0)
-            ).filter(
+            # Count unique users who received direct income
+            direct_income_users = db.query(func.count(func.distinct(DirectIncome.receiver_member))).scalar() or 0
+            
+            # Count unique users who received level income
+            level_income_users = db.query(func.count(func.distinct(LevelIncome.receiver_member))).scalar() or 0
+            
+            # Total LCR Money = Users with INR Wallet Balance > 0
+            total_lcr_money = db.query(User).filter(
+                User.INRWalletBalance > 0,
                 or_(User.IsDeleted == False, User.IsDeleted == None)
-            ).scalar()
-            total_prime_reward = float(prime_reward_sum) if prime_reward_sum else 0.0
+            ).count()
+            
+            # Total Distributor LCR Money = Users with any wallet balance
+            total_distributor_lcr_money = db.query(User).filter(
+                or_(User.INRWalletBalance > 0, User.RewardWalletBalance > 0),
+                or_(User.IsDeleted == False, User.IsDeleted == None)
+            ).count()
+            
+            # Total Distributor Prime Reward = Unique users from DirectIncome + LevelIncome
+            total_prime_reward = direct_income_users + level_income_users
             
             # ============ PAYMENT GATEWAY STATS - NO JOINS, DIRECT COUNT ============
             # Mobile recharge count - ONLY from payment_gateway table, no joins
@@ -77,15 +85,16 @@ class DashboardService:
             # Calculate verified accounts (KYC completed users)
             verified_accounts = kyc_verified_users
 
-            print(f"📊 Dashboard Stats Debug (NO JOINS, DIRECT QUERIES):")
+            print(f"📊 Dashboard Stats Debug (USER COUNTS FROM TABLES):")
             print(f"   Total Users: {total_users}")
             print(f"   New Signups Today: {new_signups_today}")
             print(f"   KYC Verified: {kyc_verified_users}")
             print(f"   Prime Users: {prime_users}")
-            print(f"   LCR Money (from users.INRWalletBalance): ₹{total_lcr_money}")
-            print(f"   Prime Reward (from users.RewardWalletBalance): ₹{total_prime_reward}")
-            print(f"   Mobile Recharge (from payment_gateway WHERE status=SUCCESS): {total_mobile_recharge}")
-            print(f"   DTH Recharge (from payment_gateway WHERE status=SUCCESS): {total_dth_recharge}")
+            print(f"   Total LCR Money (users with INR wallet > 0): {total_lcr_money}")
+            print(f"   Total Distributor LCR Money (users with any wallet balance): {total_distributor_lcr_money}")
+            print(f"   Total Distributor Prime Reward (DirectIncome + LevelIncome users): {total_prime_reward}")
+            print(f"   Mobile Recharge (payment_gateway count): {total_mobile_recharge}")
+            print(f"   DTH Recharge (payment_gateway count): {total_dth_recharge}")
 
             return {
                 "total_users": total_users,
@@ -94,8 +103,8 @@ class DashboardService:
                 "verified_accounts": verified_accounts,
                 "kyc_verification_percentage": round(kyc_verification_percentage, 2),
                 "prime_users": prime_users,
-                "total_distributor_lcr_money": round(total_lcr_money, 2),
-                "total_distributor_prime_reward": round(total_prime_reward, 2),
+                "total_distributor_lcr_money": total_distributor_lcr_money,
+                "total_distributor_prime_reward": total_prime_reward,
                 "total_mobile_recharge": total_mobile_recharge,
                 "total_dth_recharge": total_dth_recharge
             }

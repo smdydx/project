@@ -123,16 +123,16 @@ export default function Dashboard() {
     },
     {
       title: "Total Distributor LCR Money",
-      subtitle: "LCR balance",
-      value: `₹${(stats?.total_distributor_lcr_money || 0).toLocaleString()}`,
-      icon: DollarSign,
+      subtitle: "Users with wallet balance",
+      value: (stats?.total_distributor_lcr_money || 0).toLocaleString(),
+      icon: Users,
       trend: { value: 8.2, isPositive: true, period: "vs yesterday" },
       color: "green" as const,
     },
     {
       title: "Total Distributor Prime Reward",
-      subtitle: "Rewards earned",
-      value: `₹${(stats?.total_distributor_prime_reward || 0).toLocaleString()}`,
+      subtitle: "Users with income rewards",
+      value: (stats?.total_distributor_prime_reward || 0).toLocaleString(),
       icon: Activity,
       trend: { value: 18.3, isPositive: true, period: "vs yesterday" },
       color: "red" as const,
@@ -333,7 +333,7 @@ export default function Dashboard() {
                 ? `Total: ${transactions.length}`
                 : "No Transactions"}{" "}
               {stats?.total_mobile_recharge && stats?.total_dth_recharge
-                ? `| ₹${(stats.total_mobile_recharge + stats.total_dth_recharge).toLocaleString()}`
+                ? `| Recharges: ${(stats.total_mobile_recharge + stats.total_dth_recharge).toLocaleString()}`
                 : ""}
             </span>
           </div>
