@@ -11,19 +11,122 @@ from models.service_request import Service_Request
 
 router = APIRouter(tags=["transactions"])
 
+
+@router.get("/service-types")
+async def get_service_types(db: Session = Depends(get_db)):
+    """Get all unique service types"""
+    try:
+        service_types = db.query(Service_Request.service_type).distinct().all()
+        return [st[0] for st in service_types if st[0]]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/mobile")
 async def get_mobile_transactions(
     limit: int = Query(500, le=1000),
+    service_type: str = Query(None),
+    status: str = Query(None),
     db: Session = Depends(get_db)
 ):
-    """Get all service request transactions (excluding pending status)"""
+    """Get all service request transactions with filters"""
     try:
-        # Get all service requests excluding pending
-        service_requests = db.query(Service_Request).filter(
-            Service_Request.status != 'pending'
-        ).order_by(desc(Service_Request.created_at)).limit(limit).all()
+        # Base query excluding pending by default
+        query = db.query(Service_Request).filter(
+            Service_Request.status.in_(['completed', 'failed', 'processing', 'paid'])
+        )
+        
+        # Apply service type filter if provided
+        if service_type and service_type != 'all':
+            query = query.filter(Service_Request.service_type == service_type)
+        
+        # Apply status filter if provided
+        if status and status != 'all':
+            query = query.filter(Service_Request.status == status)
+        
+        service_requests = query.order_by(desc(Service_Request.created_at)).limit(limit).all()
 
         result = []
+
+
+@router.get("/payment-details/{reference_id}")
+async def get_payment_details_by_reference(
+    reference_id: str,
+    db: Session = Depends(get_db)
+):
+    """Get all payment gateway transactions for a specific reference ID"""
+    try:
+        # Get service request
+        service_request = db.query(Service_Request).filter(
+            Service_Request.reference_id == reference_id
+        ).first()
+        
+        if not service_request:
+            raise HTTPException(status_code=404, detail="Service request not found")
+        
+        # Get all payment gateway records for this service request
+        payments = db.query(Payment_Gateway).filter(
+            Payment_Gateway.service_request_id == service_request.id
+        ).order_by(desc(Payment_Gateway.created_at)).all()
+        
+        # Get user details
+        user = db.query(User).filter(User.UserID == service_request.user_id).first()
+        
+        return {
+            "service_request": {
+                "id": service_request.id,
+                "reference_id": service_request.reference_id,
+                "service_type": service_request.service_type,
+                "operator_code": service_request.operator_code,
+                "mobile_number": service_request.mobile_number,
+                "amount": float(service_request.amount),
+                "status": service_request.status,
+                "payment_txn_id": service_request.payment_txn_id,
+                "utr_no": service_request.utr_no,
+                "created_at": service_request.created_at.isoformat() if service_request.created_at else None,
+                "updated_at": service_request.updated_at.isoformat() if service_request.updated_at else None,
+                "metadata": service_request.service_metadata
+            },
+            "user": {
+                "id": user.UserID if user else None,
+                "name": user.fullname if user else "Unknown",
+                "mobile": user.MobileNumber if user else "N/A",
+                "email": user.Email if user else "N/A"
+            },
+            "payment_gateway_transactions": [
+                {
+                    "id": pg.id,
+                    "client_txn_id": pg.client_txn_id,
+                    "sabpaisa_txn_id": pg.sabpaisa_txn_id,
+                    "payer_name": pg.payer_name,
+                    "payer_email": pg.payer_email,
+                    "payer_mobile": pg.payer_mobile,
+                    "amount": float(pg.amount) if pg.amount else 0,
+                    "paid_amount": float(pg.paid_amount) if pg.paid_amount else 0,
+                    "payment_mode": pg.payment_mode,
+                    "bank_name": pg.bank_name,
+                    "rrn": pg.rrn,
+                    "purpose": pg.purpose,
+                    "status": pg.status,
+                    "status_code": pg.status_code,
+                    "sabpaisa_message": pg.sabpaisa_message,
+                    "service_data": pg.service_data,
+                    "amount_type": pg.amount_type,
+                    "challan_number": pg.challan_number,
+                    "bank_error_code": pg.bank_error_code,
+                    "sabpaisa_error_code": pg.sabpaisa_error_code,
+                    "trans_date": pg.trans_date.isoformat() if pg.trans_date else None,
+                    "created_at": pg.created_at.isoformat() if pg.created_at else None,
+                    "updated_at": pg.updated_at.isoformat() if pg.updated_at else None
+                }
+                for pg in payments
+            ]
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
         for sr in service_requests:
             result.append({
                 "id": sr.id,

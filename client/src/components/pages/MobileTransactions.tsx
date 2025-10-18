@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Smartphone, Filter, ChevronDown, Download } from 'lucide-react';
+import { Search, Smartphone, Filter, ChevronDown, Download, X } from 'lucide-react';
 import Card from '@/components/common/Card';
 
 interface ServiceRequestTransaction {
@@ -17,76 +17,116 @@ interface ServiceRequestTransaction {
   updated_at: string;
 }
 
-const fetchServiceRequests = async (): Promise<any[]> => {
-  try {
-    const API_URL = window.location.origin;
-    const token = localStorage.getItem('access_token');
-    const headers: HeadersInit = {};
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    console.log('🔍 Fetching mobile transactions from:', `${API_URL}/api/v1/transactions/mobile`);
-    const response = await fetch(`${API_URL}/api/v1/transactions/mobile?limit=500`, { headers });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ API Error Response:', errorText);
-      throw new Error(`Failed to fetch mobile transactions: ${response.status}`);
-    }
+interface PaymentDetail {
+  service_request: any;
+  user: any;
+  payment_gateway_transactions: any[];
+}
 
-    const data = await response.json();
-    console.log('✅ Fetched mobile transaction records:', data.length);
-    return data;
-  } catch (error) {
-    console.error('❌ Error fetching mobile transactions:', error);
-    throw error;
-  }
-};
+const fetchServiceTypes = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/v1/transactions/service-types');
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error('Error fetching service types:', err);
+      return [];
+    }
+  };
+
+const fetchServiceRequests = async (filterServiceType: string, filterStatus: string) => {
+    try {
+      const params = new URLSearchParams();
+      if (filterServiceType && filterServiceType !== 'all') {
+        params.append('service_type', filterServiceType);
+      }
+      if (filterStatus && filterStatus !== 'all') {
+        params.append('status', filterStatus);
+      }
+
+      const response = await fetch(`http://localhost:8000/api/v1/transactions/mobile?${params.toString()}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ API Error Response:', errorText);
+        throw new Error(`Failed to fetch mobile transactions: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Fetched mobile transaction records:', data.length);
+      return data;
+    } catch (error) {
+      console.error('❌ Error fetching mobile transactions:', error);
+      throw error;
+    }
+  };
+
+const fetchPaymentDetails = async (referenceId: string) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/v1/transactions/payment-details/${referenceId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch payment details');
+      }
+      return await response.json();
+    } catch (err: any) {
+      console.error('Error fetching payment details:', err);
+      alert('Failed to load payment details');
+      return null;
+    }
+  };
 
 export default function MobileTransactions() {
   const [transactions, setTransactions] = useState<ServiceRequestTransaction[]>([]);
+  const [serviceTypes, setServiceTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<string>('non-pending');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterServiceType, setFilterServiceType] = useState('all');
+  const [selectedPaymentDetail, setSelectedPaymentDetail] = useState<PaymentDetail | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
-    const loadTransactions = async () => {
+    const loadServiceTypes = async () => {
+      const types = await fetchServiceTypes();
+      setServiceTypes(types);
+    };
+    loadServiceTypes();
+  }, []);
+
+  useEffect(() => {
+    const loadData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await fetchServiceRequests();
-        if (!data || data.length === 0) {
-          console.log('No service requests found, setting empty array');
-          setTransactions([]);
-        } else {
-          setTransactions(data);
-        }
+        const data = await fetchServiceRequests(filterServiceType, filterStatus);
+        setTransactions(data || []);
       } catch (err: any) {
-        console.error('Failed to load service requests:', err);
-        setError(err.message || 'Failed to load service requests. Please check backend connection.');
-      } finally {
-        setLoading(false);
+        setError(err.message || 'Failed to load service requests. Please try again.');
       }
+      setLoading(false);
     };
-    loadTransactions();
-  }, []);
+
+    loadData();
+  }, [filterStatus, filterServiceType]);
+
+  const handleReferenceClick = async (referenceId: string) => {
+    const details = await fetchPaymentDetails(referenceId);
+    if (details) {
+      setSelectedPaymentDetail(details);
+      setShowDetailModal(true);
+    }
+  };
 
   const filteredTransactions = transactions.filter(txn => {
-    if (!txn) return false;
-    
+    const searchLower = searchTerm.toLowerCase();
     const matchesSearch = 
-      txn.reference_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (txn.mobile_number || '').includes(searchTerm) ||
-      (txn.payment_txn_id || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (txn.utr_no || '').toLowerCase().includes(searchTerm.toLowerCase());
+      txn.reference_id?.toLowerCase().includes(searchLower) ||
+      txn.mobile_number?.toLowerCase().includes(searchLower) ||
+      txn.payment_txn_id?.toLowerCase().includes(searchLower) ||
+      txn.utr_no?.toLowerCase().includes(searchLower);
 
-    const matchesFilter = 
-      filterStatus === 'all' || 
-      (filterStatus === 'non-pending' && txn.status.toLowerCase() !== 'pending') ||
-      txn.status.toLowerCase() === filterStatus.toLowerCase();
-
-    return matchesSearch && matchesFilter;
+    return matchesSearch;
   });
 
   const getStatusColor = (status: string) => {
@@ -144,7 +184,7 @@ export default function MobileTransactions() {
                 setLoading(true);
                 setError(null);
                 try {
-                  const data = await fetchServiceRequests();
+                  const data = await fetchServiceRequests(filterServiceType, filterStatus);
                   setTransactions(data || []);
                 } catch (err: any) {
                   setError(err.message || 'Failed to load service requests. Please try again.');
@@ -175,26 +215,37 @@ export default function MobileTransactions() {
               <div className="relative">
                 <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <select
+                  value={filterServiceType}
+                  onChange={(e) => setFilterServiceType(e.target.value)}
+                  className="pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white appearance-none cursor-pointer"
+                  data-testid="select-service-type"
+                >
+                  <option value="all">All Services</option>
+                  {serviceTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="relative">
+                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
                   className="pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white appearance-none cursor-pointer"
                   data-testid="select-filter"
                 >
-                  <option value="non-pending">Non-Pending (Default)</option>
                   <option value="all">All Status</option>
                   <option value="completed">Completed</option>
                   <option value="paid">Paid</option>
                   <option value="processing">Processing</option>
                   <option value="failed">Failed</option>
-                  <option value="pending">Pending</option>
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
               </div>
             </div>
 
             <div className="mb-3 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
               <p className="text-sm text-blue-700 dark:text-blue-300" data-testid="text-current-filter">
-                <strong>Current Filter:</strong> {filterStatus === 'non-pending' ? 'Non-Pending (Excluding Pending Status)' : filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)}
+                <strong>Current Filter:</strong> {filterServiceType === 'all' ? 'All Services' : filterServiceType} | {filterStatus === 'all' ? 'All Status' : filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)}
                 <span className="ml-2">|</span>
                 <span className="ml-2"><strong>Total Results:</strong> {filteredTransactions.length}</span>
               </p>
@@ -231,7 +282,15 @@ export default function MobileTransactions() {
                       <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300" data-testid={`text-operator-${txn.id}`}>{txn.operator_code || '-'}</td>
                       <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-gray-300" data-testid={`text-mobile-${txn.id}`}>{txn.mobile_number || '-'}</td>
                       <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white" data-testid={`text-amount-${txn.id}`}>₹{parseFloat(txn.amount).toLocaleString()}</td>
-                      <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-gray-300" data-testid={`text-reference-${txn.id}`}>{txn.reference_id}</td>
+                      <td className="px-4 py-3 text-sm font-mono">
+                        <button
+                          onClick={() => handleReferenceClick(txn.reference_id)}
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer font-semibold"
+                          data-testid={`text-reference-${txn.id}`}
+                        >
+                          {txn.reference_id || 'N/A'}
+                        </button>
+                      </td>
                       <td className="px-4 py-3" data-testid={`text-status-${txn.id}`}>
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(txn.status)}`}>
                           {txn.status}
@@ -255,6 +314,73 @@ export default function MobileTransactions() {
           </div>
         )}
       </Card>
+
+      {showDetailModal && selectedPaymentDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-xl w-full max-w-4xl">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Payment Details</h2>
+              <button onClick={() => { setShowDetailModal(false); setSelectedPaymentDetail(null); }} className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h3 className="font-semibold text-lg text-gray-800 dark:text-white mb-2">Service Request Info</h3>
+                <p><strong className="text-gray-600 dark:text-gray-300">Reference ID:</strong> {selectedPaymentDetail.service_request.reference_id}</p>
+                <p><strong className="text-gray-600 dark:text-gray-300">Service Type:</strong> {selectedPaymentDetail.service_request.service_type}</p>
+                <p><strong className="text-gray-600 dark:text-gray-300">Amount:</strong> ₹{parseFloat(selectedPaymentDetail.service_request.amount).toLocaleString()}</p>
+                <p><strong className="text-gray-600 dark:text-gray-300">Status:</strong> 
+                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ml-2 ${getStatusColor(selectedPaymentDetail.service_request.status)}`}>
+                    {selectedPaymentDetail.service_request.status}
+                  </span>
+                </p>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg text-gray-800 dark:text-white mb-2">User Info</h3>
+                <p><strong className="text-gray-600 dark:text-gray-300">User ID:</strong> {selectedPaymentDetail.user.id}</p>
+                <p><strong className="text-gray-600 dark:text-gray-300">Name:</strong> {selectedPaymentDetail.user.name}</p>
+                <p><strong className="text-gray-600 dark:text-gray-300">Email:</strong> {selectedPaymentDetail.user.email}</p>
+              </div>
+            </div>
+            <div className="mt-6">
+              <h3 className="font-semibold text-lg text-gray-800 dark:text-white mb-2">Payment Gateway Transactions</h3>
+              {selectedPaymentDetail.payment_gateway_transactions.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200 dark:border-gray-700">
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Gateway</th>
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Transaction ID</th>
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Amount</th>
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Timestamp</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedPaymentDetail.payment_gateway_transactions.map((pgTxn, index) => (
+                        <tr key={index} className="border-b border-gray-100 dark:border-gray-800">
+                          <td className="px-3 py-2 text-sm text-gray-600 dark:text-gray-300">{pgTxn.gateway_name}</td>
+                          <td className="px-3 py-2 text-sm font-mono text-gray-600 dark:text-gray-300">{pgTxn.transaction_id}</td>
+                          <td className="px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white">₹{parseFloat(pgTxn.amount).toLocaleString()}</td>
+                          <td className="px-3 py-2" data-testid={`pg-text-status-${index}`}>
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(pgTxn.status)}`}>
+                              {pgTxn.status}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 text-sm text-gray-600 dark:text-gray-300">{formatDate(pgTxn.timestamp)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-gray-500 dark:text-gray-400">No payment gateway transactions found for this request.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
