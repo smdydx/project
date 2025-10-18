@@ -1,4 +1,4 @@
-modules = ["python-3.12", "nodejs-20", "cpp-clang14", "c-clang14"]
+modules = ["nodejs-20", "cpp-clang14", "c-clang14", "python-3.11"]
 [agent]
 expertMode = true
 
@@ -41,8 +41,11 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev"
+args = "bash -c 'cd backend && python run.py & npm run dev'"
 waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
 
 [[workflows.workflow]]
 name = "Start Python Backend & Frontend"
