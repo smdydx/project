@@ -125,7 +125,7 @@ mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd backend && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+args = "cd backend && pip install -q uvicorn fastapi sqlalchemy python-multipart pydantic pydantic-settings python-jose passlib bcrypt psycopg2-binary && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
