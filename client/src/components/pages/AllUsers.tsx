@@ -328,10 +328,10 @@ export default function AllUsers() {
           columns={columns}
           data={data}
           onDataUpdate={generateRealtimeUsers}
-          updateInterval={10000}
+          updateInterval={30000}
           searchPlaceholder="Search by name, email, or mobile..."
           showStats={true}
-          enableAnimations={true}
+          enableAnimations={false}
         />
       ) : (
         <Card>

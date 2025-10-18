@@ -29,11 +29,11 @@ export default function AdvancedRealtimeTable({
   data: initialData,
   searchable = true,
   searchPlaceholder = "Search...",
-  updateInterval = 5000,
+  updateInterval = 30000,
   onDataUpdate,
   title,
   showStats = true,
-  enableAnimations = true,
+  enableAnimations = false,
   wsChannel,
   useWebSocket: useWS = false
 }: AdvancedRealtimeTableProps) {
