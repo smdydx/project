@@ -1,26 +1,26 @@
+
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { loginSchema, type LoginInput } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/lib/auth";
+import { Lock, User, Eye, EyeOff, LogIn, Shield } from 'lucide-react';
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<LoginInput>({
-    MobileNumber: "",
-    LoginPIN: "",
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
   });
-  const [errors, setErrors] = useState<Partial<Record<keyof LoginInput, string>>>({});
+  const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
-    if (errors[name as keyof LoginInput]) {
+    if (errors[name as keyof typeof errors]) {
       setErrors(prev => ({ ...prev, [name]: undefined }));
     }
   };
@@ -31,44 +31,65 @@ export default function Login() {
     setErrors({});
 
     try {
-      // Validate form data
-      const validation = loginSchema.safeParse(formData);
-      if (!validation.success) {
-        const fieldErrors: Partial<Record<keyof LoginInput, string>> = {};
-        validation.error.issues.forEach((err: any) => {
-          if (err.path[0]) {
-            fieldErrors[err.path[0] as keyof LoginInput] = err.message;
-          }
-        });
-        setErrors(fieldErrors);
+      // Validate inputs
+      if (!formData.username.trim()) {
+        setErrors({ username: "Username is required" });
         setIsLoading(false);
         return;
       }
 
-      // Login API call
-      const response = await apiRequest<{ access_token: string; user: any }>(
-        "/api/auth/login",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      if (!formData.password) {
+        setErrors({ password: "Password is required" });
+        setIsLoading(false);
+        return;
+      }
 
-      // Store token and user data using auth context
-      login(response.access_token, response.user);
+      if (formData.password.length < 6) {
+        setErrors({ password: "Password must be at least 6 characters" });
+        setIsLoading(false);
+        return;
+      }
 
-      toast({
-        title: "Login Successful",
-        description: `Welcome back, ${response.user.fullname}!`,
+      // Call API
+      const API_URL = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username.trim(),
+          password: formData.password
+        })
       });
 
-      // Redirect to dashboard
-      setLocation("/");
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Store token and user data
+        login(data.access_token, { username: data.username });
+
+        toast({
+          title: "Login Successful",
+          description: `Welcome back, ${data.username}!`,
+        });
+
+        // Redirect to dashboard
+        setLocation("/");
+      } else {
+        const errorData = await response.json().catch(() => ({ detail: 'Login failed' }));
+        toast({
+          title: "Login Failed",
+          description: errorData.detail || "Invalid username or password",
+          variant: "destructive",
+        });
+        setFormData(prev => ({ ...prev, password: "" }));
+      }
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
         title: "Login Failed",
-        description: error.message || "Invalid mobile number or PIN",
+        description: error.message || "Connection error. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -83,19 +104,7 @@ export default function Login() {
           {/* Logo and Title */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <svg
-                className="w-8 h-8 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
+              <Shield className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               LCRpay Admin
@@ -107,59 +116,81 @@ export default function Login() {
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Mobile Number Input */}
+            {/* Username Input */}
             <div>
               <label
-                htmlFor="MobileNumber"
+                htmlFor="username"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                Mobile Number
+                Username
               </label>
-              <input
-                id="MobileNumber"
-                name="MobileNumber"
-                type="tel"
-                value={formData.MobileNumber}
-                onChange={handleChange}
-                placeholder="Enter your mobile number"
-                className={`w-full px-4 py-3 border ${
-                  errors.MobileNumber ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors`}
-                data-testid="input-mobile"
-                disabled={isLoading}
-              />
-              {errors.MobileNumber && (
-                <p className="mt-1 text-sm text-red-500" data-testid="error-mobile">
-                  {errors.MobileNumber}
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  value={formData.username}
+                  onChange={handleChange}
+                  placeholder="Enter your username"
+                  className={`w-full pl-10 pr-4 py-3 border ${
+                    errors.username ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                  } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors`}
+                  data-testid="input-username"
+                  disabled={isLoading}
+                  autoComplete="username"
+                />
+              </div>
+              {errors.username && (
+                <p className="mt-1 text-sm text-red-500" data-testid="error-username">
+                  {errors.username}
                 </p>
               )}
             </div>
 
-            {/* PIN Input */}
+            {/* Password Input */}
             <div>
               <label
-                htmlFor="LoginPIN"
+                htmlFor="password"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                Login PIN
+                Password
               </label>
-              <input
-                id="LoginPIN"
-                name="LoginPIN"
-                type="password"
-                value={formData.LoginPIN}
-                onChange={handleChange}
-                placeholder="Enter your 4-digit PIN"
-                className={`w-full px-4 py-3 border ${
-                  errors.LoginPIN ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors`}
-                data-testid="input-pin"
-                disabled={isLoading}
-                maxLength={4}
-              />
-              {errors.LoginPIN && (
-                <p className="mt-1 text-sm text-red-500" data-testid="error-pin">
-                  {errors.LoginPIN}
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                  className={`w-full pl-10 pr-10 py-3 border ${
+                    errors.password ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                  } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors`}
+                  data-testid="input-password"
+                  disabled={isLoading}
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-500" data-testid="error-password">
+                  {errors.password}
                 </p>
               )}
             </div>
@@ -168,16 +199,19 @@ export default function Login() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg flex items-center justify-center gap-2"
               data-testid="button-login"
             >
               {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                   Logging in...
-                </div>
+                </>
               ) : (
-                "Sign In"
+                <>
+                  <LogIn className="w-5 h-5" />
+                  Sign In
+                </>
               )}
             </button>
           </form>
@@ -194,6 +228,14 @@ export default function Login() {
               <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
                 Password: <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">LCRADMIN1216SMDYDX</span>
               </p>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center justify-center gap-1">
+              <Lock className="w-3 h-3" />
+              <p>Protected by LCRpay Security</p>
             </div>
           </div>
         </div>
