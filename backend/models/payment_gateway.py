@@ -39,9 +39,10 @@ class Payment_Gateway(IntPrimaryKeyMixin, Base):
         index=True
     )
     
+    # Relationship - uses lazy loading, won't auto-join unless explicitly accessed
     service_request: Mapped["Service_Request"] = relationship(
         back_populates="payments",
-        lazy="selectin"
+        lazy="select"  # Changed from selectin to select for better performance
     )
 
     # =========================

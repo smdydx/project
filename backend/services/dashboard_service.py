@@ -11,6 +11,7 @@ class DashboardService:
     @staticmethod
     def get_dashboard_stats(db: Session):
         try:
+            # ============ USER STATS - NO JOINS ============
             # Total users - excluding deleted
             total_users = db.query(User).filter(
                 or_(User.IsDeleted == False, User.IsDeleted == None)
@@ -40,6 +41,7 @@ class DashboardService:
                 or_(User.IsDeleted == False, User.IsDeleted == None)
             ).count()
             
+            # ============ WALLET BALANCES - DIRECT SUM FROM USERS TABLE ============
             # Total distributor LCR money (sum of INR wallet balance)
             lcr_money_sum = db.query(
                 func.coalesce(func.sum(cast(User.INRWalletBalance, Numeric)), 0)
@@ -56,41 +58,34 @@ class DashboardService:
             ).scalar()
             total_prime_reward = float(prime_reward_sum) if prime_reward_sum else 0.0
             
-            # Mobile recharge from Payment_Gateway - check multiple status variations
-            total_mobile_recharge = db.query(Payment_Gateway).filter(
+            # ============ PAYMENT GATEWAY STATS - NO JOINS, DIRECT COUNT ============
+            # Mobile recharge count - ONLY from payment_gateway table, no joins
+            total_mobile_recharge = db.query(func.count(Payment_Gateway.id)).filter(
                 or_(
                     Payment_Gateway.purpose.ilike('%mobile%'),
                     Payment_Gateway.purpose.ilike('%recharge%')
                 ),
-                or_(
-                    Payment_Gateway.status.ilike('%success%'),
-                    Payment_Gateway.status == 'SUCCESS',
-                    Payment_Gateway.status == 'COMPLETED'
-                )
-            ).count()
+                Payment_Gateway.status == 'SUCCESS'
+            ).scalar() or 0
             
-            # DTH recharge from Payment_Gateway
-            total_dth_recharge = db.query(Payment_Gateway).filter(
+            # DTH recharge count - ONLY from payment_gateway table, no joins
+            total_dth_recharge = db.query(func.count(Payment_Gateway.id)).filter(
                 Payment_Gateway.purpose.ilike('%dth%'),
-                or_(
-                    Payment_Gateway.status.ilike('%success%'),
-                    Payment_Gateway.status == 'SUCCESS',
-                    Payment_Gateway.status == 'COMPLETED'
-                )
-            ).count()
+                Payment_Gateway.status == 'SUCCESS'
+            ).scalar() or 0
 
             # Calculate verified accounts (KYC completed users)
             verified_accounts = kyc_verified_users
 
-            print(f"📊 Dashboard Stats Debug:")
+            print(f"📊 Dashboard Stats Debug (NO JOINS, DIRECT QUERIES):")
             print(f"   Total Users: {total_users}")
             print(f"   New Signups Today: {new_signups_today}")
             print(f"   KYC Verified: {kyc_verified_users}")
             print(f"   Prime Users: {prime_users}")
-            print(f"   LCR Money: {total_lcr_money}")
-            print(f"   Prime Reward: {total_prime_reward}")
-            print(f"   Mobile Recharge: {total_mobile_recharge}")
-            print(f"   DTH Recharge: {total_dth_recharge}")
+            print(f"   LCR Money (from users.INRWalletBalance): ₹{total_lcr_money}")
+            print(f"   Prime Reward (from users.RewardWalletBalance): ₹{total_prime_reward}")
+            print(f"   Mobile Recharge (from payment_gateway WHERE status=SUCCESS): {total_mobile_recharge}")
+            print(f"   DTH Recharge (from payment_gateway WHERE status=SUCCESS): {total_dth_recharge}")
 
             return {
                 "total_users": total_users,
