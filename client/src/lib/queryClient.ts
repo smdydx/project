@@ -7,11 +7,32 @@ async function throwIfNotOk(response: Response) {
   }
 }
 
+function getAuthHeaders(): HeadersInit {
+  const token = localStorage.getItem("access_token");
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+  
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  
+  return headers;
+}
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: async ({ queryKey }) => {
-        const response = await fetch(queryKey[0] as string);
+        const token = localStorage.getItem("access_token");
+        const headers: HeadersInit = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch(queryKey[0] as string, {
+          headers,
+        });
         await throwIfNotOk(response);
         return response.json();
       },
@@ -22,19 +43,27 @@ export const queryClient = new QueryClient({
   },
 });
 
-type RequestMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+interface ApiRequestOptions {
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  body?: any;
+  headers?: HeadersInit;
+}
 
-export async function apiRequest(
+export async function apiRequest<T = any>(
   url: string,
-  method: RequestMethod = "GET",
-  data?: any
-): Promise<Response> {
+  options: ApiRequestOptions = {}
+): Promise<T> {
+  const { method = "GET", body, headers: customHeaders } = options;
+  
+  const defaultHeaders = getAuthHeaders();
+  const headers = { ...defaultHeaders, ...customHeaders };
+
   const response = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : undefined,
-    body: data ? JSON.stringify(data) : undefined,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
   });
 
   await throwIfNotOk(response);
-  return response;
+  return response.json();
 }
