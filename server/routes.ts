@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { MemStorage } from "./storage";
-import { createAccessToken, verifyToken, authMiddleware } from "./auth";
+import { createAccessToken, authMiddleware } from "./auth";
 import { loginSchema, registerSchema } from "@shared/schema";
 
 const storage = new MemStorage();
@@ -12,7 +12,7 @@ export function registerRoutes(app: Express) {
       const validation = registerSchema.safeParse(req.body);
       
       if (!validation.success) {
-        return res.status(400).json({ error: validation.error.errors[0].message });
+        return res.status(400).json({ error: validation.error.issues[0].message });
       }
 
       const { MobileNumber, LoginPIN, fullname, Email } = validation.data;
@@ -53,7 +53,7 @@ export function registerRoutes(app: Express) {
       const validation = loginSchema.safeParse(req.body);
       
       if (!validation.success) {
-        return res.status(400).json({ error: validation.error.errors[0].message });
+        return res.status(400).json({ error: validation.error.issues[0].message });
       }
 
       const { MobileNumber, LoginPIN } = validation.data;

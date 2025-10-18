@@ -1,5 +1,4 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { createProxyMiddleware } from "http-proxy-middleware";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic } from "./vite";
 import { setupWebSocket } from "./websocket";
@@ -62,7 +61,7 @@ app.use((req, res, next) => {
   });
 
   // Setup WebSocket
-  const { broadcast } = setupWebSocket(server);
+  setupWebSocket(server);
 
   // Mock data simulator disabled - using real database
   // const simulator = createDataSimulator(broadcast);

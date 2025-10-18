@@ -1,0 +1,43 @@
+Server running on port 5000
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+6:19:48 AM [vite] Pre-transform error: Failed to resolve import "@/hooks/use-toast" from "client/src/pages/Login.tsx". Does the file exist?
+6:19:52 AM [vite] Internal server error: Failed to resolve import "@/hooks/use-toast" from "client/src/pages/Login.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/runner/workspace/client/src/pages/Login.tsx:4:25
+  3  |  import { useLocation } from "wouter";
+  4  |  import { loginSchema } from "@shared/schema";
+  5  |  import { useToast } from "@/hooks/use-toast";
+     |                            ^
+  6  |  import { apiRequest } from "@/lib/queryClient";
+  7  |  export default function Login() {
+      at TransformPluginContext._formatError (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:49258:41)
+      at TransformPluginContext.error (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:49253:16)
+      at normalizeUrl (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:64306:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async <anonymous> (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:64438:39)
+      at async Promise.all (index 4)
+      at async TransformPluginContext.transform (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:64365:7)
+      at async PluginContainer.transform (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:49099:18)
+      at async loadAndTransform (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:51977:27)
+      at async viteTransformMiddleware (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:62105:24)
+6:19:54 AM [vite] Internal server error: Failed to resolve import "@/hooks/use-toast" from "client/src/pages/Login.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/runner/workspace/client/src/pages/Login.tsx:4:25
+  3  |  import { useLocation } from "wouter";
+  4  |  import { loginSchema } from "@shared/schema";
+  5  |  import { useToast } from "@/hooks/use-toast";
+     |                            ^
+  6  |  import { apiRequest } from "@/lib/queryClient";
+  7  |  export default function Login() {
+      at TransformPluginContext._formatError (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:49258:41)
+      at TransformPluginContext.error (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:49253:16)
+      at normalizeUrl (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:64306:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async <anonymous> (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:64438:39)
+      at async Promise.all (index 4)
+      at async TransformPluginContext.transform (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:64365:7)
+      at async PluginContainer.transform (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:49099:18)
+      at async loadAndTransform (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:51977:27)
+POST /api/auth/login 200 in 8ms :: {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI…/dist/node/chunks/dep-D_zLpgQd.js:62105:24)
