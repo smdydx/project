@@ -24,14 +24,21 @@ app = FastAPI(
     description="Admin Dashboard API for comprehensive platform management"
 )
 
-# Configure CORS
+# Configure CORS with explicit settings
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5000",
+        "http://127.0.0.1:5000",
+        "https://*.replit.dev",
+        "https://*.repl.co",
+        "*"  # Allow all origins for development
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
-    expose_headers=["*"]
+    expose_headers=["*"],
+    max_age=3600
 )
 
 # Create upload directory if not exists

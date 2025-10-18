@@ -1,13 +1,11 @@
-
 """
 JWT Authentication and Authorization - Production Ready
 """
-from fastapi import HTTPException, Depends, status
+from fastapi import HTTPException, status, Depends, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from typing import Optional
+from pydantic import BaseModel
 from datetime import datetime, timedelta
 import jwt
-from pydantic import BaseModel
 import secrets
 
 # JWT Configuration
@@ -44,7 +42,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    
+
     to_encode.update({
         "exp": expire,
         "token_type": "access",
@@ -57,7 +55,7 @@ def create_refresh_token(data: dict) -> str:
     """Create JWT refresh token"""
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
-    
+
     to_encode.update({
         "exp": expire,
         "token_type": "refresh",
@@ -73,16 +71,16 @@ def verify_token(token: str, expected_type: str = "access") -> Optional[TokenDat
         username: str = payload.get("username")
         exp: int = payload.get("exp")
         token_type: str = payload.get("token_type", "access")
-        
+
         if username is None:
             return None
-        
+
         if token_type != expected_type:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=f"Invalid token type. Expected {expected_type}, got {token_type}"
             )
-            
+
         return TokenData(
             username=username,
             exp=datetime.fromtimestamp(exp),
@@ -107,25 +105,38 @@ def verify_token(token: str, expected_type: str = "access") -> Optional[TokenDat
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)) -> TokenData:
-    """Get current authenticated user from JWT token"""
-    if credentials is None:
+async def get_current_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    authorization: Optional[str] = Header(None)
+) -> TokenData:
+    """Validate JWT token and return user data"""
+    token = None
+
+    # Try to get token from Authorization header
+    if credentials:
+        token = credentials.credentials
+    elif authorization:
+        # Handle "Bearer <token>" format
+        parts = authorization.split()
+        if len(parts) == 2 and parts[0].lower() == "bearer":
+            token = parts[1]
+
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
+            detail="Missing or invalid authorization header",
             headers={"WWW-Authenticate": "Bearer"}
         )
-    
-    token = credentials.credentials
+
     token_data = verify_token(token, "access")
-    
+
     if token_data is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
+            detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"}
         )
-    
+
     return token_data
 
 async def require_admin(current_user: TokenData = Depends(get_current_user)) -> TokenData:
@@ -138,5 +149,5 @@ def authenticate_user(username: str, password: str) -> bool:
     """Authenticate user credentials"""
     ADMIN_USERNAME = "AdminLCR"
     ADMIN_PASSWORD = "LCRADMIN1216SMDYDX"
-    
+
     return username == ADMIN_USERNAME and password == ADMIN_PASSWORD

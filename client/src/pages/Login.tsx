@@ -50,18 +50,27 @@ export default function Login() {
         return;
       }
 
-      // Call API
+      // Call API with timeout
       const API_URL = import.meta.env.VITE_API_URL || '';
+      console.log('🔑 Attempting login to:', `${API_URL}/api/v1/auth/login`);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
       const response = await fetch(`${API_URL}/api/v1/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify({
           username: formData.username.trim(),
           password: formData.password
-        })
+        }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
@@ -87,11 +96,20 @@ export default function Login() {
       }
     } catch (error: any) {
       console.error("Login error:", error);
+      
+      let errorMessage = "Connection error. Please try again.";
+      if (error.name === 'AbortError') {
+        errorMessage = "Login timeout. The server took too long to respond.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Login Failed",
-        description: error.message || "Connection error. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
+      setFormData(prev => ({ ...prev, password: "" }));
     } finally {
       setIsLoading(false);
     }

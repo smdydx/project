@@ -12,25 +12,39 @@ router = APIRouter(tags=["authentication"])
 @router.post("/login", response_model=LoginResponse)
 async def login(request: LoginRequest):
     """Login endpoint - returns JWT access and refresh tokens"""
-    if not authenticate_user(request.username, request.password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"}
+    try:
+        print(f"🔐 Login attempt for user: {request.username}")
+        
+        if not authenticate_user(request.username, request.password):
+            print(f"❌ Authentication failed for user: {request.username}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect username or password",
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+        
+        # Create tokens
+        token_data = {"username": request.username}
+        access_token = create_access_token(token_data)
+        refresh_token = create_refresh_token(token_data)
+        
+        print(f"✅ Login successful for user: {request.username}")
+        
+        return LoginResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="bearer",
+            username=request.username,
+            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
         )
-    
-    # Create tokens
-    token_data = {"username": request.username}
-    access_token = create_access_token(token_data)
-    refresh_token = create_refresh_token(token_data)
-    
-    return LoginResponse(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        token_type="bearer",
-        username=request.username,
-        expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
-    )
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Login error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Login failed: {str(e)}"
+        )
 
 @router.post("/refresh")
 async def refresh_token(request: RefreshRequest):
