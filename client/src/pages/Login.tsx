@@ -75,7 +75,7 @@ export default function Login() {
         });
 
         // Redirect to dashboard
-        setLocation("/");
+        setTimeout(() => setLocation("/"), 100);
       } else {
         const errorData = await response.json().catch(() => ({ detail: 'Login failed' }));
         toast({

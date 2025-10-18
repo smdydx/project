@@ -3,10 +3,7 @@ import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 
 interface User {
-  id: number;
-  fullname: string;
-  MobileNumber: string;
-  Email: string | null;
+  username: string;
 }
 
 interface AuthContextType {
@@ -26,16 +23,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Check if user is logged in on mount
-    const token = localStorage.getItem("access_token");
-    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("lcrpay_auth_token");
+    const username = localStorage.getItem("lcrpay_username");
 
-    if (token && storedUser) {
+    if (token && username) {
       try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
+        setUser({ username });
         verifyToken(token);
       } catch (error) {
-        console.error("Failed to parse stored user:", error);
+        console.error("Failed to restore session:", error);
         logout();
       }
     }
@@ -56,13 +52,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = (token: string, userData: User) => {
-    localStorage.setItem("access_token", token);
+    localStorage.setItem("lcrpay_auth_token", token);
+    localStorage.setItem("lcrpay_username", userData.username);
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
   };
 
   const logout = () => {
-    localStorage.removeItem("access_token");
+    localStorage.removeItem("lcrpay_auth_token");
+    localStorage.removeItem("lcrpay_refresh_token");
+    localStorage.removeItem("lcrpay_username");
     localStorage.removeItem("user");
     setUser(null);
     setLocation("/login");
