@@ -19,7 +19,12 @@ export default function KYCVerification() {
       const params = new URLSearchParams();
       params.append('status', kycStatusFilter.toLowerCase());
 
-      const response = await fetch(`${API_URL}/api/v1/kyc/verification?${params}`);
+      const token = localStorage.getItem('access_token');
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const response = await fetch(`${API_URL}/api/v1/kyc/verification?${params}`, { headers });
       if (!response.ok) throw new Error('Failed to fetch KYC data');
 
       const data = await response.json();
@@ -240,7 +245,12 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
     const fetchUserDetail = async () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL || '';
-        const response = await fetch(`${API_URL}/api/v1/users/detail/${userId}`);
+        const token = localStorage.getItem('access_token');
+        const headers: HeadersInit = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        const response = await fetch(`${API_URL}/api/v1/users/detail/${userId}`, { headers });
         if (!response.ok) throw new Error('Failed to fetch user details');
         const data = await response.json();
         setUserDetail(data);

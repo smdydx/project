@@ -40,8 +40,17 @@ export default function AllUsers() {
       }
       params.append('limit', '100');
 
+      // Get JWT token from localStorage
+      const token = localStorage.getItem('access_token');
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       console.log('🔍 Fetching users from:', `${API_URL}/api/v1/users/all?${params}`);
-      const response = await fetch(`${API_URL}/api/v1/users/all?${params}`);
+      const response = await fetch(`${API_URL}/api/v1/users/all?${params}`, {
+        headers
+      });
       
       if (!response.ok) {
         const errorText = await response.text();

@@ -10,7 +10,12 @@ export default function NewSignUp() {
   const generateNewSignups = async () => {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      const response = await fetch(`${API_URL}/api/v1/users/signups?limit=100`);
+      const token = localStorage.getItem('access_token');
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const response = await fetch(`${API_URL}/api/v1/users/signups?limit=100`, { headers });
       if (!response.ok) throw new Error('Failed to fetch signups');
       
       const data = await response.json();
