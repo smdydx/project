@@ -71,10 +71,12 @@ async def get_mobile_transactions(
 @router.get("/payment-details/{reference_id}")
 async def get_payment_details_by_reference(
     reference_id: str,
-    limit: int = Query(50, le=100),
+    lcr_money_page: int = Query(1, ge=1),
+    lcr_rewards_page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=10, le=50),
     db: Session = Depends(get_db)
 ):
-    """Get payment gateway transactions, LCR Money and LCR Rewards for a specific reference ID (OPTIMIZED)"""
+    """Get payment gateway transactions, LCR Money and LCR Rewards for a specific reference ID (SERVER-SIDE PAGINATION)"""
     try:
         # Single optimized query to get service request with user details
         service_request = db.query(Service_Request).filter(
@@ -89,21 +91,30 @@ async def get_payment_details_by_reference(
             User.UserID, User.fullname, User.MobileNumber, User.Email, User.member_id
         ).filter(User.UserID == service_request.user_id).first()
         
-        # Parallel queries with STRICT limit (default 50, max 100)
-        # Payment Gateway transactions - LIMIT to 50
+        # Payment Gateway transactions - LIMIT to 10 (most recent only)
         payments = db.query(Payment_Gateway).filter(
             Payment_Gateway.service_request_id == service_request.id
-        ).order_by(desc(Payment_Gateway.created_at)).limit(limit).all()
+        ).order_by(desc(Payment_Gateway.created_at)).limit(10).all()
         
-        # LCR Money transactions - LIMIT to 50 (optimized query)
+        # SERVER-SIDE PAGINATION for LCR Money
+        lcr_money_offset = (lcr_money_page - 1) * page_size
         lcr_money = db.query(LcrMoney).filter(
             LcrMoney.reference_id == reference_id
-        ).order_by(desc(LcrMoney.transactiondate)).limit(limit).all()
+        ).order_by(desc(LcrMoney.transactiondate)).limit(page_size).offset(lcr_money_offset).all()
         
-        # LCR Rewards transactions - LIMIT to 50 (optimized query)
+        lcr_money_total = db.query(LcrMoney).filter(
+            LcrMoney.reference_id == reference_id
+        ).count()
+        
+        # SERVER-SIDE PAGINATION for LCR Rewards
+        lcr_rewards_offset = (lcr_rewards_page - 1) * page_size
         lcr_rewards = db.query(LcrRewards).filter(
             LcrRewards.reference_id == reference_id
-        ).order_by(desc(LcrRewards.transactiondate)).limit(limit).all()
+        ).order_by(desc(LcrRewards.transactiondate)).limit(page_size).offset(lcr_rewards_offset).all()
+        
+        lcr_rewards_total = db.query(LcrRewards).filter(
+            LcrRewards.reference_id == reference_id
+        ).count()
         
         return {
             "service_request": {
@@ -184,7 +195,21 @@ async def get_payment_details_by_reference(
                     "remark": lr.remark or "N/A"
                 }
                 for lr in lcr_rewards
-            ]
+            ],
+            "pagination": {
+                "lcr_money": {
+                    "current_page": lcr_money_page,
+                    "page_size": page_size,
+                    "total_records": lcr_money_total,
+                    "total_pages": (lcr_money_total + page_size - 1) // page_size
+                },
+                "lcr_rewards": {
+                    "current_page": lcr_rewards_page,
+                    "page_size": page_size,
+                    "total_records": lcr_rewards_total,
+                    "total_pages": (lcr_rewards_total + page_size - 1) // page_size
+                }
+            }
         }
     except HTTPException:
         raise

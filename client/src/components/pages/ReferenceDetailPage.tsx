@@ -39,12 +39,12 @@ export default function ReferenceDetailPage() {
           headers['Authorization'] = `Bearer ${token}`;
         }
         
-        // Fetch with optimized limit (50 records max)
+        // SERVER-SIDE PAGINATION - Fetch only current page
         const response = await fetch(
-          `${API_URL}/api/v1/transactions/payment-details/${referenceId}?limit=50`, 
+          `${API_URL}/api/v1/transactions/payment-details/${referenceId}?lcr_money_page=${lcrMoneyPage}&lcr_rewards_page=${lcrRewardsPage}&page_size=${itemsPerPage}`, 
           { 
             headers,
-            signal: AbortSignal.timeout(15000) // 15 second timeout
+            signal: AbortSignal.timeout(10000) // 10 second timeout
           }
         );
         
@@ -62,7 +62,7 @@ export default function ReferenceDetailPage() {
     };
 
     fetchDetails();
-  }, [referenceId]);
+  }, [referenceId, lcrMoneyPage, lcrRewardsPage]);
 
   if (loading) {
     return (
@@ -90,32 +90,15 @@ export default function ReferenceDetailPage() {
     );
   }
 
-  // Sort transactions by date (latest first)
-  const sortedLcrMoney = [...paymentDetail.lcr_money_transactions].sort((a, b) => {
-    const dateA = new Date(`${a.date} ${a.time}`).getTime();
-    const dateB = new Date(`${b.date} ${b.time}`).getTime();
-    return dateB - dateA;
-  });
+  // Server already returns sorted & paginated data
+  const paginatedLcrMoney = paymentDetail.lcr_money_transactions;
+  const paginatedLcrRewards = paymentDetail.lcr_rewards_transactions;
 
-  const sortedLcrRewards = [...paymentDetail.lcr_rewards_transactions].sort((a, b) => {
-    const dateA = new Date(`${a.date} ${a.time}`).getTime();
-    const dateB = new Date(`${b.date} ${b.time}`).getTime();
-    return dateB - dateA;
-  });
-
-  // Pagination logic
-  const totalLcrMoneyPages = Math.ceil(sortedLcrMoney.length / itemsPerPage);
-  const totalLcrRewardsPages = Math.ceil(sortedLcrRewards.length / itemsPerPage);
-
-  const paginatedLcrMoney = sortedLcrMoney.slice(
-    (lcrMoneyPage - 1) * itemsPerPage,
-    lcrMoneyPage * itemsPerPage
-  );
-
-  const paginatedLcrRewards = sortedLcrRewards.slice(
-    (lcrRewardsPage - 1) * itemsPerPage,
-    lcrRewardsPage * itemsPerPage
-  );
+  // Get pagination info from server
+  const totalLcrMoneyPages = paymentDetail.pagination?.lcr_money?.total_pages || 1;
+  const totalLcrRewardsPages = paymentDetail.pagination?.lcr_rewards?.total_pages || 1;
+  const totalLcrMoneyRecords = paymentDetail.pagination?.lcr_money?.total_records || 0;
+  const totalLcrRewardsRecords = paymentDetail.pagination?.lcr_rewards?.total_records || 0;
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -220,7 +203,7 @@ export default function ReferenceDetailPage() {
             LCR Money Transactions
           </h2>
           <span className="text-sm text-gray-600 dark:text-gray-400">
-            Total: {sortedLcrMoney.length} records
+            Total: {totalLcrMoneyRecords} records
           </span>
         </div>
 
@@ -283,7 +266,7 @@ export default function ReferenceDetailPage() {
             LCR Rewards Transactions
           </h2>
           <span className="text-sm text-gray-600 dark:text-gray-400">
-            Total: {sortedLcrRewards.length} records
+            Total: {totalLcrRewardsRecords} records
           </span>
         </div>
 
