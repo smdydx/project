@@ -368,3 +368,19 @@ export const settings = pgTable("settings", {
 });
 
 export type Settings = typeof settings.$inferSelect;
+
+// ============================= AUTHENTICATION =============================
+export const loginSchema = z.object({
+  MobileNumber: z.string().min(10, "Mobile number must be at least 10 digits").max(15, "Mobile number too long"),
+  LoginPIN: z.string().min(4, "PIN must be at least 4 digits"),
+});
+
+export const registerSchema = z.object({
+  fullname: z.string().min(2, "Name must be at least 2 characters"),
+  MobileNumber: z.string().min(10, "Mobile number must be at least 10 digits").max(15, "Mobile number too long"),
+  Email: z.string().email("Invalid email").optional().or(z.literal("")),
+  LoginPIN: z.string().min(4, "PIN must be at least 4 digits"),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
+export type RegisterInput = z.infer<typeof registerSchema>;
