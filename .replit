@@ -11,7 +11,7 @@ run = ["npm", "run", "start"]
 build = ["npm", "run", "build"]
 
 [workflows]
-runButton = "Project"
+runButton = "Start Full Stack (Backend + Frontend)"
 
 [[workflows.workflow]]
 name = "Start Full Stack"
@@ -159,6 +159,19 @@ args = "cd backend && pip uninstall -y pydantic-settings && pip install -q -r re
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "sleep 5 && npm run dev"
+
+[[workflows.workflow]]
+name = "Start Full Stack (Backend + Frontend)"
+author = 48762550
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
 
 [[ports]]
 localPort = 5000

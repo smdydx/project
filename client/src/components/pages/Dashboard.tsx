@@ -160,16 +160,16 @@ export default function Dashboard() {
       return [];
     }
 
-    // Only show real database transactions - no dummy data
+    // STRICTLY REAL DATABASE DATA ONLY - NO DUMMY/FAKE DATA
     return transactions
-      .filter(txn => txn.id || txn.TransactionID) // Filter out any invalid entries
+      .filter(txn => (txn.id || txn.TransactionID)) // Only valid database entries
       .slice(0, 12)
       .map(txn => ({
-        id: txn.id || txn.TransactionID || 'N/A',
-        user: txn.user || txn.fullname || 'Unknown',
-        service: txn.service || txn.purpose || 'Service',
-        amount: txn.amount || 0,
-        status: txn.status || 'Pending',
+        id: txn.id || txn.TransactionID,
+        user: txn.user || txn.fullname,
+        service: txn.service || txn.purpose,
+        amount: txn.amount,
+        status: txn.status,
         location: txn.location || 'India'
       }));
   };
