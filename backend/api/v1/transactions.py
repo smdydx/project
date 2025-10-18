@@ -47,6 +47,25 @@ async def get_mobile_transactions(
         service_requests = query.order_by(desc(Service_Request.created_at)).limit(limit).all()
 
         result = []
+        for sr in service_requests:
+            result.append({
+                "id": sr.id,
+                "user_id": sr.user_id,
+                "service_type": sr.service_type or "N/A",
+                "operator_code": sr.operator_code,
+                "mobile_number": sr.mobile_number,
+                "amount": str(sr.amount) if sr.amount else "0",
+                "reference_id": sr.reference_id or "N/A",
+                "status": sr.status or "unknown",
+                "payment_txn_id": sr.payment_txn_id,
+                "utr_no": sr.utr_no,
+                "created_at": sr.created_at.isoformat() if sr.created_at else None,
+                "updated_at": sr.updated_at.isoformat() if sr.updated_at else None
+            })
+
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/payment-details/{reference_id}")
@@ -54,7 +73,7 @@ async def get_payment_details_by_reference(
     reference_id: str,
     db: Session = Depends(get_db)
 ):
-    """Get all payment gateway transactions for a specific reference ID"""
+    """Get all payment gateway transactions, LCR Money and LCR Rewards for a specific reference ID"""
     try:
         # Get service request
         service_request = db.query(Service_Request).filter(
@@ -71,6 +90,16 @@ async def get_payment_details_by_reference(
         
         # Get user details
         user = db.query(User).filter(User.UserID == service_request.user_id).first()
+        
+        # Get LCR Money transactions for this reference ID
+        lcr_money = db.query(LcrMoney).filter(
+            LcrMoney.reference_id == reference_id
+        ).order_by(desc(LcrMoney.transactiondate)).all()
+        
+        # Get LCR Rewards transactions for this reference ID
+        lcr_rewards = db.query(LcrRewards).filter(
+            LcrRewards.reference_id == reference_id
+        ).order_by(desc(LcrRewards.transactiondate)).all()
         
         return {
             "service_request": {
@@ -91,7 +120,8 @@ async def get_payment_details_by_reference(
                 "id": user.UserID if user else None,
                 "name": user.fullname if user else "Unknown",
                 "mobile": user.MobileNumber if user else "N/A",
-                "email": user.Email if user else "N/A"
+                "email": user.Email if user else "N/A",
+                "member_id": user.member_id if user else "N/A"
             },
             "payment_gateway_transactions": [
                 {
@@ -120,6 +150,36 @@ async def get_payment_details_by_reference(
                     "updated_at": pg.updated_at.isoformat() if pg.updated_at else None
                 }
                 for pg in payments
+            ],
+            "lcr_money_transactions": [
+                {
+                    "id": lm.srno,
+                    "amount": float(lm.amount) if lm.amount else 0.0,
+                    "type": lm.transactiontype or "N/A",
+                    "received_by": lm.received_by or "N/A",
+                    "received_from": lm.received_from or "N/A",
+                    "status": "Active" if lm.status == 1 else "Inactive",
+                    "date": lm.transactiondate.strftime('%Y-%m-%d') if lm.transactiondate else "N/A",
+                    "time": lm.transactiondate.strftime('%H:%M:%S') if lm.transactiondate else "N/A",
+                    "purpose": lm.purpose or "N/A",
+                    "remark": lm.remark or "N/A"
+                }
+                for lm in lcr_money
+            ],
+            "lcr_rewards_transactions": [
+                {
+                    "id": lr.srno,
+                    "amount": float(lr.amount) if lr.amount else 0.0,
+                    "type": lr.transactiontype or "N/A",
+                    "received_by": lr.received_by or "N/A",
+                    "received_from": lr.received_from or "N/A",
+                    "status": "Active" if lr.status == 1 else "Inactive",
+                    "date": lr.transactiondate.strftime('%Y-%m-%d') if lr.transactiondate else "N/A",
+                    "time": lr.transactiondate.strftime('%H:%M:%S') if lr.transactiondate else "N/A",
+                    "purpose": lr.purpose or "N/A",
+                    "remark": lr.remark or "N/A"
+                }
+                for lr in lcr_rewards
             ]
         }
     except HTTPException:
