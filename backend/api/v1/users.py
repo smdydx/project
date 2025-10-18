@@ -88,30 +88,15 @@ async def get_all_users(
                 verification_status = "Not Verified"
 
             result.append({
-                "id": str(user.UserID),
-                "UserID": user.UserID,
                 "fullname": user.fullname or f"User {user.UserID}",
-                "name": user.fullname or f"User {user.UserID}",
                 "MobileNumber": user.MobileNumber,
-                "mobile": user.MobileNumber,
                 "Email": user.Email or "N/A",
-                "email": user.Email or "N/A",
-                "introducer_id": user.introducer_id,
-                "member_id": user.member_id,
-                "RewardWalletBalance": float(user.RewardWalletBalance) if user.RewardWalletBalance else 0,
-                "INRWalletBalance": float(user.INRWalletBalance) if user.INRWalletBalance else 0,
-                "balance": float(user.INRWalletBalance) if user.INRWalletBalance else 0,
+                "prime_status": user.prime_status,
                 "DeviceVerified": user.DeviceVerified,
                 "CreatedAt": user.CreatedAt.isoformat() if user.CreatedAt else None,
                 "UpdatedAt": user.UpdatedAt.isoformat() if user.UpdatedAt else None,
                 "DeletedAt": user.DeletedAt.isoformat() if user.DeletedAt else None,
-                "IsDeleted": user.IsDeleted,
-                "activation_status": user.activation_status,
-                "userType": "Prime User" if user.prime_status else "Normal User",
-                "totalTransactions": txn_count,
-                "verification_status": verification_status,
-                "aadhar_verified": aadhaar_verified,
-                "pan_verified": pan_verified
+                "prime_activation_date": user.prime_activation_date.isoformat() if user.prime_activation_date else None
             })
 
         return result
