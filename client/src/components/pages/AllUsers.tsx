@@ -22,7 +22,8 @@ export default function AllUsers() {
   const generateRealtimeUsers = async () => {
     try {
       setLoading(true);
-      const API_URL = import.meta.env.VITE_API_URL || '';
+      // Use window.location.origin to get the correct backend URL
+      const API_URL = window.location.origin;
       const params = new URLSearchParams();
       
       // Filter logic for All Users page
@@ -40,7 +41,9 @@ export default function AllUsers() {
       params.append('limit', '100');
 
       const response = await fetch(`${API_URL}/api/v1/users/all?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch users');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch users: ${response.status}`);
+      }
 
       const fetchedData = await response.json();
       console.log('Fetched users data:', fetchedData);
@@ -48,6 +51,8 @@ export default function AllUsers() {
       return fetchedData;
     } catch (error) {
       console.error('Error fetching all users:', error);
+      // Show empty array if error
+      setData([]);
       return [];
     } finally {
       setLoading(false);
