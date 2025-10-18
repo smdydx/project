@@ -85,6 +85,8 @@ export default function MobileTransactions() {
   const [filterServiceType, setFilterServiceType] = useState('all');
   const [selectedPaymentDetail, setSelectedPaymentDetail] = useState<PaymentDetail | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     const loadServiceTypes = async () => {
@@ -101,6 +103,7 @@ export default function MobileTransactions() {
       try {
         const data = await fetchServiceRequests(filterServiceType, filterStatus);
         setTransactions(data || []);
+        setCurrentPage(1); // Reset to first page when filters change
       } catch (err: any) {
         setError(err.message || 'Failed to load service requests. Please try again.');
       }
@@ -124,6 +127,12 @@ export default function MobileTransactions() {
 
     return matchesSearch;
   });
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedTransactions = filteredTransactions.slice(startIndex, endIndex);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -267,7 +276,7 @@ export default function MobileTransactions() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredTransactions.map((txn) => (
+                  {paginatedTransactions.map((txn) => (
                     <tr 
                       key={txn.id} 
                       className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
@@ -309,6 +318,65 @@ export default function MobileTransactions() {
             {filteredTransactions.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-gray-500 dark:text-gray-400" data-testid="text-no-results">No service requests found</p>
+              </div>
+            )}
+
+            {/* Pagination Controls */}
+            {filteredTransactions.length > 0 && (
+              <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-sm text-gray-700 dark:text-gray-300">
+                  Showing <span className="font-medium">{startIndex + 1}</span> to{' '}
+                  <span className="font-medium">{Math.min(endIndex, filteredTransactions.length)}</span> of{' '}
+                  <span className="font-medium">{filteredTransactions.length}</span> entries
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-colors"
+                    data-testid="btn-prev-page"
+                  >
+                    Previous
+                  </button>
+
+                  {/* Page Numbers */}
+                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                    let page;
+                    if (totalPages <= 5) {
+                      page = i + 1;
+                    } else if (currentPage <= 3) {
+                      page = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      page = totalPages - 4 + i;
+                    } else {
+                      page = currentPage - 2 + i;
+                    }
+
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-3 py-2 border rounded-lg text-sm transition-colors ${
+                          currentPage === page
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                        }`}
+                        data-testid={`btn-page-${page}`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-colors"
+                    data-testid="btn-next-page"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
             )}
           </div>
