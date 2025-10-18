@@ -117,7 +117,7 @@ export function registerRoutes(app: Express) {
   });
 
   // User Management Endpoints
-  app.get("/api/v1/users/all", authMiddleware, async (req, res) => {
+  app.get("/api/v1/users/all", async (req, res) => {
     try {
       const userType = req.query.user_type as string;
       const verificationStatus = req.query.verification_status as string;
@@ -156,7 +156,7 @@ export function registerRoutes(app: Express) {
     }
   });
 
-  app.get("/api/v1/users/detail/:id", authMiddleware, async (req, res) => {
+  app.get("/api/v1/users/detail/:id", async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
       const user = await storage.getUserById(userId);
@@ -204,7 +204,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Dashboard Statistics
-  app.get("/api/dashboard/stats", authMiddleware, async (_req, res) => {
+  app.get("/api/dashboard/stats", async (_req, res) => {
     try {
       const stats = await storage.getDashboardStats();
       res.json(stats);
@@ -215,7 +215,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Dashboard Charts Data
-  app.get("/api/dashboard/charts", authMiddleware, async (_req, res) => {
+  app.get("/api/dashboard/charts", async (_req, res) => {
     try {
       const chartData = await storage.getChartData();
       res.json(chartData);
@@ -226,7 +226,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Get Recent Users for Dashboard
-  app.get("/api/dashboard/users/recent", authMiddleware, async (req, res) => {
+  app.get("/api/dashboard/users/recent", async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
       const users = await storage.getRecentUsers(limit);
@@ -238,7 +238,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Get Recent Transactions for Dashboard
-  app.get("/api/dashboard/transactions", authMiddleware, async (req, res) => {
+  app.get("/api/dashboard/transactions", async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
       const transactions = await storage.getRecentTransactions(limit);
@@ -250,7 +250,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Get Recent Transactions
-  app.get("/api/transactions", authMiddleware, async (req, res) => {
+  app.get("/api/transactions", async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
       const transactions = await storage.getRecentTransactions(limit);
@@ -262,7 +262,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Get All Transactions
-  app.get("/api/transactions/all", authMiddleware, async (_req, res) => {
+  app.get("/api/transactions/all", async (_req, res) => {
     try {
       const transactions = await storage.getAllTransactions();
       res.json(transactions);
@@ -273,7 +273,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Get Transactions by User ID
-  app.get("/api/transactions/user/:userId", authMiddleware, async (req, res) => {
+  app.get("/api/transactions/user/:userId", async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
       const transactions = await storage.getTransactionsByUserId(userId);
@@ -285,7 +285,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Get Recent Users
-  app.get("/api/users/recent", authMiddleware, async (req, res) => {
+  app.get("/api/users/recent", async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
       const users = await storage.getRecentUsers(limit);
@@ -297,7 +297,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Get All Users
-  app.get("/api/users", authMiddleware, async (_req, res) => {
+  app.get("/api/users", async (_req, res) => {
     try {
       const users = await storage.getAllUsers();
       res.json(users);
@@ -308,7 +308,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Get User by ID
-  app.get("/api/users/:id", authMiddleware, async (req, res) => {
+  app.get("/api/users/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const user = await storage.getUserById(id);

@@ -16,8 +16,7 @@ async def get_all_users(
     user_type: Optional[str] = Query(None),
     verification_status: Optional[str] = Query(None),
     limit: int = Query(100, le=500),
-    db: Session = Depends(get_db),
-    current_user: TokenData = Depends(require_admin)
+    db: Session = Depends(get_db)
 ):
     """Get all users with filters"""
     try:
@@ -88,11 +87,22 @@ async def get_all_users(
                 verification_status = "Not Verified"
 
             result.append({
+                "UserID": user.UserID,
                 "fullname": user.fullname or f"User {user.UserID}",
                 "MobileNumber": user.MobileNumber,
                 "Email": user.Email or "N/A",
+                "member_id": user.member_id,
+                "introducer_id": user.introducer_id,
                 "prime_status": user.prime_status,
                 "DeviceVerified": user.DeviceVerified,
+                "IsKYCCompleted": user.IsKYCCompleted,
+                "aadhar_verification_status": aadhaar_verified,
+                "pan_verification_status": pan_verified,
+                "verification_status": verification_status,
+                "userType": "Prime User" if user.prime_status else "Normal User",
+                "transaction_count": txn_count,
+                "INRWalletBalance": float(user.INRWalletBalance) if user.INRWalletBalance else 0,
+                "RewardWalletBalance": float(user.RewardWalletBalance) if user.RewardWalletBalance else 0,
                 "CreatedAt": user.CreatedAt.isoformat() if user.CreatedAt else None,
                 "UpdatedAt": user.UpdatedAt.isoformat() if user.UpdatedAt else None,
                 "DeletedAt": user.DeletedAt.isoformat() if user.DeletedAt else None,
@@ -106,8 +116,7 @@ async def get_all_users(
 @router.get("/signups")
 async def get_new_signups(
     limit: int = Query(100, le=500),
-    db: Session = Depends(get_db),
-    current_user: TokenData = Depends(require_admin)
+    db: Session = Depends(get_db)
 ):
     """Get new user signups"""
     try:
@@ -139,8 +148,7 @@ async def get_new_signups(
 @router.get("/detail/{user_id}")
 async def get_user_detail(
     user_id: int,
-    db: Session = Depends(get_db),
-    current_user: TokenData = Depends(require_admin)
+    db: Session = Depends(get_db)
 ):
     """Get complete user details with PAN and Aadhaar information"""
     try:

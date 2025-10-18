@@ -2,20 +2,20 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic } from "./vite";
 import { setupWebSocket } from "./websocket";
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Note: Python backend proxy disabled - using Node.js backend only
-// Uncomment below if you need to proxy to FastAPI backend on port 8000
-/*
+// Proxy /api/v1 requests to FastAPI backend on port 8000
 app.use('/api/v1', createProxyMiddleware({
   target: 'http://localhost:8000',
   changeOrigin: true,
   pathRewrite: {
     '^/': '/api/v1/'
-  }
+  },
+  logLevel: 'debug'
 }));
 
 app.use('/ws', createProxyMiddleware({
@@ -23,7 +23,6 @@ app.use('/ws', createProxyMiddleware({
   changeOrigin: true,
   ws: true
 }));
-*/
 
 app.use((req, res, next) => {
   const start = Date.now();

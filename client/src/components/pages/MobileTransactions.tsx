@@ -17,38 +17,28 @@ interface ServiceRequestTransaction {
   updated_at: string;
 }
 
-const fetchServiceRequests = async (): Promise<ServiceRequestTransaction[]> => {
+const fetchServiceRequests = async (): Promise<any[]> => {
   try {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const API_URL = window.location.origin;
     const token = localStorage.getItem('access_token');
     const headers: HeadersInit = {};
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
-    console.log('Fetching from API:', `${API_URL}/api/v1/transactions/mobile`);
+    console.log('🔍 Fetching mobile transactions from:', `${API_URL}/api/v1/transactions/mobile`);
     const response = await fetch(`${API_URL}/api/v1/transactions/mobile?limit=500`, { headers });
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('API Error Response:', errorText);
-      throw new Error(`Failed to fetch service requests: ${response.status}`);
+      console.error('❌ API Error Response:', errorText);
+      throw new Error(`Failed to fetch mobile transactions: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('Fetched mobile transactions:', data.length);
-    
-    // The mobile endpoint returns grouped user data, not individual transactions
-    // We need to fetch individual transactions from service-request table
-    const transactionsResponse = await fetch(`${API_URL}/api/crud/service-request`, { headers });
-    if (!transactionsResponse.ok) {
-      throw new Error(`Failed to fetch transactions: ${transactionsResponse.status}`);
-    }
-    
-    const transactions = await transactionsResponse.json();
-    console.log('Fetched service requests:', transactions.length);
-    return transactions;
+    console.log('✅ Fetched mobile transaction records:', data.length);
+    return data;
   } catch (error) {
-    console.error('Error fetching service requests:', error);
+    console.error('❌ Error fetching mobile transactions:', error);
     throw error;
   }
 };

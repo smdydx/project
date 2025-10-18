@@ -13,42 +13,32 @@ router = APIRouter(tags=["transactions"])
 
 @router.get("/mobile")
 async def get_mobile_transactions(
-    limit: int = Query(100, le=500),
+    limit: int = Query(500, le=1000),
     db: Session = Depends(get_db)
 ):
-    """Get grouped users list from service_request (excluding pending status)"""
+    """Get all service request transactions (excluding pending status)"""
     try:
-        # Get distinct users who have transactions (excluding pending)
-        from sqlalchemy import func
-        
-        users_with_txns = db.query(
-            Service_Request.user_id,
-            func.count(Service_Request.id).label('transaction_count'),
-            func.sum(Service_Request.amount).label('total_amount'),
-            func.max(Service_Request.created_at).label('last_transaction')
-        ).filter(
+        # Get all service requests excluding pending
+        service_requests = db.query(Service_Request).filter(
             Service_Request.status != 'pending'
-        ).group_by(Service_Request.user_id).order_by(
-            desc('last_transaction')
-        ).limit(limit).all()
+        ).order_by(desc(Service_Request.created_at)).limit(limit).all()
 
         result = []
-        for user_data in users_with_txns:
-            user = db.query(User).filter(User.UserID == user_data.user_id).first()
-            
-            if user:
-                result.append({
-                    "id": user.UserID,
-                    "userId": user.UserID,
-                    "user": user.fullname,
-                    "mobile": user.MobileNumber,
-                    "memberId": user.member_id,
-                    "transactionCount": user_data.transaction_count,
-                    "totalAmount": float(user_data.total_amount) if user_data.total_amount else 0,
-                    "lastTransaction": user_data.last_transaction.strftime('%Y-%m-%d %H:%M:%S') if user_data.last_transaction else "",
-                    "primeStatus": user.prime_status,
-                    "kycStatus": "Verified" if user.IsKYCCompleted else "Pending"
-                })
+        for sr in service_requests:
+            result.append({
+                "id": sr.id,
+                "user_id": sr.user_id,
+                "service_type": sr.service_type or "N/A",
+                "operator_code": sr.operator_code,
+                "mobile_number": sr.mobile_number,
+                "amount": str(sr.amount) if sr.amount else "0",
+                "reference_id": sr.reference_id or "N/A",
+                "status": sr.status or "unknown",
+                "payment_txn_id": sr.payment_txn_id,
+                "utr_no": sr.utr_no,
+                "created_at": sr.created_at.isoformat() if sr.created_at else None,
+                "updated_at": sr.updated_at.isoformat() if sr.updated_at else None
+            })
 
         return result
     except Exception as e:
