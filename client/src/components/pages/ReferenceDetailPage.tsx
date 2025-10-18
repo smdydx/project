@@ -21,7 +21,7 @@ export default function ReferenceDetailPage() {
   // Pagination states
   const [lcrMoneyPage, setLcrMoneyPage] = useState(1);
   const [lcrRewardsPage, setLcrRewardsPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 20; // Increased from 10 to 20 for better performance
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -31,7 +31,12 @@ export default function ReferenceDetailPage() {
       setError(null);
       try {
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-        const response = await fetch(`${API_URL}/api/v1/transactions/payment-details/${referenceId}`);
+        const token = localStorage.getItem('access_token');
+        const headers: HeadersInit = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        const response = await fetch(`${API_URL}/api/v1/transactions/payment-details/${referenceId}`, { headers });
         if (!response.ok) {
           throw new Error('Failed to fetch payment details');
         }
@@ -40,8 +45,9 @@ export default function ReferenceDetailPage() {
       } catch (err: any) {
         console.error('Error fetching payment details:', err);
         setError(err.message || 'Failed to load payment details');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchDetails();

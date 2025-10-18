@@ -71,11 +71,12 @@ async def get_mobile_transactions(
 @router.get("/payment-details/{reference_id}")
 async def get_payment_details_by_reference(
     reference_id: str,
+    limit: int = Query(100, le=500),
     db: Session = Depends(get_db)
 ):
     """Get all payment gateway transactions, LCR Money and LCR Rewards for a specific reference ID"""
     try:
-        # Get service request
+        # Get service request with optimized query
         service_request = db.query(Service_Request).filter(
             Service_Request.reference_id == reference_id
         ).first()
@@ -83,23 +84,23 @@ async def get_payment_details_by_reference(
         if not service_request:
             raise HTTPException(status_code=404, detail="Service request not found")
         
-        # Get all payment gateway records for this service request
+        # Get all payment gateway records for this service request (limited)
         payments = db.query(Payment_Gateway).filter(
             Payment_Gateway.service_request_id == service_request.id
-        ).order_by(desc(Payment_Gateway.created_at)).all()
+        ).order_by(desc(Payment_Gateway.created_at)).limit(limit).all()
         
         # Get user details
         user = db.query(User).filter(User.UserID == service_request.user_id).first()
         
-        # Get LCR Money transactions for this reference ID
+        # Get LCR Money transactions for this reference ID (optimized with limit)
         lcr_money = db.query(LcrMoney).filter(
             LcrMoney.reference_id == reference_id
-        ).order_by(desc(LcrMoney.transactiondate)).all()
+        ).order_by(desc(LcrMoney.transactiondate)).limit(limit).all()
         
-        # Get LCR Rewards transactions for this reference ID
+        # Get LCR Rewards transactions for this reference ID (optimized with limit)
         lcr_rewards = db.query(LcrRewards).filter(
             LcrRewards.reference_id == reference_id
-        ).order_by(desc(LcrRewards.transactiondate)).all()
+        ).order_by(desc(LcrRewards.transactiondate)).limit(limit).all()
         
         return {
             "service_request": {

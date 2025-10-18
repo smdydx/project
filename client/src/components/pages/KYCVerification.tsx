@@ -18,19 +18,23 @@ export default function KYCVerification() {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const params = new URLSearchParams();
       params.append('status', kycStatusFilter.toLowerCase());
+      params.append('limit', '1000'); // Increased limit to get all data
 
       const token = localStorage.getItem('access_token');
       const headers: HeadersInit = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
+      
+      console.log('🔍 Fetching KYC data with status:', kycStatusFilter);
       const response = await fetch(`${API_URL}/api/v1/kyc/verification?${params}`, { headers });
       if (!response.ok) throw new Error('Failed to fetch KYC data');
 
       const data = await response.json();
+      console.log('✅ Fetched KYC records:', data.length);
       return data;
     } catch (error) {
-      console.error('Error fetching KYC data:', error);
+      console.error('❌ Error fetching KYC data:', error);
       return [];
     }
   };
