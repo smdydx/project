@@ -23,7 +23,12 @@ export function DynamicDataTable({ config }: DynamicDataTableProps) {
         if (value) params[key] = value;
       });
 
-      const response = await fetch(`${config.apiEndpoint}?${new URLSearchParams(params)}`);
+      const token = localStorage.getItem('access_token');
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const response = await fetch(`${config.apiEndpoint}?${new URLSearchParams(params)}`, { headers });
       if (!response.ok) throw new Error('Failed to fetch data');
       return response.json();
     },
