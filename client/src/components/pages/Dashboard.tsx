@@ -11,6 +11,7 @@ import {
   XCircle,
   Smartphone,
   Globe,
+  TrendingUp,
 } from "lucide-react";
 import AdvancedStatCard from "../common/AdvancedStatCard";
 import Card from "../common/Card";
@@ -153,37 +154,6 @@ export default function Dashboard() {
       color: "pink" as const,
     },
   ];
-
-  // Autoplay functionality removed as it was not explicitly requested to be fixed and used unused state
-  // const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  // useEffect(() => {
-  //   // Autoplay only on desktop/laptop (lg breakpoint and above)
-  //   if (!isAutoPlaying || window.innerWidth < 1024) return;
-
-  //   const interval = setInterval(() => {
-  //     const container = document.getElementById("stats-scroll-container");
-  //     if (container) {
-  //       const maxScroll = container.scrollWidth - container.clientWidth;
-  //       const currentScroll = container.scrollLeft;
-
-  //       if (currentScroll >= maxScroll - 10) {
-  //         container.scrollTo({ left: 0, behavior: "smooth" });
-  //       } else {
-  //         container.scrollBy({ left: 400, behavior: "smooth" });
-  //       }
-  //     }
-  //   }, 4000);
-
-  //   return () => clearInterval(interval);
-  // }, [isAutoPlaying]);
-
-  // const scrollStats = (direction: "left" | "right") => {
-  //   const container = document.getElementById("stats-scroll-container");
-  //   if (container) {
-  //     const scrollAmount = direction === "left" ? -400 : 400;
-  //     container.scrollBy({ left: scrollAmount, behavior: "smooth" });
-  //   }
-  // };
 
   const generateRealtimeTransactions = () => {
     if (!transactions || !Array.isArray(transactions) || transactions.length === 0) {

@@ -59,9 +59,10 @@ export default function KYCVerification() {
     }
   };
 
-  const handleViewDetails = (userId: any) => {
-    const userIdNum = typeof userId === 'string' ? parseInt(userId.replace('USR', ''), 10) : userId;
-    setSelectedUserId(userIdNum);
+  const handleViewDetails = (row: any) => {
+    // Extract user ID from the row data
+    const userId = row.userId ? parseInt(row.userId.replace('USR', ''), 10) : row.id;
+    setSelectedUserId(userId);
     setShowUserModal(true);
   };
 
@@ -134,7 +135,7 @@ export default function KYCVerification() {
       render: (value: any, row: any) => (
         <div className="flex items-center space-x-2">
           <button 
-            onClick={() => handleViewDetails(row.userId)}
+            onClick={() => handleViewDetails(row)}
             className="px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md" 
             title="View User Details"
             data-testid="button-view-user"
@@ -235,7 +236,7 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
   useEffect(() => {
     const fetchUserDetail = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        const API_URL = import.meta.env.VITE_API_URL || '';
         const response = await fetch(`${API_URL}/api/v1/users/detail/${userId}`);
         if (!response.ok) throw new Error('Failed to fetch user details');
         const data = await response.json();
@@ -246,7 +247,9 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
         setLoading(false);
       }
     };
-    fetchUserDetail();
+    if (userId) {
+      fetchUserDetail();
+    }
   }, [userId]);
 
   if (loading) {

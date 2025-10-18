@@ -198,22 +198,6 @@ export default function AllUsers() {
       render: (value: string) => getUserTypeBadge(value)
     },
     {
-      key: 'INRWalletBalance',
-      title: 'INR Balance',
-      sortable: true,
-      render: (value: number) => (
-        <span className="font-bold text-green-600 dark:text-green-400">₹{value.toLocaleString()}</span>
-      )
-    },
-    {
-      key: 'RewardWalletBalance',
-      title: 'Reward Balance',
-      sortable: true,
-      render: (value: number) => (
-        <span className="font-bold text-purple-600 dark:text-purple-400">₹{value.toLocaleString()}</span>
-      )
-    },
-    {
       key: 'verification_status',
       title: 'KYC Verification',
       sortable: true,
