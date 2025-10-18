@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useLocation } from 'wouter';
 import { ArrowLeft, Wallet, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import Card from '@/components/common/Card';
 
@@ -12,8 +12,9 @@ interface PaymentDetail {
 }
 
 export default function ReferenceDetailPage() {
-  const { referenceId } = useParams<{ referenceId: string }>();
-  const navigate = useNavigate();
+  const params = useParams();
+  const referenceId = params.referenceId;
+  const [, setLocation] = useLocation();
   const [paymentDetail, setPaymentDetail] = useState<PaymentDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +60,7 @@ export default function ReferenceDetailPage() {
       <div className="flex flex-col justify-center items-center min-h-screen space-y-4">
         <p className="text-red-500 dark:text-red-400">{error || 'No data found'}</p>
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => setLocation('/transactions/mobile')}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           Go Back
@@ -149,7 +150,7 @@ export default function ReferenceDetailPage() {
       {/* Header with Back Button */}
       <div className="flex items-center gap-4">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => setLocation('/transactions/mobile')}
           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
         >
           <ArrowLeft className="w-6 h-6 text-gray-600 dark:text-gray-400" />

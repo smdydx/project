@@ -110,12 +110,8 @@ export default function MobileTransactions() {
     loadData();
   }, [filterStatus, filterServiceType]);
 
-  const handleReferenceClick = async (referenceId: string) => {
-    const details = await fetchPaymentDetails(referenceId);
-    if (details) {
-      setSelectedPaymentDetail(details);
-      setShowDetailModal(true);
-    }
+  const handleReferenceClick = (referenceId: string) => {
+    window.location.href = `/reference/${referenceId}`;
   };
 
   const filteredTransactions = transactions.filter(txn => {
