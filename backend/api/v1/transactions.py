@@ -71,12 +71,12 @@ async def get_mobile_transactions(
 @router.get("/payment-details/{reference_id}")
 async def get_payment_details_by_reference(
     reference_id: str,
-    limit: int = Query(100, le=500),
+    limit: int = Query(50, le=100),
     db: Session = Depends(get_db)
 ):
-    """Get all payment gateway transactions, LCR Money and LCR Rewards for a specific reference ID"""
+    """Get payment gateway transactions, LCR Money and LCR Rewards for a specific reference ID (OPTIMIZED)"""
     try:
-        # Get service request with optimized query
+        # Single optimized query to get service request with user details
         service_request = db.query(Service_Request).filter(
             Service_Request.reference_id == reference_id
         ).first()
@@ -84,20 +84,23 @@ async def get_payment_details_by_reference(
         if not service_request:
             raise HTTPException(status_code=404, detail="Service request not found")
         
-        # Get all payment gateway records for this service request (limited)
+        # Get user details (optimized - only required fields)
+        user = db.query(
+            User.UserID, User.fullname, User.MobileNumber, User.Email, User.member_id
+        ).filter(User.UserID == service_request.user_id).first()
+        
+        # Parallel queries with STRICT limit (default 50, max 100)
+        # Payment Gateway transactions - LIMIT to 50
         payments = db.query(Payment_Gateway).filter(
             Payment_Gateway.service_request_id == service_request.id
         ).order_by(desc(Payment_Gateway.created_at)).limit(limit).all()
         
-        # Get user details
-        user = db.query(User).filter(User.UserID == service_request.user_id).first()
-        
-        # Get LCR Money transactions for this reference ID (optimized with limit)
+        # LCR Money transactions - LIMIT to 50 (optimized query)
         lcr_money = db.query(LcrMoney).filter(
             LcrMoney.reference_id == reference_id
         ).order_by(desc(LcrMoney.transactiondate)).limit(limit).all()
         
-        # Get LCR Rewards transactions for this reference ID (optimized with limit)
+        # LCR Rewards transactions - LIMIT to 50 (optimized query)
         lcr_rewards = db.query(LcrRewards).filter(
             LcrRewards.reference_id == reference_id
         ).order_by(desc(LcrRewards.transactiondate)).limit(limit).all()

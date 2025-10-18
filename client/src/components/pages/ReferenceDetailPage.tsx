@@ -32,13 +32,24 @@ export default function ReferenceDetailPage() {
       try {
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
         const token = localStorage.getItem('access_token');
-        const headers: HeadersInit = {};
+        const headers: HeadersInit = {
+          'Accept': 'application/json',
+        };
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
         }
-        const response = await fetch(`${API_URL}/api/v1/transactions/payment-details/${referenceId}`, { headers });
+        
+        // Fetch with optimized limit (50 records max)
+        const response = await fetch(
+          `${API_URL}/api/v1/transactions/payment-details/${referenceId}?limit=50`, 
+          { 
+            headers,
+            signal: AbortSignal.timeout(15000) // 15 second timeout
+          }
+        );
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch payment details');
+          throw new Error(`Failed to fetch payment details (${response.status})`);
         }
         const data = await response.json();
         setPaymentDetail(data);
@@ -56,7 +67,11 @@ export default function ReferenceDetailPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <p className="text-gray-500 dark:text-gray-400">Loading transaction details...</p>
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-gray-500 dark:text-gray-400 font-medium">Loading transaction details...</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">Fetching data from database</p>
+        </div>
       </div>
     );
   }
