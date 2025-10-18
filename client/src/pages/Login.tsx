@@ -74,8 +74,12 @@ export default function Login() {
       if (response.ok) {
         const data = await response.json();
         
+        console.log('✅ Login successful, token received:', data.access_token ? 'YES' : 'NO');
+        
         // Store token and user data
         login(data.access_token, { username: data.username });
+        
+        console.log('✅ Token stored in localStorage as: lcrpay_auth_token');
 
         toast({
           title: "Login Successful",

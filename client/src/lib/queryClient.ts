@@ -8,7 +8,7 @@ async function throwIfNotOk(response: Response) {
 }
 
 function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem("lcrpay_auth_token");
   const headers: HeadersInit = {
     "Content-Type": "application/json",
   };
@@ -24,7 +24,7 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: async ({ queryKey }) => {
-        const token = localStorage.getItem("access_token");
+        const token = localStorage.getItem("lcrpay_auth_token");
         const headers: HeadersInit = {};
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
