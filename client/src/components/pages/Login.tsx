@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Lock, Mail, Eye, EyeOff, LogIn, Shield, CreditCard, ArrowRightLeft, Wallet } from 'lucide-react';
 
@@ -57,7 +56,7 @@ export default function Login({ onLogin }: LoginProps) {
         localStorage.setItem('lcrpay_auth_token', data.access_token);
         localStorage.setItem('lcrpay_refresh_token', data.refresh_token);
         localStorage.setItem('lcrpay_username', data.username);
-        
+
         // Successful login
         onLogin(username, password);
       } else {
@@ -77,7 +76,7 @@ export default function Login({ onLogin }: LoginProps) {
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
       {/* Animated Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-purple-400 to-indigo-600 animate-gradient-shift"></div>
-      
+
       {/* Animated Background Blobs */}
       <div className="absolute inset-0">
         <div className="absolute top-0 -left-4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
@@ -271,8 +270,22 @@ export default function Login({ onLogin }: LoginProps) {
             </button>
           </form>
 
-          {/* Footer */}
-          <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+          {/* Test Credentials Info */}
+          <div className="mt-6 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+            <p className="text-sm text-gray-700 dark:text-gray-300 font-medium mb-2 text-center">
+              Admin Credentials:
+            </p>
+            <div className="space-y-1">
+              <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
+                Username: <span className="font-mono font-semibold text-purple-600 dark:text-purple-400">AdminLCR</span>
+              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
+                Password: <span className="font-mono font-semibold text-purple-600 dark:text-purple-400">LCRADMIN1216SMDYDX</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
             <div className="flex items-center justify-center gap-1">
               <Lock className="w-3 h-3" />
               <p>Protected by LCRpay Security</p>

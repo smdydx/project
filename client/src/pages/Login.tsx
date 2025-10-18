@@ -183,16 +183,18 @@ export default function Login() {
           </form>
 
           {/* Test Credentials Info */}
-          <div className="mt-6 p-4 bg-blue-50 dark:bg-gray-700 rounded-lg">
-            <p className="text-sm text-gray-700 dark:text-gray-300 font-medium mb-1">
-              Test Credentials:
+          <div className="mt-6 p-4 bg-blue-50 dark:bg-gray-700 rounded-lg border border-blue-200 dark:border-gray-600">
+            <p className="text-sm text-gray-700 dark:text-gray-300 font-medium mb-2 text-center">
+              Admin Credentials:
             </p>
-            <p className="text-xs text-gray-600 dark:text-gray-400">
-              Mobile: <span className="font-mono">9876543211</span>
-            </p>
-            <p className="text-xs text-gray-600 dark:text-gray-400">
-              PIN: <span className="font-mono">1234</span>
-            </p>
+            <div className="space-y-1">
+              <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
+                Username: <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">AdminLCR</span>
+              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
+                Password: <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">LCRADMIN1216SMDYDX</span>
+              </p>
+            </div>
           </div>
         </div>
       </div>

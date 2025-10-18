@@ -136,7 +136,7 @@ async def require_admin(current_user: TokenData = Depends(get_current_user)) -> 
 
 def authenticate_user(username: str, password: str) -> bool:
     """Authenticate user credentials"""
-    ADMIN_USERNAME = "LCRadmin"
-    ADMIN_PASSWORD = "admin123smdydx1216"
+    ADMIN_USERNAME = "AdminLCR"
+    ADMIN_PASSWORD = "LCRADMIN1216SMDYDX"
     
     return username == ADMIN_USERNAME and password == ADMIN_PASSWORD
