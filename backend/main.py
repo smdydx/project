@@ -64,7 +64,6 @@ crud_routers = create_auto_crud_routers()
 for router, name, prefix in crud_routers:
     app.include_router(router, prefix=f"/api/crud{prefix}", tags=["Auto CRUD", name])
 
-app.include_router(auto_crud.router, prefix="/api/v1/crud", tags=["auto-crud"])
 app.include_router(payment_gateway.router, prefix="/api/v1/payment-gateway", tags=["payment-gateway"])
 
 @app.get("/")
