@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'wouter';
 import { ArrowLeft, Wallet, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -27,11 +26,12 @@ export default function ReferenceDetailPage() {
   useEffect(() => {
     const fetchDetails = async () => {
       if (!referenceId) return;
-      
+
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`http://localhost:8000/api/v1/transactions/payment-details/${referenceId}`);
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        const response = await fetch(`${API_URL}/api/v1/transactions/payment-details/${referenceId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch payment details');
         }

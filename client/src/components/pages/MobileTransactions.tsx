@@ -25,7 +25,8 @@ interface PaymentDetail {
 
 const fetchServiceTypes = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/v1/transactions/service-types');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/api/v1/transactions/service-types`);
       if (!response.ok) return [];
       const data = await response.json();
       return data;
@@ -37,6 +38,7 @@ const fetchServiceTypes = async () => {
 
 const fetchServiceRequests = async (filterServiceType: string, filterStatus: string) => {
     try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const params = new URLSearchParams();
       if (filterServiceType && filterServiceType !== 'all') {
         params.append('service_type', filterServiceType);
@@ -45,7 +47,7 @@ const fetchServiceRequests = async (filterServiceType: string, filterStatus: str
         params.append('status', filterStatus);
       }
 
-      const response = await fetch(`http://localhost:8000/api/v1/transactions/mobile?${params.toString()}`);
+      const response = await fetch(`${API_URL}/api/v1/transactions/mobile?${params.toString()}`);
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ API Error Response:', errorText);
@@ -63,7 +65,8 @@ const fetchServiceRequests = async (filterServiceType: string, filterStatus: str
 
 const fetchPaymentDetails = async (referenceId: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/transactions/payment-details/${referenceId}`);
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/api/v1/transactions/payment-details/${referenceId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch payment details');
       }
