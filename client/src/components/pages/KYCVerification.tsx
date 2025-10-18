@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   CheckCircle, XCircle, Shield, FileText, Upload, Download, AlertTriangle, 
-  UserCheck, Phone, Mail, CreditCard, MapPin, X
+  UserCheck, Phone, Mail, CreditCard, MapPin, X, Eye
 } from 'lucide-react';
 import AdvancedRealtimeTable from '../common/AdvancedRealtimeTable';
 import Card from '../common/Card';
@@ -59,11 +59,11 @@ export default function KYCVerification() {
     }
   };
 
-  const handleViewDetails = (row: any) => {
-    // Extract user ID from the row data
-    const userId = row.userId ? parseInt(row.userId.replace('USR', ''), 10) : row.id;
-    setSelectedUserId(userId);
-    setShowUserModal(true);
+  const handleViewDetails = (userId: number | null) => {
+    if (userId !== null) {
+      setSelectedUserId(userId);
+      setShowUserModal(true);
+    }
   };
 
   const columns = [
@@ -135,10 +135,13 @@ export default function KYCVerification() {
       render: (value: any, row: any) => (
         <div className="flex items-center space-x-2">
           <button 
-            onClick={() => handleViewDetails(row)}
             className="px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md" 
             title="View User Details"
             data-testid="button-view-user"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewDetails(row.userId ? parseInt(row.userId.replace('USR', ''), 10) : row.id);
+            }}
           >
             View Details
           </button>
@@ -215,7 +218,7 @@ export default function KYCVerification() {
       />
 
       {/* User Detail Modal */}
-      {showUserModal && selectedUserId && (
+      {showUserModal && selectedUserId !== null && (
         <UserDetailModal 
           userId={selectedUserId} 
           onClose={() => {
