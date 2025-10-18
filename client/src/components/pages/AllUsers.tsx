@@ -40,17 +40,22 @@ export default function AllUsers() {
       }
       params.append('limit', '100');
 
+      console.log('🔍 Fetching users from:', `${API_URL}/api/v1/users/all?${params}`);
       const response = await fetch(`${API_URL}/api/v1/users/all?${params}`);
+      
       if (!response.ok) {
-        throw new Error(`Failed to fetch users: ${response.status}`);
+        const errorText = await response.text();
+        console.error('❌ API Error:', errorText);
+        throw new Error(`Failed to fetch users: ${response.status} - ${errorText}`);
       }
 
       const fetchedData = await response.json();
-      console.log('Fetched users data:', fetchedData);
+      console.log('✅ Fetched real users from database:', fetchedData.length, 'users');
+      console.log('📊 Sample user data:', fetchedData[0]);
       setData(fetchedData);
       return fetchedData;
     } catch (error) {
-      console.error('Error fetching all users:', error);
+      console.error('❌ Error fetching all users:', error);
       // Show empty array if error
       setData([]);
       return [];
@@ -364,13 +369,19 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
   useEffect(() => {
     const fetchUserDetail = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || '';
+        const API_URL = window.location.origin;
+        console.log('🔍 Fetching user detail for UserID:', userId);
         const response = await fetch(`${API_URL}/api/v1/users/detail/${userId}`);
-        if (!response.ok) throw new Error('Failed to fetch user details');
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('❌ API Error:', errorText);
+          throw new Error('Failed to fetch user details');
+        }
         const data = await response.json();
+        console.log('✅ Fetched user detail:', data);
         setUserDetail(data);
       } catch (error) {
-        console.error('Error fetching user detail:', error);
+        console.error('❌ Error fetching user detail:', error);
       } finally {
         setLoading(false);
       }
