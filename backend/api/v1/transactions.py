@@ -187,26 +187,6 @@ async def get_payment_details_by_reference(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-        for sr in service_requests:
-            result.append({
-                "id": sr.id,
-                "user_id": sr.user_id,
-                "service_type": sr.service_type or "N/A",
-                "operator_code": sr.operator_code,
-                "mobile_number": sr.mobile_number,
-                "amount": str(sr.amount) if sr.amount else "0",
-                "reference_id": sr.reference_id or "N/A",
-                "status": sr.status or "unknown",
-                "payment_txn_id": sr.payment_txn_id,
-                "utr_no": sr.utr_no,
-                "created_at": sr.created_at.isoformat() if sr.created_at else None,
-                "updated_at": sr.updated_at.isoformat() if sr.updated_at else None
-            })
-
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 @router.get("/dth")
 async def get_dth_transactions(
     limit: int = Query(100, le=500),
