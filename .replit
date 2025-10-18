@@ -39,13 +39,13 @@ args = "Start application"
 name = "Start application"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash -c 'cd backend && python run.py & npm run dev'"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
 
 [[workflows.workflow]]
 name = "Start Python Backend & Frontend"
@@ -183,6 +183,10 @@ externalPort = 5000
 [[ports]]
 localPort = 36699
 externalPort = 3003
+
+[[ports]]
+localPort = 40857
+externalPort = 5173
 
 [[ports]]
 localPort = 41057
