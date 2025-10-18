@@ -1,155 +1,118 @@
 import type { Express } from "express";
-import jwt from "jsonwebtoken";
 import { MemStorage } from "./storage";
+import { createAccessToken, verifyToken, authMiddleware } from "./auth";
+import { loginSchema, registerSchema } from "@shared/schema";
 
 const storage = new MemStorage();
 
-// JWT Configuration
-const SECRET_KEY = process.env.JWT_SECRET || "lcrpay-secret-key-change-in-production-2024";
-const ALGORITHM = "HS256";
-const ACCESS_TOKEN_EXPIRE_MINUTES = 30;
-const REFRESH_TOKEN_EXPIRE_DAYS = 7;
-
-// Admin credentials
-const ADMIN_USERNAME = "LCRadmin";
-const ADMIN_PASSWORD = "admin123smdydx1216";
-
-// JWT Helper Functions
-function createAccessToken(username: string): string {
-  const payload = {
-    username,
-    token_type: "access",
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + (ACCESS_TOKEN_EXPIRE_MINUTES * 60)
-  };
-  return jwt.sign(payload, SECRET_KEY, { algorithm: ALGORITHM as jwt.Algorithm });
-}
-
-function createRefreshToken(username: string): string {
-  const payload = {
-    username,
-    token_type: "refresh",
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + (REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60)
-  };
-  return jwt.sign(payload, SECRET_KEY, { algorithm: ALGORITHM as jwt.Algorithm });
-}
-
-function verifyToken(token: string, expectedType: string = "access"): { username: string; token_type: string } | null {
-  try {
-    const decoded = jwt.verify(token, SECRET_KEY, { algorithms: [ALGORITHM as jwt.Algorithm] }) as any;
-    if (decoded.token_type !== expectedType) {
-      return null;
-    }
-    return { username: decoded.username, token_type: decoded.token_type };
-  } catch (error) {
-    return null;
-  }
-}
-
 export function registerRoutes(app: Express) {
   // Authentication Routes
-  app.post("/api/v1/auth/login", async (req, res) => {
+  app.post("/api/auth/register", async (req, res) => {
     try {
-      const { username, password } = req.body;
-
-      if (!username || !password) {
-        return res.status(400).json({ detail: "Username and password are required" });
+      const validation = registerSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ error: validation.error.errors[0].message });
       }
 
-      // Authenticate user
-      if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
-        return res.status(401).json({ detail: "Incorrect username or password" });
+      const { MobileNumber, LoginPIN, fullname, Email } = validation.data;
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByMobile(MobileNumber);
+      if (existingUser) {
+        return res.status(400).json({ error: "Mobile number already registered" });
       }
 
-      // Create tokens
-      const accessToken = createAccessToken(username);
-      const refreshToken = createRefreshToken(username);
+      // Create new user
+      const newUser = await storage.createUser({
+        fullname,
+        MobileNumber,
+        Email: Email || undefined,
+        LoginPIN,
+      });
+
+      const accessToken = createAccessToken(newUser.UserID, newUser.MobileNumber);
+
+      res.status(201).json({
+        access_token: accessToken,
+        token_type: "bearer",
+        user: {
+          id: newUser.UserID,
+          fullname: newUser.fullname,
+          MobileNumber: newUser.MobileNumber,
+        }
+      });
+    } catch (error) {
+      console.error("Registration error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const validation = loginSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ error: validation.error.errors[0].message });
+      }
+
+      const { MobileNumber, LoginPIN } = validation.data;
+
+      // Get user by mobile number
+      const user = await storage.getUserByMobile(MobileNumber);
+      
+      if (!user || user.LoginPIN !== LoginPIN) {
+        return res.status(401).json({ error: "Invalid mobile number or PIN" });
+      }
+
+      const accessToken = createAccessToken(user.UserID, user.MobileNumber);
 
       res.json({
         access_token: accessToken,
-        refresh_token: refreshToken,
         token_type: "bearer",
-        username: username,
-        expires_in: ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        user: {
+          id: user.UserID,
+          fullname: user.fullname,
+          MobileNumber: user.MobileNumber,
+          Email: user.Email,
+        }
       });
     } catch (error) {
       console.error("Login error:", error);
-      res.status(500).json({ detail: "Internal server error" });
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 
-  app.post("/api/v1/auth/refresh", async (req, res) => {
+  app.get("/api/auth/verify", authMiddleware, async (req, res) => {
     try {
-      const { refresh_token } = req.body;
-
-      if (!refresh_token) {
-        return res.status(400).json({ detail: "Refresh token is required" });
-      }
-
-      const tokenData = verifyToken(refresh_token, "refresh");
-      if (!tokenData) {
-        return res.status(401).json({ detail: "Invalid refresh token" });
-      }
-
-      const newAccessToken = createAccessToken(tokenData.username);
-
-      res.json({
-        access_token: newAccessToken,
-        token_type: "bearer",
-        expires_in: ACCESS_TOKEN_EXPIRE_MINUTES * 60
-      });
-    } catch (error) {
-      console.error("Token refresh error:", error);
-      res.status(500).json({ detail: "Internal server error" });
-    }
-  });
-
-  app.get("/api/v1/auth/verify", async (req, res) => {
-    try {
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ detail: "Missing or invalid authorization header" });
-      }
-
-      const token = authHeader.substring(7);
-      const tokenData = verifyToken(token, "access");
-
-      if (!tokenData) {
-        return res.status(401).json({ detail: "Invalid or expired token" });
+      const userId = (req as any).user.userId;
+      const user = await storage.getUserById(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
       }
 
       res.json({
         valid: true,
-        username: tokenData.username
+        user: {
+          id: user.UserID,
+          fullname: user.fullname,
+          MobileNumber: user.MobileNumber,
+          Email: user.Email,
+        }
       });
     } catch (error) {
       console.error("Token verification error:", error);
-      res.status(500).json({ detail: "Internal server error" });
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 
-  app.post("/api/v1/auth/logout", async (req, res) => {
+  app.post("/api/auth/logout", authMiddleware, async (_req, res) => {
     try {
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ detail: "Missing or invalid authorization header" });
-      }
-
-      const token = authHeader.substring(7);
-      const tokenData = verifyToken(token, "access");
-
-      if (!tokenData) {
-        return res.status(401).json({ detail: "Invalid or expired token" });
-      }
-
-      res.json({
-        message: "Successfully logged out",
-        username: tokenData.username
-      });
+      res.json({ message: "Successfully logged out" });
     } catch (error) {
       console.error("Logout error:", error);
-      res.status(500).json({ detail: "Internal server error" });
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 

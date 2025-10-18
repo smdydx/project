@@ -45,6 +45,8 @@ export interface IStorage {
   // User methods
   getAllUsers(): Promise<User[]>;
   getUserById(id: number): Promise<User | null>;
+  getUserByMobile(mobileNumber: string): Promise<User | null>;
+  createUser(data: { fullname: string; MobileNumber: string; Email?: string; LoginPIN: string }): Promise<User>;
   
   // Transaction methods
   getAllTransactions(): Promise<Transaction[]>;
@@ -114,7 +116,7 @@ export class MemStorage implements IStorage {
         MobileNumber: `98765${String(43210 + i).padStart(5, '0')}`,
         Email: `user${i}@lcr.com`,
         PasswordHash: null,
-        LoginPIN: null,
+        LoginPIN: userId === 1 ? "1234" : null,
         TransactionPIN: null,
         IsKYCCompleted: isKYC,
         introducer_id: i > 1 ? `${memberIdPrefix}${String(Math.floor(i / 2)).padStart(6, '0')}` : null,
@@ -256,6 +258,46 @@ export class MemStorage implements IStorage {
 
   async getUserById(id: number): Promise<User | null> {
     return this.users.find(u => u.UserID === id) || null;
+  }
+
+  async getUserByMobile(mobileNumber: string): Promise<User | null> {
+    return this.users.find(u => u.MobileNumber === mobileNumber) || null;
+  }
+
+  async createUser(data: { fullname: string; MobileNumber: string; Email?: string; LoginPIN: string }): Promise<User> {
+    const newId = this.users.length > 0 ? Math.max(...this.users.map(u => u.UserID)) + 1 : 1;
+    const memberId = `LCR${String(newId).padStart(6, '0')}`;
+    
+    const newUser: User = {
+      UserID: newId,
+      fullname: data.fullname,
+      MobileNumber: data.MobileNumber,
+      Email: data.Email || null,
+      PasswordHash: null,
+      LoginPIN: data.LoginPIN,
+      TransactionPIN: null,
+      IsKYCCompleted: false,
+      introducer_id: null,
+      member_id: memberId,
+      RewardWalletBalance: "0.00",
+      INRWalletBalance: "0.00",
+      DeviceVerified: false,
+      CreatedAt: new Date(),
+      UpdatedAt: null,
+      DeletedAt: null,
+      IsDeleted: false,
+      fingerPrintStatus: 0,
+      activation_status: true,
+      aadhar_verification_status: false,
+      pan_verification_status: false,
+      email_verification_status: false,
+      prime_status: false,
+      prime_activation_date: null,
+      total_packages: "0.00",
+    };
+    
+    this.users.push(newUser);
+    return newUser;
   }
 
   async getAllTransactions(): Promise<Transaction[]> {
