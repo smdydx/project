@@ -20,8 +20,8 @@ interface ServiceRequestTransaction {
 const fetchServiceRequests = async (): Promise<ServiceRequestTransaction[]> => {
   try {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-    console.log('Fetching from API:', `${API_URL}/api/crud/service-request`);
-    const response = await fetch(`${API_URL}/api/crud/service-request`);
+    console.log('Fetching from API:', `${API_URL}/api/v1/transactions/mobile`);
+    const response = await fetch(`${API_URL}/api/v1/transactions/mobile?limit=500`);
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -30,8 +30,18 @@ const fetchServiceRequests = async (): Promise<ServiceRequestTransaction[]> => {
     }
 
     const data = await response.json();
-    console.log('Fetched service requests:', data.length);
-    return data;
+    console.log('Fetched mobile transactions:', data.length);
+    
+    // The mobile endpoint returns grouped user data, not individual transactions
+    // We need to fetch individual transactions from service-request table
+    const transactionsResponse = await fetch(`${API_URL}/api/crud/service-request`);
+    if (!transactionsResponse.ok) {
+      throw new Error(`Failed to fetch transactions: ${transactionsResponse.status}`);
+    }
+    
+    const transactions = await transactionsResponse.json();
+    console.log('Fetched service requests:', transactions.length);
+    return transactions;
   } catch (error) {
     console.error('Error fetching service requests:', error);
     throw error;
@@ -51,14 +61,15 @@ export default function MobileTransactions() {
       setError(null);
       try {
         const data = await fetchServiceRequests();
-        if (data.length === 0) {
-          setError('No service requests found.');
+        if (!data || data.length === 0) {
+          console.log('No service requests found, setting empty array');
+          setTransactions([]);
         } else {
           setTransactions(data);
         }
       } catch (err: any) {
         console.error('Failed to load service requests:', err);
-        setError(err.message || 'Failed to connect to backend. Please ensure the backend server is running on port 8000.');
+        setError(err.message || 'Failed to load service requests. Please check backend connection.');
       } finally {
         setLoading(false);
       }
@@ -132,19 +143,16 @@ export default function MobileTransactions() {
         {error && !loading && (
           <div className="flex flex-col justify-center items-center py-12 space-y-4">
             <p className="text-red-500 dark:text-red-400" data-testid="text-error">{error}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Please ensure the backend server is running on port 8000</p>
             <button 
               onClick={async () => {
                 setLoading(true);
                 setError(null);
                 try {
                   const data = await fetchServiceRequests();
-                  if (data.length === 0) {
-                    setError('Failed to load service requests. Please try again.');
-                  } else {
-                    setTransactions(data);
-                  }
-                } catch {
-                  setError('Failed to load service requests. Please try again.');
+                  setTransactions(data || []);
+                } catch (err: any) {
+                  setError(err.message || 'Failed to load service requests. Please try again.');
                 }
                 setLoading(false);
               }}
