@@ -36,7 +36,6 @@ export default function Dashboard() {
   // WebSocket connections for real-time updates
   const { data: wsStats, isConnected: wsConnected } = useWebSocket("dashboard-stats");
   const { data: wsTransaction } = useWebSocket("transactions");
-  const { data: wsUser } = useWebSocket("user-registrations");
 
   // Initial data fetch - Optimized with sequential loading
   useEffect(() => {

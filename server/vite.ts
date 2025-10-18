@@ -9,6 +9,7 @@ export async function setupVite(app: Express, server: any) {
     server: {
       middlewareMode: true,
       hmr: false,
+      host: "0.0.0.0",
     },
     appType: "spa",
     clearScreen: false,
