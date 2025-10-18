@@ -19,4 +19,8 @@ export default defineConfig({
     outDir: path.resolve(__dirname, 'dist/public'),
     emptyOutDir: true,
   },
+  server: {
+    host: "0.0.0.0",
+    allowedHosts: [".replit.dev", "localhost", "127.0.0.1"],
+  },
 });

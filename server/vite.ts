@@ -10,6 +10,7 @@ export async function setupVite(app: Express, server: any) {
       middlewareMode: true,
       hmr: false,
       host: "0.0.0.0",
+      allowedHosts: [".replit.dev", "localhost", "127.0.0.1"],
     },
     appType: "spa",
     clearScreen: false,
