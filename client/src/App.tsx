@@ -97,7 +97,7 @@ function AppContent() {
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
-    return saved ? JSON.JSON.parse(saved) : false;
+    return saved ? JSON.parse(saved) : false;
   });
 
   useEffect(() => {
