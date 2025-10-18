@@ -371,20 +371,20 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Stats Cards - Fully Responsive Grid */}
+      {/* Stats Cards - Single Horizontal Swipeable Row */}
       <div className="relative" data-testid="stats-carousel">
-        {/* Mobile/Tablet: Horizontal Scroll, Desktop: Grid */}
+        {/* Horizontal Scroll on All Devices */}
         <div
           id="stats-scroll-container"
-          className="lg:grid lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 lg:gap-4 xl:gap-6 overflow-x-auto lg:overflow-visible scrollbar-hide scroll-smooth px-2 sm:px-4 lg:px-0 touch-pan-x cursor-grab active:cursor-grabbing lg:cursor-default"
+          className="overflow-x-auto scrollbar-hide scroll-smooth px-2 sm:px-4 touch-pan-x cursor-grab active:cursor-grabbing"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           data-testid="stats-container"
         >
-          <div className="flex lg:contents space-x-3 sm:space-x-4 lg:space-x-0 pb-4 lg:pb-0">
+          <div className="flex space-x-3 sm:space-x-4 pb-4">
             {allStatCards.map((card, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 w-[85vw] sm:w-[70vw] md:w-[48%] lg:w-auto"
+                className="flex-shrink-0 w-[85vw] sm:w-[70vw] md:w-[45vw] lg:w-[30vw] xl:w-[23vw] 2xl:w-[18vw]"
                 data-testid={`stat-card-${index}`}
               >
                 <AdvancedStatCard
