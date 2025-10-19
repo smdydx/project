@@ -265,6 +265,55 @@ async def get_dth_transactions(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/other")
+async def get_other_transactions(
+    limit: int = Query(500, le=1000),
+    service_type: str = Query(None),
+    status: str = Query(None),
+    db: Session = Depends(get_db)
+):
+    """Get other service transactions (Prime Activation, etc.) - excluding Mobile and DTH"""
+    try:
+        # Base query excluding pending, mobile, and DTH services
+        query = db.query(Service_Request).filter(
+            Service_Request.status.in_(['completed', 'failed', 'processing', 'paid']),
+            ~Service_Request.service_type.ilike('%mobile%'),
+            ~Service_Request.service_type.ilike('%recharge%'),
+            ~Service_Request.service_type.ilike('%dth%')
+        )
+
+        # Apply service type filter if provided
+        if service_type and service_type != 'all':
+            query = query.filter(Service_Request.service_type == service_type)
+
+        # Apply status filter if provided
+        if status and status != 'all':
+            query = query.filter(Service_Request.status == status)
+
+        service_requests = query.order_by(desc(Service_Request.created_at)).limit(limit).all()
+
+        result = []
+        for sr in service_requests:
+            result.append({
+                "id": sr.id,
+                "user_id": sr.user_id,
+                "service_type": sr.service_type or "Other Service",
+                "operator_code": sr.operator_code,
+                "mobile_number": sr.mobile_number,
+                "amount": str(sr.amount) if sr.amount else "0",
+                "reference_id": sr.reference_id or "N/A",
+                "status": sr.status or "unknown",
+                "payment_txn_id": sr.payment_txn_id,
+                "utr_no": sr.utr_no,
+                "created_at": sr.created_at.isoformat() if sr.created_at else None,
+                "updated_at": sr.updated_at.isoformat() if sr.updated_at else None
+            })
+
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/user/{user_id}/all")
 async def get_user_all_transactions(
     user_id: int,

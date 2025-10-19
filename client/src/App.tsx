@@ -15,6 +15,7 @@ import KYCVerification from './components/pages/KYCVerification';
 import Transactions from './components/pages/Transactions';
 import MobileTransactions from './components/pages/MobileTransactions';
 import DthTransactions from './components/pages/DthTransactions';
+import OtherTransactions from './components/pages/OtherTransactions'; // Import the new component
 import Complaints from './components/pages/Complaints';
 import Reports from './components/pages/Reports';
 import Settings from './components/pages/Settings';
@@ -71,6 +72,7 @@ function AppContent() {
                   <Route path="/transactions" component={Transactions} />
                   <Route path="/transactions/mobile" component={MobileTransactions} />
                   <Route path="/transactions/dth" component={DthTransactions} />
+                  <Route path="/transactions/other" component={OtherTransactions} /> {/* Added route for Other Transactions */}
                   <Route path="/loans" component={LoansPage} />
                   <Route path="/payments" component={PaymentsPage} />
                   <Route path="/services" component={ServicesPage} />
@@ -97,7 +99,7 @@ function AppContent() {
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
-    return saved ? JSON.parse(saved) : false;
+    return saved ? JSON.JSON.parse(saved) : false;
   });
 
   useEffect(() => {

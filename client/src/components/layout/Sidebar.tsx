@@ -22,7 +22,8 @@ import {
   Wallet,
   Briefcase,
   Image,
-  Monitor
+  Monitor,
+  Activity
 } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import { useState } from 'react';
@@ -58,7 +59,8 @@ const menuItems: MenuItem[] = [
     icon: CreditCard,
     subMenu: [
       { path: '/transactions/mobile', label: 'Mobile Transactions', icon: Smartphone },
-      { path: '/transactions/dth', label: 'DTH Transactions', icon: Tv }
+      { path: '/transactions/dth', label: 'DTH Transactions', icon: Tv },
+      { path: '/transactions/other', label: 'Other Transactions', icon: Activity } // Added Other Transactions
     ]
   },
   { path: '/loans', label: 'Loan Applications', icon: Banknote },
@@ -82,6 +84,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const [location] = useLocation();
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
+  const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null); // State to manage active submenu
 
   const toggleSubMenu = (path: string) => {
     setExpandedMenus(prev => 
@@ -89,6 +92,23 @@ export default function Sidebar({
         ? prev.filter(p => p !== path)
         : [...prev, path]
     );
+  };
+
+  // Helper function to determine navigation item class
+  const getNavItemClass = (path: string) => {
+    const isActive = location === path;
+    return `flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
+      isActive
+        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
+        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+    }`;
+  };
+
+  // Helper function for navigation
+  const handleNavigation = (path: string) => {
+    if (onMobileClose) onMobileClose();
+    // Use Link from wouter, which handles navigation
+    // This function is called from onClick handlers within Link components or buttons acting as links
   };
 
   return (
@@ -164,7 +184,10 @@ export default function Sidebar({
                 {hasSubMenu ? (
                   <>
                     <button
-                      onClick={() => toggleSubMenu(item.path)}
+                      onClick={() => {
+                        toggleSubMenu(item.path);
+                        setActiveSubmenu(activeSubmenu === item.path ? null : item.path);
+                      }}
                       className={`w-full flex items-center justify-between text-left transition-all duration-200 rounded-lg relative overflow-hidden ${
                         isCollapsed ? 'lg:justify-center lg:px-3 lg:py-4' : 'px-3 py-3'
                       } ${
@@ -210,7 +233,10 @@ export default function Sidebar({
                             <Link
                               key={subItem.path}
                               href={subItem.path}
-                              onClick={onMobileClose}
+                              onClick={() => {
+                                handleNavigation(subItem.path);
+                                if (onMobileClose) onMobileClose();
+                              }}
                               className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
                                 isSubActive
                                   ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium'
@@ -228,7 +254,10 @@ export default function Sidebar({
                 ) : (
                   <Link
                     href={item.path}
-                    onClick={onMobileClose}
+                    onClick={() => {
+                      handleNavigation(item.path);
+                      if (onMobileClose) onMobileClose();
+                    }}
                     className={`w-full flex items-center text-left transition-all duration-200 rounded-lg relative overflow-hidden ${
                       isCollapsed ? 'lg:justify-center lg:px-3 lg:py-4' : 'space-x-3 px-3 py-3'
                     } ${
