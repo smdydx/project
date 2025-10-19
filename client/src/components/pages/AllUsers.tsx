@@ -18,8 +18,8 @@ export default function AllUsers() {
   const generateRealtimeUsers = async () => {
     try {
       setLoading(true);
-      // Use window.location.origin to get the correct backend URL
-      const API_URL = window.location.origin;
+      // Use environment variable for backend URL
+      const API_URL = import.meta.env.VITE_API_URL || 'http://0.0.0.0:8000';
       const params = new URLSearchParams();
       
       // Filter logic for All Users page
@@ -29,7 +29,7 @@ export default function AllUsers() {
       params.append('limit', '100');
 
       // Get JWT token from localStorage
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem('lcrpay_auth_token');
       const headers: HeadersInit = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;

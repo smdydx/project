@@ -15,14 +15,14 @@ export default function KYCVerification() {
 
   const generateKYCData = async () => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const API_URL = import.meta.env.VITE_API_URL || 'http://0.0.0.0:8000';
       const params = new URLSearchParams();
       if (kycStatusFilter !== 'All') {
         params.append('status', kycStatusFilter.toLowerCase());
       }
       params.append('limit', '1000');
 
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem('lcrpay_auth_token');
       const headers: HeadersInit = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -250,8 +250,8 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
   useEffect(() => {
     const fetchUserDetail = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || '';
-        const token = localStorage.getItem('access_token');
+        const API_URL = import.meta.env.VITE_API_URL || 'http://0.0.0.0:8000';
+        const token = localStorage.getItem('lcrpay_auth_token');
         const headers: HeadersInit = {};
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
