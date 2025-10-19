@@ -7,8 +7,8 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     API_V1_PREFIX: str = "/api"
 
-    # Database - Use PostgreSQL from Replit or fallback to SQLite
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./lcrpay.db")
+    # Database - PostgreSQL only (from environment variable)
+    DATABASE_URL: str = os.getenv("DATABASE_URL")
     
     # Upload/Static file settings
     UPLOAD_FOLDER: str = os.getenv("UPLOAD_FOLDER", "./uploads")

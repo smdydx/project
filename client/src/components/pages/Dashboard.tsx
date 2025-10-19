@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import {
-  DollarSign,
   Users,
   UserPlus,
   Activity,
@@ -10,10 +9,12 @@ import {
   XCircle,
   Smartphone,
   Globe,
+  Zap,
 } from "lucide-react";
 import Card from "../common/Card";
 import AdvancedRealtimeTable from "../common/RealtimeTable";
 import RealtimeUserRegistrations from "../common/RealtimeUserRegistrations";
+import AdvancedStatCard from "../common/AdvancedStatCard";
 import { apiService } from "../../services/api";
 
 export default function Dashboard() {
@@ -21,6 +22,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState<any>({});
   const [transactions, setTransactions] = useState<any[]>([]);
   const [charts, setCharts] = useState<any>({});
+  const wsConnected = false; // WebSocket disabled
 
   // Initial data fetch - Optimized with sequential loading
   useEffect(() => {
@@ -59,25 +61,24 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  // Update stats when WebSocket data arrives
-  useEffect(() => {
-    if (wsStats) {
-      setStats((prev: any) => ({
-        ...prev,
-        ...wsStats,
-      }));
-    }
-  }, [wsStats]);
+  // WebSocket updates disabled for now
+  // useEffect(() => {
+  //   if (wsStats) {
+  //     setStats((prev: any) => ({
+  //       ...prev,
+  //       ...wsStats,
+  //     }));
+  //   }
+  // }, [wsStats]);
 
-  // Add new transactions from WebSocket
-  useEffect(() => {
-    if (wsTransaction) {
-      setTransactions((prev: any[]) => {
-        const newTransactions = [wsTransaction, ...prev];
-        return newTransactions.slice(0, 50); // Keep only last 50
-      });
-    }
-  }, [wsTransaction]);
+  // useEffect(() => {
+  //   if (wsTransaction) {
+  //     setTransactions((prev: any[]) => {
+  //       const newTransactions = [wsTransaction, ...prev];
+  //       return newTransactions.slice(0, 50);
+  //     });
+  //   }
+  // }, [wsTransaction]);
 
   const allStatCards = [
     {
