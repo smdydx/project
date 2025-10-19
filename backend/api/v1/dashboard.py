@@ -14,78 +14,30 @@ router = APIRouter(tags=["dashboard"])
 
 @router.get("/stats", response_model=DashboardStatsResponse)
 async def get_dashboard_stats(db: Session = Depends(get_db)):
-    """
-    Get comprehensive dashboard statistics including:
-    - Total users, new signups
-    - KYC verification stats
-    - Prime user count
-    - LCR money and rewards
-    - Recharge counts
-    """
-    try:
-        stats = DashboardService.get_dashboard_stats(db)
-        return DashboardStatsResponse(**stats)
-    except Exception as e:
-        return DashboardStatsResponse()
+    """Get comprehensive dashboard statistics"""
+    stats = DashboardService.get_dashboard_stats(db)
+    return DashboardStatsResponse(**stats)
 
 @router.get("/charts", response_model=ChartDataResponse)
 async def get_chart_data(db: Session = Depends(get_db)):
-    """
-    Get chart data for:
-    - Daily transaction volume (last 7 days)
-    - Service distribution by category
-    """
-    try:
-        charts = DashboardService.get_chart_data(db)
-        return ChartDataResponse(**charts)
-    except Exception as e:
-        return ChartDataResponse(daily_volume=[], service_distribution=[])
-
-@router.get("/transactions/live", response_model=List[LiveTransactionResponse])
-async def get_live_transactions(
-    limit: int = 10,
-    db: Session = Depends(get_db)
-):
-    """Get latest live transactions"""
-    try:
-        transactions = DashboardService.get_live_transactions(db, limit)
-        return transactions
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching transactions: {str(e)}")
+    """Get chart data for daily volume and service distribution"""
+    charts = DashboardService.get_chart_data(db)
+    return ChartDataResponse(**charts)
 
 @router.get("/transactions", response_model=List[LiveTransactionResponse])
 async def get_transactions(
     limit: int = 50,
     db: Session = Depends(get_db)
 ):
-    """Get transactions - alias for live transactions"""
-    try:
-        transactions = DashboardService.get_live_transactions(db, limit)
-        return transactions
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching transactions: {str(e)}")
+    """Get transactions"""
+    transactions = DashboardService.get_live_transactions(db, limit)
+    return transactions
 
 @router.get("/users/recent", response_model=List[RecentUserResponse])
 async def get_recent_users(
-    limit: int = 10,
+    limit: int = 100,
     db: Session = Depends(get_db)
 ):
     """Get recently registered users"""
-    try:
-        users = DashboardService.get_recent_users(db, limit)
-        return users
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching users: {str(e)}")
-
-@router.get("/users", response_model=List[RecentUserResponse])
-async def get_all_users(
-    limit: int = 100,
-    page: int = 1,
-    db: Session = Depends(get_db)
-):
-    """Get all users with pagination"""
-    try:
-        users = DashboardService.get_recent_users(db, limit)
-        return users
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching users: {str(e)}")
+    users = DashboardService.get_recent_users(db, limit)
+    return users

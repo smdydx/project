@@ -22,19 +22,9 @@ import { apiService } from "../../services/api";
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
-  const [activeServiceSegment, setActiveServiceSegment] = useState<
-    number | null
-  >(null);
-  const [activeDailySegment, setActiveDailySegment] = useState<number | null>(
-    null,
-  );
-
-  // Initial data from REST API
   const [stats, setStats] = useState<any>({});
   const [transactions, setTransactions] = useState<any[]>([]);
   const [charts, setCharts] = useState<any>({});
-
-  // WebSocket connections for real-time updates
   const { data: wsStats, isConnected: wsConnected } = useWebSocket("dashboard-stats");
   const { data: wsTransaction } = useWebSocket("transactions");
 
@@ -417,9 +407,7 @@ export default function Dashboard() {
                 {charts?.dailyVolume?.map((day: any, index: number) => (
                   <div
                     key={index}
-                    className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors"
-                    onMouseEnter={() => setActiveDailySegment(index)}
-                    onMouseLeave={() => setActiveDailySegment(null)}
+                    className="flex items-center space-x-3 p-2"
                     data-testid={`chart-day-${day.name}`}
                   >
                     <span className="text-xs font-medium text-gray-600 dark:text-gray-400 w-12">
@@ -427,9 +415,7 @@ export default function Dashboard() {
                     </span>
                     <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 overflow-hidden">
                       <div
-                        className={`h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-end pr-2 transition-all duration-500 ${
-                          activeDailySegment === index ? "scale-105" : ""
-                        }`}
+                        className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-end pr-2"
                         style={{ width: `${(day.transactions / 3100) * 100}%` }}
                       >
                         <span className="text-xs font-bold text-white">
@@ -456,9 +442,7 @@ export default function Dashboard() {
             {charts?.serviceDistribution?.map((service: any, index: number) => (
               <div
                 key={index}
-                className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors"
-                onMouseEnter={() => setActiveServiceSegment(index)}
-                onMouseLeave={() => setActiveServiceSegment(null)}
+                className="flex items-center space-x-3 p-2"
                 data-testid={`service-${service.name}`}
               >
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300 w-24">
@@ -466,9 +450,7 @@ export default function Dashboard() {
                 </span>
                 <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 overflow-hidden">
                   <div
-                    className={`h-full rounded-full flex items-center justify-end pr-2 transition-all duration-500 ${
-                      activeServiceSegment === index ? "scale-105" : ""
-                    }`}
+                    className="h-full rounded-full flex items-center justify-end pr-2"
                     style={{
                       width: `${(service.value / 35) * 100}%`,
                       background: service.color,
