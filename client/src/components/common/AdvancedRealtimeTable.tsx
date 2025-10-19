@@ -39,19 +39,10 @@ export default function AdvancedRealtimeTable({
 }: AdvancedRealtimeTableProps) {
   const [data, setData] = useState(initialData);
 
-  // WebSocket integration
-  const { data: wsData, isConnected: wsConnected } = useWebSocket(wsChannel || '');
   const [sortColumn, setSortColumn] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [lastUpdate, setLastUpdate] = useState(new Date());
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [newRows, setNewRows] = useState<Set<string>>(new Set());
-  const [updatedRows, setUpdatedRows] = useState<Set<string>>(new Set());
-  const [deletedRows, setDeletedRows] = useState<Set<string>>(new Set());
-  const [stats, setStats] = useState({ total: 0, added: 0, updated: 0, deleted: 0 });
-  const prevDataRef = useRef(data);
   const [itemsPerPage, setItemsPerPage] = useState(8);
 
   // Adjust items per page based on screen size

@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List, Dict, Any
+from typing import List
 from core.database import get_db
 from services.dashboard_service import DashboardService
-# Removed: from services.mock_data_service import MockDataService
 from schemas.dashboard import (
     DashboardStatsResponse,
     ChartDataResponse,
@@ -25,13 +24,8 @@ async def get_dashboard_stats(db: Session = Depends(get_db)):
     """
     try:
         stats = DashboardService.get_dashboard_stats(db)
-        print(f"📊 Stats response: {stats}")
         return DashboardStatsResponse(**stats)
     except Exception as e:
-        print(f"❌ Error in get_dashboard_stats: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        # Return default values instead of error
         return DashboardStatsResponse()
 
 @router.get("/charts", response_model=ChartDataResponse)
@@ -43,13 +37,8 @@ async def get_chart_data(db: Session = Depends(get_db)):
     """
     try:
         charts = DashboardService.get_chart_data(db)
-        print(f"📈 Charts response: {charts}")
         return ChartDataResponse(**charts)
     except Exception as e:
-        print(f"❌ Error in get_chart_data: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        # Return empty chart data instead of error
         return ChartDataResponse(daily_volume=[], service_distribution=[])
 
 @router.get("/transactions/live", response_model=List[LiveTransactionResponse])

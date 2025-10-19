@@ -46,12 +46,10 @@ export default function Dashboard() {
 
         // Load critical data first
         const statsData = await apiService.getDashboardStats();
-        console.log("📊 Stats Data Received:", statsData);
         
         if (statsData && typeof statsData === 'object') {
           setStats(statsData);
         } else {
-          console.warn("Invalid stats data received:", statsData);
           setStats({});
         }
         
@@ -62,17 +60,13 @@ export default function Dashboard() {
           apiService.getLiveTransactions(),
           apiService.getChartData(),
         ]).then(([transactionsData, chartsData]) => {
-          console.log("📊 Transactions Data:", transactionsData?.length || 0);
-          console.log("📈 Charts Data:", chartsData);
           setTransactions(transactionsData || []);
           setCharts(chartsData || {});
-        }).catch(error => {
-          console.error("Error fetching secondary data:", error);
+        }).catch(() => {
           setTransactions([]);
           setCharts({});
         });
       } catch (error) {
-        console.error("❌ Error fetching dashboard data:", error);
         setStats({});
         setLoading(false);
       }
@@ -175,9 +169,8 @@ export default function Dashboard() {
       return [];
     }
 
-    // STRICTLY REAL DATABASE DATA ONLY - NO DUMMY/FAKE DATA
     return transactions
-      .filter(txn => (txn.id || txn.TransactionID)) // Only valid database entries
+      .filter(txn => (txn.id || txn.TransactionID))
       .slice(0, 12)
       .map(txn => ({
         id: txn.id || txn.TransactionID,
