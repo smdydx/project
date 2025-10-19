@@ -6,7 +6,7 @@ from fastapi import HTTPException, status, Depends, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from datetime import datetime, timedelta
-import jwt
+from jose import jwt
 import secrets
 
 # JWT Configuration
