@@ -16,38 +16,31 @@ export default function KYCVerification() {
   const generateKYCData = async () => {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://0.0.0.0:8000';
-      const params = new URLSearchParams();
-      if (kycStatusFilter !== 'All') {
-        params.append('status', kycStatusFilter.toLowerCase());
-      }
-      params.append('limit', '1000');
-
       const token = localStorage.getItem('lcrpay_auth_token');
       const headers: HeadersInit = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      const apiUrl = `${API_URL}/api/v1/kyc/verification?${params}`;
-      console.log('🔍 Fetching KYC data');
-      console.log('📍 API URL:', apiUrl);
-      console.log('🔑 Token present:', !!token);
-      console.log('🎯 Filter status:', kycStatusFilter);
+      const apiUrl = `${API_URL}/api/v1/kyc/verification`;
       
       const response = await fetch(apiUrl, { headers });
-      
-      console.log('📡 Response status:', response.status);
-      console.log('📡 Response ok:', response.ok);
       
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ API Error Response:', errorText);
-        throw new Error(`Failed to fetch KYC data: ${response.status} ${errorText}`);
+        throw new Error(`Failed to fetch KYC data: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('✅ Fetched KYC records:', data.length);
-      console.log('📊 Sample record:', data[0]);
+      
+      // Client-side filtering if needed
+      if (kycStatusFilter !== 'All') {
+        return data.filter((item: any) => 
+          item.kycStatus?.toLowerCase() === kycStatusFilter.toLowerCase()
+        );
+      }
+      
       return data;
     } catch (error) {
       console.error('❌ Error fetching KYC data:', error);

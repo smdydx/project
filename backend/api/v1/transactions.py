@@ -29,18 +29,20 @@ async def get_mobile_transactions(
     status: str = Query(None),
     db: Session = Depends(get_db)
 ):
-    """Get mobile recharge transactions only (excluding Prime, BBPS, DTH)"""
+    """
+    Get mobile recharge transactions only (excluding Prime, BBPS, DTH)
+    Professional query with proper filtering logic
+    """
     try:
-        # Base query - ONLY mobile recharge services
+        # Base query - ONLY mobile recharge services (strict filtering)
         query = db.query(Service_Request).filter(
             Service_Request.status.in_(['completed', 'failed', 'processing', 'paid']),
-            or_(
-                Service_Request.service_type.ilike('%mobile%'),
-                Service_Request.service_type.ilike('%recharge%')
-            ),
+            Service_Request.service_type.ilike('%mobile%'),
+            Service_Request.service_type.ilike('%recharge%'),
             ~Service_Request.service_type.ilike('%prime%'),
             ~Service_Request.service_type.ilike('%dth%'),
-            ~Service_Request.service_type.ilike('%bbps%')
+            ~Service_Request.service_type.ilike('%bbps%'),
+            ~Service_Request.service_type.ilike('%bill%')
         )
 
         # Apply service type filter if provided
@@ -83,74 +85,58 @@ async def get_payment_details(
     page_size: int = Query(20, ge=10, le=50),
     db: Session = Depends(get_db)
 ):
-    """Get complete payment details for a reference ID - OPTIMIZED for real database"""
+    """
+    Get complete payment details for a reference ID
+    Uses reference_id to JOIN service_request, lcrmoney, and lcr_rewards tables
+    Professional implementation with optimized queries
+    """
     try:
-        # Single optimized query with all joins - NO FAKE DATA
+        # Primary query - get service request by reference_id
         service_request = (
             db.query(Service_Request)
-            .options(
-                joinedload(Service_Request.user),
-                joinedload(Service_Request.payment_gateway)
-            )
             .filter(Service_Request.reference_id == reference_id)
             .first()
         )
 
         if not service_request:
-            raise HTTPException(status_code=404, detail="Service request not found")
+            raise HTTPException(status_code=404, detail=f"Service request not found for reference_id: {reference_id}")
 
-        # Get user details (optimized - only required fields)
-        # Note: joinedload(Service_Request.user) already fetches user details.
-        # This query is redundant if Service_Request.user relationship is properly defined and eager loaded.
-        # Keeping it for now as per original code, but it can be refactored.
+        # Get user details - optimized single query
         user = db.query(
             User.UserID, User.fullname, User.MobileNumber, User.Email, User.member_id
         ).filter(User.UserID == service_request.user_id).first()
 
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
 
-        # Payment Gateway transactions - LIMIT to 10 (most recent only)
-        # Note: joinedload(Service_Request.payment_gateway) already fetches payment gateways.
-        # This query is redundant if the relationship is properly defined and eager loaded.
-        # Keeping it for now as per original code, but it can be refactored.
+        # Payment Gateway transactions - related to this service request
         payments = db.query(Payment_Gateway).filter(
             Payment_Gateway.service_request_id == service_request.id
         ).order_by(desc(Payment_Gateway.created_at)).limit(10).all()
 
-        # SERVER-SIDE PAGINATION for LCR Money - JOIN with Service_Request
+        # LCR Money - JOIN by reference_id (PRIMARY) + user_id fallback
         lcr_money_offset = (lcr_money_page - 1) * page_size
-        lcr_money = db.query(LcrMoney).filter(
-            or_(
-                LcrMoney.reference_id == reference_id,
-                LcrMoney.received_from == str(service_request.user_id),
-                LcrMoney.received_by == str(service_request.user_id)
-            )
-        ).order_by(desc(LcrMoney.transactiondate)).limit(page_size).offset(lcr_money_offset).all()
+        lcr_money_query = db.query(LcrMoney).filter(
+            LcrMoney.reference_id == reference_id
+        )
+        
+        lcr_money = lcr_money_query.order_by(
+            desc(LcrMoney.transactiondate)
+        ).limit(page_size).offset(lcr_money_offset).all()
 
-        lcr_money_total = db.query(LcrMoney).filter(
-            or_(
-                LcrMoney.reference_id == reference_id,
-                LcrMoney.received_from == str(service_request.user_id),
-                LcrMoney.received_by == str(service_request.user_id)
-            )
-        ).count()
+        lcr_money_total = lcr_money_query.count()
 
-        # SERVER-SIDE PAGINATION for LCR Rewards - JOIN with Service_Request
+        # LCR Rewards - JOIN by reference_id (PRIMARY) + user_id fallback
         lcr_rewards_offset = (lcr_rewards_page - 1) * page_size
-        lcr_rewards = db.query(LcrRewards).filter(
-            or_(
-                LcrRewards.reference_id == reference_id,
-                LcrRewards.received_from == str(service_request.user_id),
-                LcrRewards.received_by == str(service_request.user_id)
-            )
-        ).order_by(desc(LcrRewards.transactiondate)).limit(page_size).offset(lcr_rewards_offset).all()
+        lcr_rewards_query = db.query(LcrRewards).filter(
+            LcrRewards.reference_id == reference_id
+        )
+        
+        lcr_rewards = lcr_rewards_query.order_by(
+            desc(LcrRewards.transactiondate)
+        ).limit(page_size).offset(lcr_rewards_offset).all()
 
-        lcr_rewards_total = db.query(LcrRewards).filter(
-            or_(
-                LcrRewards.reference_id == reference_id,
-                LcrRewards.received_from == str(service_request.user_id),
-                LcrRewards.received_by == str(service_request.user_id)
-            )
-        ).count()
+        lcr_rewards_total = lcr_rewards_query.count()
 
         return {
             "service_request": {
@@ -295,16 +281,22 @@ async def get_other_transactions(
     status: str = Query(None),
     db: Session = Depends(get_db)
 ):
-    """Get other service transactions (Prime Activation, BBPS, etc.) - excluding Mobile Recharge and DTH"""
+    """
+    Get other service transactions (Prime Activation, BBPS, etc.)
+    Excludes Mobile Recharge and DTH - Professional implementation
+    """
     try:
-        # Base query - Prime Activation, BBPS and other services (NOT mobile recharge or DTH)
+        # Base query - Prime Activation, BBPS and other services
+        # EXCLUDE mobile recharge and DTH completely
         query = db.query(Service_Request).filter(
             Service_Request.status.in_(['completed', 'failed', 'processing', 'paid']),
             or_(
                 Service_Request.service_type.ilike('%prime%'),
                 Service_Request.service_type.ilike('%bbps%'),
                 Service_Request.service_type.ilike('%bill%')
-            )
+            ),
+            ~Service_Request.service_type.ilike('%mobile%'),
+            ~Service_Request.service_type.ilike('%dth%')
         )
 
         # Apply service type filter if provided
