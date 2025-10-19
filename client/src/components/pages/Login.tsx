@@ -52,13 +52,20 @@ export default function Login({ onLogin }: LoginProps) {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ Login successful:', data);
+        
         // Store JWT tokens
         localStorage.setItem('lcrpay_auth_token', data.access_token);
         localStorage.setItem('lcrpay_refresh_token', data.refresh_token);
         localStorage.setItem('lcrpay_username', data.username);
 
-        // Successful login
+        // Successful login - redirect to dashboard
         onLogin(username, password);
+        
+        // Force redirect after a small delay
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 100);
       } else {
         const errorData = await response.json().catch(() => ({ detail: 'Login failed' }));
         setError(errorData.detail || 'Invalid credentials. Please check your username and password.');

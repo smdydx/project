@@ -27,29 +27,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const username = localStorage.getItem("lcrpay_username");
 
     if (token && username) {
-      try {
-        setUser({ username });
-        verifyToken(token);
-      } catch (error) {
-        console.error("Failed to restore session:", error);
-        logout();
-      }
+      setUser({ username });
+      // Skip verification for now - token will be verified on API calls
     }
     setIsLoading(false);
   }, []);
-
-  const verifyToken = async (token: string) => {
-    try {
-      await apiRequest("/api/auth/verify", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-    } catch (error) {
-      console.error("Token verification failed:", error);
-      logout();
-    }
-  };
 
   const login = (token: string, userData: User) => {
     localStorage.setItem("lcrpay_auth_token", token);
