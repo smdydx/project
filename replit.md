@@ -14,6 +14,38 @@ A modern full-stack admin dashboard for BBPS (Bharat Bill Payment System) paymen
 - **Real-time**: WebSocket for live dashboard updates
 
 ## Recent Changes
+**Date**: October 19, 2025
+
+### Dashboard & User Management Restructuring - COMPLETED ✅
+
+Successfully restructured the admin dashboard with new statistics and simplified user management:
+
+1. **7 Dashboard Statistics Cards**:
+   - Total Users (registered base)
+   - Total New SignUp (last 7 days)
+   - Total LCR Money (sum of all INR wallet balances)
+   - Total LCR Reward Distributed (sum of direct + level income)
+   - Total Prime Users
+   - Total Verified Users (KYC verified)
+   - Total Payment Requests
+
+2. **Backend API Updates**:
+   - Enhanced `backend/services/dashboard_service.py` to calculate all 7 new metrics
+   - Updated `backend/schemas/dashboard.py` with new response fields
+   - Modified `/api/v1/users/all` to filter by Prime/Normal only (removed KYC status)
+   - Kept `/api/v1/kyc/verification` for KYC-specific filtering
+
+3. **Frontend Restructuring**:
+   - Updated `Dashboard.tsx` to display all 7 statistics cards
+   - Simplified `AllUsers.tsx` to show only Prime/Normal filter, removed KYC status column
+   - Added Wallet Balance column to All Users table
+   - Fixed badge logic to match backend response format (Prime/Normal)
+   - Kept `KYCVerification.tsx` with KYC status filter and View Details modal
+
+4. **Menu Structure**:
+   - User Management now has sub-items: All Users and KYC Verification
+   - Clean separation between user type filtering and KYC verification workflows
+
 **Date**: October 16, 2025
 
 ### Auto-Generated CRUD API System - COMPLETED ✅
