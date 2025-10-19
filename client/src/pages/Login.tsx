@@ -67,7 +67,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+    <div className="min-h-screen min-h-screen-mobile relative overflow-hidden flex items-center justify-center p-3 sm:p-4 safe-area-padding">
       {/* Animated Gradient Background - PhonePe/GPay Style */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-purple-700 to-indigo-900 animate-gradient-shift"></div>
 
@@ -160,23 +160,23 @@ export default function Login() {
       </div>
 
       {/* Login Card - PhonePe/GPay Professional Style */}
-      <div className="relative w-full max-w-md z-10">
+      <div className="relative w-full max-w-md z-10 mx-auto">
         {/* Glow Effect */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 rounded-3xl blur-2xl opacity-50 animate-pulse"></div>
+        <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 rounded-2xl sm:rounded-3xl blur-xl sm:blur-2xl opacity-50 animate-pulse"></div>
 
-        <div className="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20">
+        <div className="relative bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border border-white/20">
           {/* Logo & Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-700 rounded-3xl shadow-2xl mb-6 animate-fade-in-scale relative overflow-hidden">
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-700 rounded-2xl sm:rounded-3xl shadow-2xl mb-4 sm:mb-6 animate-fade-in-scale relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
               <img 
                 src="/lcrpay-logo.png" 
                 alt="LCR Pay" 
-                className="w-20 h-20 rounded-2xl object-cover relative z-10"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl object-cover relative z-10"
               />
             </div>
             
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-700 bg-clip-text text-transparent mb-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-700 bg-clip-text text-transparent mb-2">
               LCRpay Admin
             </h1>
             
@@ -199,21 +199,21 @@ export default function Login() {
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {/* Username Field */}
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">
+            <div className="space-y-1.5 sm:space-y-2">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700">
                 Admin Username
               </label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-purple-600 transition-colors" />
+                <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 group-focus-within:text-purple-600 transition-colors" />
                 </div>
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-base font-medium"
+                  className="block w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 border-2 border-gray-200 rounded-xl sm:rounded-2xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-sm sm:text-base font-medium tap-target"
                   placeholder="Enter your username"
                   autoComplete="off"
                   maxLength={50}
@@ -223,19 +223,19 @@ export default function Login() {
             </div>
 
             {/* Password Field */}
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">
+            <div className="space-y-1.5 sm:space-y-2">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700">
                 Admin Password
               </label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-purple-600 transition-colors" />
+                <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                  <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 group-focus-within:text-purple-600 transition-colors" />
                 </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-2xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-base font-medium"
+                  className="block w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 border-2 border-gray-200 rounded-xl sm:rounded-2xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-sm sm:text-base font-medium tap-target"
                   placeholder="Enter your password"
                   autoComplete="current-password"
                   minLength={6}
@@ -245,12 +245,12 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-purple-600 transition-colors"
+                  className="absolute inset-y-0 right-0 pr-3 sm:pr-4 flex items-center text-gray-400 hover:text-purple-600 transition-colors tap-target"
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
+                    <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" />
                   ) : (
-                    <Eye className="h-5 w-5" />
+                    <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
                   )}
                 </button>
               </div>
@@ -270,7 +270,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-700 text-white py-4 rounded-2xl font-bold text-lg hover:from-purple-700 hover:via-purple-800 hover:to-indigo-800 focus:outline-none focus:ring-4 focus:ring-purple-500/50 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-2xl relative overflow-hidden group"
+              className="w-full bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-700 text-white py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg hover:from-purple-700 hover:via-purple-800 hover:to-indigo-800 focus:outline-none focus:ring-4 focus:ring-purple-500/50 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:gap-3 shadow-2xl relative overflow-hidden group tap-target"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
               {isLoading ? (
@@ -280,7 +280,7 @@ export default function Login() {
                 </>
               ) : (
                 <>
-                  <LogIn className="w-6 h-6" />
+                  <LogIn className="w-5 h-5 sm:w-6 sm:h-6" />
                   <span>Sign In Securely</span>
                 </>
               )}
@@ -288,35 +288,35 @@ export default function Login() {
           </form>
 
           {/* Test Credentials - Professional Design */}
-          <div className="mt-8 p-5 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl border-2 border-purple-200">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                <Shield className="w-5 h-5 text-white" />
+          <div className="mt-6 sm:mt-8 p-3 sm:p-5 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl sm:rounded-2xl border-2 border-purple-200">
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <p className="text-sm text-gray-800 font-bold">
+              <p className="text-xs sm:text-sm text-gray-800 font-bold">
                 Admin Test Credentials
               </p>
             </div>
-            <div className="space-y-2 bg-white/70 rounded-xl p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-600 font-medium">Username:</span>
-                <span className="font-mono font-bold text-sm text-purple-700 bg-purple-100 px-3 py-1 rounded-lg">AdminLCR</span>
+            <div className="space-y-2 bg-white/70 rounded-lg sm:rounded-xl p-2 sm:p-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
+                <span className="text-[10px] sm:text-xs text-gray-600 font-medium">Username:</span>
+                <span className="font-mono font-bold text-xs sm:text-sm text-purple-700 bg-purple-100 px-2 sm:px-3 py-1 rounded-md sm:rounded-lg break-all">AdminLCR</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-600 font-medium">Password:</span>
-                <span className="font-mono font-bold text-sm text-purple-700 bg-purple-100 px-3 py-1 rounded-lg">LCRADMIN1216SMDYDX</span>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
+                <span className="text-[10px] sm:text-xs text-gray-600 font-medium">Password:</span>
+                <span className="font-mono font-bold text-xs sm:text-sm text-purple-700 bg-purple-100 px-2 sm:px-3 py-1 rounded-md sm:rounded-lg break-all">LCRADMIN1216SMDYDX</span>
               </div>
             </div>
           </div>
 
           {/* Security Footer */}
-          <div className="mt-6 text-center">
-            <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-              <Lock className="w-4 h-4 text-purple-600" />
-              <p className="font-medium">256-bit SSL Encrypted Connection</p>
+          <div className="mt-4 sm:mt-6 text-center">
+            <div className="flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-500">
+              <Lock className="w-3 h-3 sm:w-4 sm:h-4 text-purple-600" />
+              <p className="font-medium">256-bit SSL Encrypted</p>
             </div>
-            <p className="mt-2 text-xs text-gray-400">
-              Your credentials are secured with bank-grade encryption
+            <p className="mt-1 sm:mt-2 text-[10px] sm:text-xs text-gray-400">
+              Bank-grade encryption security
             </p>
           </div>
         </div>
