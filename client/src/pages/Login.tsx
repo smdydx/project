@@ -37,8 +37,15 @@ export default function Login() {
     }
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || '';
-      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://0.0.0.0:8000';
+      const loginUrl = `${API_URL}/api/v1/auth/login`;
+      
+      console.log('🔐 Login Request:');
+      console.log('  - API_URL:', API_URL);
+      console.log('  - Full URL:', loginUrl);
+      console.log('  - Username:', username);
+      
+      const response = await fetch(loginUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,6 +55,8 @@ export default function Login() {
           password: password
         })
       });
+      
+      console.log('📡 Response Status:', response.status);
 
       if (response.ok) {
         const data = await response.json();
