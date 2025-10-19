@@ -287,27 +287,7 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Test Credentials - Professional Design */}
-          <div className="mt-6 sm:mt-8 p-3 sm:p-5 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl sm:rounded-2xl border-2 border-purple-200">
-            <div className="flex items-center gap-2 mb-2 sm:mb-3">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-              </div>
-              <p className="text-xs sm:text-sm text-gray-800 font-bold">
-                Admin Test Credentials
-              </p>
-            </div>
-            <div className="space-y-2 bg-white/70 rounded-lg sm:rounded-xl p-2 sm:p-3">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
-                <span className="text-[10px] sm:text-xs text-gray-600 font-medium">Username:</span>
-                <span className="font-mono font-bold text-xs sm:text-sm text-purple-700 bg-purple-100 px-2 sm:px-3 py-1 rounded-md sm:rounded-lg break-all">AdminLCR</span>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
-                <span className="text-[10px] sm:text-xs text-gray-600 font-medium">Password:</span>
-                <span className="font-mono font-bold text-xs sm:text-sm text-purple-700 bg-purple-100 px-2 sm:px-3 py-1 rounded-md sm:rounded-lg break-all">LCRADMIN1216SMDYDX</span>
-              </div>
-            </div>
-          </div>
+          
 
           {/* Security Footer */}
           <div className="mt-4 sm:mt-6 text-center">

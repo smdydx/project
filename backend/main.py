@@ -10,8 +10,14 @@ from core.base import Base
 # Import all models to register them with Base
 import models
 
-# Create all database tables
-Base.metadata.create_all(bind=engine)
+# Create all database tables with proper error handling
+try:
+    Base.metadata.create_all(bind=engine)
+    print("✅ Database connection successful - Tables ready")
+except Exception as e:
+    print(f"❌ Database Connection Error: {e}")
+    print("⚠️  Please check your DATABASE_URL in backend/.env file")
+    print("📝 Example: postgresql://username:password@localhost:5432/database_name")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

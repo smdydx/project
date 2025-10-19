@@ -98,12 +98,16 @@ function AppContent() {
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    try {
-      const saved = localStorage?.getItem('darkMode');
-      return saved ? JSON.parse(saved) : false;
-    } catch {
-      return false;
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        const saved = window.localStorage.getItem('darkMode');
+        return saved ? JSON.parse(saved) : false;
+      } catch (error) {
+        console.error('LocalStorage error:', error);
+        return false;
+      }
     }
+    return false;
   });
 
   useEffect(() => {
@@ -113,7 +117,9 @@ function App() {
       } else {
         document.documentElement.classList.remove('dark');
       }
-      localStorage?.setItem('darkMode', JSON.stringify(isDarkMode));
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+      }
     } catch (error) {
       console.error('LocalStorage error:', error);
     }

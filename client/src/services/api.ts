@@ -1,10 +1,23 @@
 /**
  * Production API Service
  * Connects React frontend to backend APIs
+ * NO SQLite - Only PostgreSQL from .env
  */
 
 // API requests go to Express backend on port 5000
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+
+// Database error detection
+export function isDatabaseError(error: any): boolean {
+  const errorMessage = error?.message?.toLowerCase() || '';
+  return (
+    errorMessage.includes('database') ||
+    errorMessage.includes('connection') ||
+    errorMessage.includes('postgresql') ||
+    error?.status === 503 ||
+    error?.status === 500
+  );
+}
 
 interface ApiResponse<T> {
   data?: T;

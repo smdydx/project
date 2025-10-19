@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import {
   Users,
-  UserPlus,
   Activity,
   AlertTriangle,
   CheckCircle,
@@ -10,11 +9,14 @@ import {
   Smartphone,
   Globe,
   Zap,
+  Database,
+  RefreshCw,
 } from "lucide-react";
 import Card from "../common/Card";
 import AdvancedRealtimeTable from "../common/RealtimeTable";
 import RealtimeUserRegistrations from "../common/RealtimeUserRegistrations";
 import AdvancedStatCard from "../common/AdvancedStatCard";
+import DatabaseErrorState from '../common/DatabaseErrorState';
 import { apiService } from "../../services/api";
 
 export default function Dashboard() {
@@ -22,6 +24,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState<any>({});
   const [transactions, setTransactions] = useState<any[]>([]);
   const [charts, setCharts] = useState<any>({});
+  const [error, setError] = useState<string | null>(null); // State to store error messages
   const wsConnected = false; // WebSocket disabled
 
   // Initial data fetch - Optimized with sequential loading
@@ -29,6 +32,7 @@ export default function Dashboard() {
     const fetchData = async () => {
       try {
         setLoading(true);
+        setError(null); // Clear previous errors
 
         // Load critical data first
         const statsData = await apiService.getDashboardStats();
@@ -36,7 +40,8 @@ export default function Dashboard() {
         if (statsData && typeof statsData === 'object') {
           setStats(statsData);
         } else {
-          setStats({});
+          // If statsData is not an object, it might be an error response or unexpected format
+          throw new Error("Invalid data format received for dashboard stats.");
         }
 
         setLoading(false);
@@ -48,21 +53,23 @@ export default function Dashboard() {
         ]).then(([transactionsData, chartsData]) => {
           setTransactions(transactionsData || []);
           setCharts(chartsData || {});
-        }).catch(() => {
+        }).catch((backgroundError) => {
+          // Log background errors but don't necessarily show a full error state
+          console.error("Error fetching background data:", backgroundError);
           setTransactions([]);
           setCharts({});
         });
-      } catch (error) {
+      } catch (fetchError: any) {
+        // Handle critical data fetching errors
         setStats({});
         setLoading(false);
+        setError(fetchError.message || "Failed to load dashboard data. Please check your connection.");
       }
     };
 
     fetchData();
   }, []);
 
-  // WebSocket updates disabled for now
-  // WebSocket is disabled, using polling instead
 
   const allStatCards = [
     {
@@ -70,7 +77,7 @@ export default function Dashboard() {
       subtitle: "Registered base",
       value: (stats?.total_users !== undefined && stats?.total_users !== null)
         ? stats.total_users.toLocaleString()
-        : "Loading...",
+        : "N/A",
       icon: Users,
       trend: { value: 5.7, isPositive: true, period: "vs last month" },
       color: "blue" as const,
@@ -269,6 +276,11 @@ export default function Dashboard() {
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
+  }
+
+  // Show database error state if connection failed
+  if (error) {
+    return <DatabaseErrorState errorMessage={error} />;
   }
 
   return (
