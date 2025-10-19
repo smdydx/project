@@ -1,6 +1,8 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
+console.log('🔗 API_BASE_URL:', API_BASE_URL || 'EMPTY - Check client/.env file!');
+
 // Token management
 const TOKEN_KEY = 'lcrpay_auth_token';
 const REFRESH_TOKEN_KEY = 'lcrpay_refresh_token';
@@ -110,7 +112,10 @@ const makeAuthenticatedRequest = async (
 
 export const apiClient = {
   async get(endpoint: string) {
-    const response = await makeAuthenticatedRequest(`${API_BASE_URL}${endpoint}`);
+    const fullUrl = `${API_BASE_URL}${endpoint}`;
+    console.log('📡 GET:', fullUrl);
+    
+    const response = await makeAuthenticatedRequest(fullUrl);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -119,7 +124,10 @@ export const apiClient = {
   },
 
   async post(endpoint: string, data: any) {
-    const response = await makeAuthenticatedRequest(`${API_BASE_URL}${endpoint}`, {
+    const fullUrl = `${API_BASE_URL}${endpoint}`;
+    console.log('📡 POST:', fullUrl, data);
+    
+    const response = await makeAuthenticatedRequest(fullUrl, {
       method: "POST",
       body: JSON.stringify(data),
     });
