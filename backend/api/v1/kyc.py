@@ -21,6 +21,8 @@ async def get_kyc_verification(
     try:
         from models.models import Aadhar_User, User_Aadhar_Address
         
+        print(f"🔍 KYC Verification API called with status: {status}, limit: {limit}")
+        
         # Optimized query with left outer joins to get ALL users
         query = db.query(User, OfflineKYC, PanOfflineKYC, Aadhar_User, User_Aadhar_Address).outerjoin(
             OfflineKYC, User.UserID == OfflineKYC.user_id
@@ -33,21 +35,21 @@ async def get_kyc_verification(
         ).filter(User.IsDeleted == False)
 
         # Apply KYC status filter only if provided and not "All"
-        if status and status.lower() != 'all':
+        if status and status.lower() not in ['all', 'none', '']:
             if status.lower() == 'verified':
                 # Both Aadhaar and PAN verified
                 query = query.filter(
                     User.aadhar_verification_status == True,
                     User.pan_verification_status == True
                 )
-            elif status.lower() == 'partially verified':
+            elif status.lower() in ['partially verified', 'partiallyverified', 'partially_verified']:
                 # Only one verified (either Aadhaar OR PAN, but not both)
                 query = query.filter(
                     (User.aadhar_verification_status == True) | (User.pan_verification_status == True)
                 ).filter(
                     ~((User.aadhar_verification_status == True) & (User.pan_verification_status == True))
                 )
-            elif status.lower() == 'not verified':
+            elif status.lower() in ['not verified', 'notverified', 'not_verified', 'pending']:
                 # Neither Aadhaar nor PAN verified
                 query = query.filter(
                     User.aadhar_verification_status == False,
@@ -55,6 +57,8 @@ async def get_kyc_verification(
                 )
 
         results = query.order_by(desc(User.CreatedAt)).limit(limit).all()
+        
+        print(f"✅ Found {len(results)} KYC records")
 
         kyc_data = []
         for user, kyc, pan_data, aadhaar, address in results:
@@ -123,6 +127,10 @@ async def get_kyc_verification(
             
             kyc_data.append(kyc_record)
 
+        print(f"📊 Returning {len(kyc_data)} KYC records to frontend")
         return kyc_data
     except Exception as e:
+        print(f"❌ KYC API Error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

@@ -28,12 +28,26 @@ export default function KYCVerification() {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      console.log('🔍 Fetching KYC data with status:', kycStatusFilter);
-      const response = await fetch(`${API_URL}/api/v1/kyc/verification?${params}`, { headers });
-      if (!response.ok) throw new Error('Failed to fetch KYC data');
+      const apiUrl = `${API_URL}/api/v1/kyc/verification?${params}`;
+      console.log('🔍 Fetching KYC data');
+      console.log('📍 API URL:', apiUrl);
+      console.log('🔑 Token present:', !!token);
+      console.log('🎯 Filter status:', kycStatusFilter);
+      
+      const response = await fetch(apiUrl, { headers });
+      
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response ok:', response.ok);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ API Error Response:', errorText);
+        throw new Error(`Failed to fetch KYC data: ${response.status} ${errorText}`);
+      }
 
       const data = await response.json();
       console.log('✅ Fetched KYC records:', data.length);
+      console.log('📊 Sample record:', data[0]);
       return data;
     } catch (error) {
       console.error('❌ Error fetching KYC data:', error);
