@@ -147,10 +147,9 @@ async def require_admin(current_user: TokenData = Depends(get_current_user)) -> 
     return current_user
 
 def authenticate_user(username: str, password: str) -> bool:
-    """Authenticate user credentials"""
-    import os
-    # Load admin credentials from environment variables for security
-    ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "AdminLCR")
-    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "LCRADMIN1216SMDYDX")
+    """Authenticate user credentials - loads from .env via Settings"""
+    # Load admin credentials from Settings (validates they exist in .env)
+    ADMIN_USERNAME = settings.ADMIN_USERNAME
+    ADMIN_PASSWORD = settings.ADMIN_PASSWORD
 
     return username == ADMIN_USERNAME and password == ADMIN_PASSWORD

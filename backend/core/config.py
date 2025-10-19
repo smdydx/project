@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
+    # Admin Credentials - MUST be set in .env file
+    ADMIN_USERNAME: str
+    ADMIN_PASSWORD: str
+    
     # Upload/Static file settings
     UPLOAD_FOLDER: str = os.getenv("UPLOAD_FOLDER", "./uploads")
     STATIC_URL_PATH: str = os.getenv("STATIC_URL_PATH", "/uploads")
