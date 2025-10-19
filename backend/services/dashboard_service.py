@@ -12,10 +12,13 @@ class DashboardService:
     def get_dashboard_stats(db: Session):
         try:
             # ============ USER STATS - NO JOINS ============
-            # Total users - excluding deleted
+            # Total users - excluding deleted (STRICT NULL CHECK)
             total_users = db.query(User).filter(
-                or_(User.IsDeleted == False, User.IsDeleted == None)
+                User.IsDeleted.is_(False) | User.IsDeleted.is_(None)
             ).count()
+            
+            # Debug print
+            print(f"🔍 Total Users Query Result: {total_users}")
             
             # New signups today
             today = datetime.now().date()

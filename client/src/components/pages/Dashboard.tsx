@@ -46,7 +46,15 @@ export default function Dashboard() {
 
         // Load critical data first
         const statsData = await apiService.getDashboardStats();
-        setStats(statsData);
+        console.log("📊 Stats Data Received:", statsData);
+        
+        if (statsData && typeof statsData === 'object') {
+          setStats(statsData);
+        } else {
+          console.warn("Invalid stats data received:", statsData);
+          setStats({});
+        }
+        
         setLoading(false);
 
         // Then load non-critical data in background
@@ -54,13 +62,18 @@ export default function Dashboard() {
           apiService.getLiveTransactions(),
           apiService.getChartData(),
         ]).then(([transactionsData, chartsData]) => {
-          setTransactions(transactionsData);
-          setCharts(chartsData);
+          console.log("📊 Transactions Data:", transactionsData?.length || 0);
+          console.log("📈 Charts Data:", chartsData);
+          setTransactions(transactionsData || []);
+          setCharts(chartsData || {});
         }).catch(error => {
           console.error("Error fetching secondary data:", error);
+          setTransactions([]);
+          setCharts({});
         });
       } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+        console.error("❌ Error fetching dashboard data:", error);
+        setStats({});
         setLoading(false);
       }
     };
@@ -92,7 +105,9 @@ export default function Dashboard() {
     {
       title: "Total Users",
       subtitle: "Registered base",
-      value: stats?.total_users?.toLocaleString() || "0",
+      value: (stats?.total_users !== undefined && stats?.total_users !== null) 
+        ? stats.total_users.toLocaleString() 
+        : "Loading...",
       icon: Users,
       trend: { value: 5.7, isPositive: true, period: "vs last month" },
       color: "blue" as const,
