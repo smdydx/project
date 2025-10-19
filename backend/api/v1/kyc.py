@@ -13,17 +13,17 @@ router = APIRouter(tags=["kyc"])
 @router.get("/verification")
 async def get_kyc_verification(
     request: Request,
-    status: Optional[str] = Query(None),
+    kyc_status: Optional[str] = Query(None),
     limit: int = Query(500, le=1000),
     db: Session = Depends(get_db)
 ):
-    """Get KYC verification data with PAN and Aadhaar joins - Optimized"""
+    """Get ALL users with KYC verification status filter"""
     try:
         from models.models import Aadhar_User, User_Aadhar_Address
         
-        print(f"🔍 KYC Verification API called with status: {status}, limit: {limit}")
+        print(f"🔍 KYC Verification API called with kyc_status: {kyc_status}, limit: {limit}")
         
-        # Optimized query with left outer joins to get ALL users
+        # Get ALL users with left outer joins
         query = db.query(User, OfflineKYC, PanOfflineKYC, Aadhar_User, User_Aadhar_Address).outerjoin(
             OfflineKYC, User.UserID == OfflineKYC.user_id
         ).outerjoin(
@@ -34,27 +34,20 @@ async def get_kyc_verification(
             User_Aadhar_Address, Aadhar_User.address_id == User_Aadhar_Address.id
         ).filter(User.IsDeleted == False)
 
-        # Apply KYC status filter only if provided and not "All"
-        if status and status.lower() not in ['all', 'none', '']:
-            if status.lower() == 'verified':
-                # Both Aadhaar and PAN verified
+        # Apply KYC status filter if provided
+        if kyc_status and kyc_status.lower() not in ['all', 'none', '']:
+            if kyc_status.lower() in ['verified', 'approved']:
                 query = query.filter(
                     User.aadhar_verification_status == True,
                     User.pan_verification_status == True
                 )
-            elif status.lower() in ['partially verified', 'partiallyverified', 'partially_verified']:
-                # Only one verified (either Aadhaar OR PAN, but not both)
-                query = query.filter(
-                    (User.aadhar_verification_status == True) | (User.pan_verification_status == True)
-                ).filter(
-                    ~((User.aadhar_verification_status == True) & (User.pan_verification_status == True))
-                )
-            elif status.lower() in ['not verified', 'notverified', 'not_verified', 'pending']:
-                # Neither Aadhaar nor PAN verified
+            elif kyc_status.lower() in ['pending', 'not verified', 'notverified']:
                 query = query.filter(
                     User.aadhar_verification_status == False,
                     User.pan_verification_status == False
                 )
+            elif kyc_status.lower() == 'rejected':
+                query = query.filter(User.IsKYCCompleted == False)
 
         results = query.order_by(desc(User.CreatedAt)).limit(limit).all()
         
@@ -62,16 +55,16 @@ async def get_kyc_verification(
 
         kyc_data = []
         for user, kyc, pan_data, aadhaar, address in results:
-            # Determine KYC/Verification status
+            # Determine KYC status: Pending / Approved / Rejected
             aadhaar_verified = user.aadhar_verification_status or False
             pan_verified = user.pan_verification_status or False
             
             if aadhaar_verified and pan_verified:
-                kyc_status = 'Verified'
-            elif aadhaar_verified or pan_verified:
-                kyc_status = 'Partially Verified'
+                kyc_status = 'Approved'
+            elif user.IsKYCCompleted == False and (kyc or pan_data):
+                kyc_status = 'Rejected'
             else:
-                kyc_status = 'Not Verified'
+                kyc_status = 'Pending'
 
             # Build full image URLs with proper base URL (optimized)
             base_url = str(request.base_url).rstrip('/')

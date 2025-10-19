@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Search, Activity, Filter, Download, ChevronDown, Eye } from 'lucide-react';
 import Card from '@/components/common/Card';
@@ -159,7 +158,7 @@ export default function OtherTransactions() {
           </div>
         )}
         {error && !loading && (
-          <div className="flex flex-col justify-center items-center py-12 space-y-4">
+          <div className="flex flex-col justify-center items-center py-12 space-4">
             <p className="text-red-500 dark:text-red-400">{error}</p>
             <button 
               onClick={async () => {
@@ -192,19 +191,7 @@ export default function OtherTransactions() {
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 />
               </div>
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <select
-                  value={filterServiceType}
-                  onChange={(e) => setFilterServiceType(e.target.value)}
-                  className="pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white appearance-none cursor-pointer"
-                >
-                  <option value="all">All Services</option>
-                  {serviceTypes.filter(t => t && !t.toLowerCase().includes('mobile') && !t.toLowerCase().includes('dth')).map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
-              </div>
+              
               <div className="relative">
                 <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <select

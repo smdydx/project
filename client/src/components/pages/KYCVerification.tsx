@@ -6,7 +6,7 @@ import {
 import AdvancedRealtimeTable from '../common/AdvancedRealtimeTable';
 import Card from '../common/Card';
 
-const kycStatusOptions = ['All', 'Verified', 'Partially Verified', 'Not Verified'];
+const kycStatusOptions = ['All', 'Pending', 'Approved', 'Rejected'];
 
 export default function KYCVerification() {
   const [kycStatusFilter, setKycStatusFilter] = useState('All');
@@ -22,7 +22,12 @@ export default function KYCVerification() {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      const apiUrl = `${API_URL}/api/v1/kyc/verification`;
+      const params = new URLSearchParams();
+      if (kycStatusFilter !== 'All') {
+        params.append('kyc_status', kycStatusFilter);
+      }
+      
+      const apiUrl = `${API_URL}/api/v1/kyc/verification?${params}`;
       
       const response = await fetch(apiUrl, { headers });
       
@@ -33,14 +38,6 @@ export default function KYCVerification() {
       }
 
       const data = await response.json();
-      
-      // Client-side filtering if needed
-      if (kycStatusFilter !== 'All') {
-        return data.filter((item: any) => 
-          item.kycStatus?.toLowerCase() === kycStatusFilter.toLowerCase()
-        );
-      }
-      
       return data;
     } catch (error) {
       console.error('❌ Error fetching KYC data:', error);
@@ -51,11 +48,11 @@ export default function KYCVerification() {
   const getKYCStatusBadge = (status: string) => {
     const baseClasses = "px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 shadow-lg";
     switch (status) {
-      case 'Verified':
+      case 'Approved':
         return (
           <span className={`${baseClasses} bg-gradient-to-r from-green-500 to-emerald-600 text-white`}>
             <CheckCircle className="w-3 h-3" />
-            <span>Verified</span>
+            <span>Approved</span>
           </span>
         );
       case 'Pending':

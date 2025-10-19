@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, func
 from typing import List
+from decimal import Decimal
 from core.database import get_db
 from services.dashboard_service import DashboardService
 from schemas.dashboard import (
@@ -16,8 +17,31 @@ router = APIRouter(tags=["dashboard"])
 async def get_dashboard_stats(db: Session = Depends(get_db)):
     """Get comprehensive dashboard statistics"""
     try:
+        # Total Prime Users
+        total_prime_users = db.query(func.count(User.UserID)).filter(
+            User.IsDeleted == False,
+            User.prime_status == True
+        ).scalar() or 0
+
+        # Total LCR Money
+        from models.models import LcrMoney
+        total_lcr_money = db.query(func.sum(LcrMoney.amount)).filter(
+            LcrMoney.status == 1
+        ).scalar() or Decimal("0.00")
+
+        # Total LCR Rewards
+        from models.models import LcrRewards
+        total_lcr_rewards = db.query(func.sum(LcrRewards.amount)).filter(
+            LcrRewards.status == 1
+        ).scalar() or Decimal("0.00")
+
         stats = DashboardService.get_dashboard_stats(db)
-        return DashboardStatsResponse(**stats)
+        return DashboardStatsResponse(**stats,
+        "total_verified_users": total_verified_users,
+        "total_payment_requests": total_payment_requests,
+        "total_lcr_money": float(total_lcr_money),
+        "total_lcr_rewards": float(total_lcr_rewards)
+    }
     except Exception as e:
         error_msg = str(e).lower()
         if 'database' in error_msg or 'connection' in error_msg or 'operational' in error_msg:

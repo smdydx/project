@@ -53,7 +53,7 @@ export default function Login({ onLogin }: LoginProps) {
       if (response.ok) {
         const data = await response.json();
         console.log('✅ Login successful:', data);
-        
+
         // Store JWT tokens
         localStorage.setItem('lcrpay_auth_token', data.access_token);
         localStorage.setItem('lcrpay_refresh_token', data.refresh_token);
@@ -61,7 +61,7 @@ export default function Login({ onLogin }: LoginProps) {
 
         // Successful login - redirect to dashboard
         onLogin(username, password);
-        
+
         // Force redirect after a small delay
         setTimeout(() => {
           window.location.href = '/';
@@ -80,7 +80,7 @@ export default function Login({ onLogin }: LoginProps) {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 sm:px-6 lg:px-8">
       {/* Animated Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-purple-400 to-indigo-600 animate-gradient-shift"></div>
 
@@ -165,25 +165,25 @@ export default function Login({ onLogin }: LoginProps) {
       </div>
 
       {/* Login Card */}
-      <div className="relative w-full max-w-md z-10">
+      <div className="relative w-full max-w-md sm:max-w-lg z-10">
         {/* Floating Background Elements */}
         <div className="absolute -top-4 -left-4 w-24 h-24 bg-purple-300 rounded-full opacity-30 blur-2xl animate-pulse"></div>
         <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-white rounded-full opacity-40 blur-2xl animate-pulse" style={{ animationDelay: '1s' }}></div>
 
-        <div className="relative bg-white/95 dark:bg-gray-800/95 rounded-2xl shadow-2xl p-8 backdrop-blur-xl border border-white/20">
+        <div className="relative bg-white/95 dark:bg-gray-800/95 rounded-2xl shadow-2xl p-6 sm:p-8 lg:p-10 backdrop-blur-xl border border-white/20">
           {/* Logo & Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl shadow-lg mb-4 animate-fade-in-scale">
+            <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl shadow-lg mb-4 animate-fade-in-scale">
               <img 
                 src="/lcrpay-logo.png" 
                 alt="LCR Pay" 
                 className="w-16 h-16 rounded-xl object-cover"
               />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2">
               LCRpay Admin
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 flex items-center justify-center gap-2">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 flex items-center justify-center gap-2">
               <Shield className="w-4 h-4" />
               Secure Admin Portal
             </p>
@@ -204,7 +204,7 @@ export default function Login({ onLogin }: LoginProps) {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="block w-full pl-10 pr-3 py-3 sm:py-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm sm:text-base"
                   placeholder="Enter your username"
                   autoComplete="off"
                   maxLength={50}
@@ -226,7 +226,7 @@ export default function Login({ onLogin }: LoginProps) {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="block w-full pl-10 pr-10 py-3 sm:py-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm sm:text-base"
                   placeholder="Enter your password"
                   autoComplete="current-password"
                   minLength={6}
@@ -261,7 +261,7 @@ export default function Login({ onLogin }: LoginProps) {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-purple-600 to-purple-800 text-white py-3 rounded-lg font-medium hover:from-purple-700 hover:to-purple-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
+              className="w-full bg-gradient-to-r from-purple-600 to-purple-800 text-white py-3 sm:py-4 rounded-lg font-medium hover:from-purple-700 hover:to-purple-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg text-sm sm:text-base"
             >
               {isLoading ? (
                 <>
