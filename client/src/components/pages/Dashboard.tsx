@@ -34,8 +34,11 @@ export default function Dashboard() {
         setLoading(true);
         setError(null); // Clear previous errors
 
+        console.log('📊 Starting dashboard data fetch...');
+
         // Load critical data first
         const statsData = await apiService.getDashboardStats();
+        console.log('📈 Stats data received:', statsData);
 
         if (statsData && typeof statsData === 'object') {
           setStats(statsData);
@@ -51,16 +54,19 @@ export default function Dashboard() {
           apiService.getLiveTransactions(),
           apiService.getChartData(),
         ]).then(([transactionsData, chartsData]) => {
+          console.log('💳 Transactions received:', transactionsData);
+          console.log('📊 Charts received:', chartsData);
           setTransactions(transactionsData || []);
           setCharts(chartsData || {});
         }).catch((backgroundError) => {
           // Log background errors but don't necessarily show a full error state
-          console.error("Error fetching background data:", backgroundError);
+          console.error("❌ Error fetching background data:", backgroundError);
           setTransactions([]);
           setCharts({});
         });
       } catch (fetchError: any) {
         // Handle critical data fetching errors
+        console.error('❌ Critical error in dashboard:', fetchError);
         setStats({});
         setLoading(false);
         setError(fetchError.message || "Failed to load dashboard data. Please check your connection.");

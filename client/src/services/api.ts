@@ -28,7 +28,8 @@ class ApiService {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = API_BASE_URL;
+    this.baseUrl = API_BASE_URL || 'http://0.0.0.0:8000';
+    console.log('🔗 ApiService initialized with baseUrl:', this.baseUrl);
   }
 
   private async fetchFreshData(url: string): Promise<any> {
