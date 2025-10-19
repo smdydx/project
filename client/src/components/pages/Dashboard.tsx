@@ -32,13 +32,13 @@ export default function Dashboard() {
 
         // Load critical data first
         const statsData = await apiService.getDashboardStats();
-        
+
         if (statsData && typeof statsData === 'object') {
           setStats(statsData);
         } else {
           setStats({});
         }
-        
+
         setLoading(false);
 
         // Then load non-critical data in background
@@ -62,30 +62,14 @@ export default function Dashboard() {
   }, []);
 
   // WebSocket updates disabled for now
-  // useEffect(() => {
-  //   if (wsStats) {
-  //     setStats((prev: any) => ({
-  //       ...prev,
-  //       ...wsStats,
-  //     }));
-  //   }
-  // }, [wsStats]);
-
-  // useEffect(() => {
-  //   if (wsTransaction) {
-  //     setTransactions((prev: any[]) => {
-  //       const newTransactions = [wsTransaction, ...prev];
-  //       return newTransactions.slice(0, 50);
-  //     });
-  //   }
-  // }, [wsTransaction]);
+  // WebSocket is disabled, using polling instead
 
   const allStatCards = [
     {
       title: "Total Users",
       subtitle: "Registered base",
-      value: (stats?.total_users !== undefined && stats?.total_users !== null) 
-        ? stats.total_users.toLocaleString() 
+      value: (stats?.total_users !== undefined && stats?.total_users !== null)
+        ? stats.total_users.toLocaleString()
         : "Loading...",
       icon: Users,
       trend: { value: 5.7, isPositive: true, period: "vs last month" },

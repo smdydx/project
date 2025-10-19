@@ -20,9 +20,4 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-# Debug: Print database URL (masked for security)
-if settings.DATABASE_URL:
-    db_type = settings.DATABASE_URL.split("://")[0] if "://" in settings.DATABASE_URL else "unknown"
-    print(f"✅ Database configured: {db_type}")
-else:
-    print("⚠️ No database configured!")
+# Database configured via environment variable
