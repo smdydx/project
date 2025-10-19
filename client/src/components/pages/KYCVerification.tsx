@@ -244,6 +244,7 @@ export default function KYCVerification() {
         searchPlaceholder="Search by name, KYC ID, or document number..."
         showStats={true}
         enableAnimations={true}
+        dataTestId="kyc-table"
       />
 
       {/* User Detail Modal */}

@@ -29,11 +29,18 @@ async def get_mobile_transactions(
     status: str = Query(None),
     db: Session = Depends(get_db)
 ):
-    """Get all service request transactions with filters"""
+    """Get mobile recharge transactions only (excluding Prime, BBPS, DTH)"""
     try:
-        # Base query excluding pending by default
+        # Base query - ONLY mobile recharge services
         query = db.query(Service_Request).filter(
-            Service_Request.status.in_(['completed', 'failed', 'processing', 'paid'])
+            Service_Request.status.in_(['completed', 'failed', 'processing', 'paid']),
+            or_(
+                Service_Request.service_type.ilike('%mobile%'),
+                Service_Request.service_type.ilike('%recharge%')
+            ),
+            ~Service_Request.service_type.ilike('%prime%'),
+            ~Service_Request.service_type.ilike('%dth%'),
+            ~Service_Request.service_type.ilike('%bbps%')
         )
 
         # Apply service type filter if provided
@@ -109,24 +116,40 @@ async def get_payment_details(
             Payment_Gateway.service_request_id == service_request.id
         ).order_by(desc(Payment_Gateway.created_at)).limit(10).all()
 
-        # SERVER-SIDE PAGINATION for LCR Money
+        # SERVER-SIDE PAGINATION for LCR Money - JOIN with Service_Request
         lcr_money_offset = (lcr_money_page - 1) * page_size
         lcr_money = db.query(LcrMoney).filter(
-            LcrMoney.reference_id == reference_id
+            or_(
+                LcrMoney.reference_id == reference_id,
+                LcrMoney.received_from == str(service_request.user_id),
+                LcrMoney.received_by == str(service_request.user_id)
+            )
         ).order_by(desc(LcrMoney.transactiondate)).limit(page_size).offset(lcr_money_offset).all()
 
         lcr_money_total = db.query(LcrMoney).filter(
-            LcrMoney.reference_id == reference_id
+            or_(
+                LcrMoney.reference_id == reference_id,
+                LcrMoney.received_from == str(service_request.user_id),
+                LcrMoney.received_by == str(service_request.user_id)
+            )
         ).count()
 
-        # SERVER-SIDE PAGINATION for LCR Rewards
+        # SERVER-SIDE PAGINATION for LCR Rewards - JOIN with Service_Request
         lcr_rewards_offset = (lcr_rewards_page - 1) * page_size
         lcr_rewards = db.query(LcrRewards).filter(
-            LcrRewards.reference_id == reference_id
+            or_(
+                LcrRewards.reference_id == reference_id,
+                LcrRewards.received_from == str(service_request.user_id),
+                LcrRewards.received_by == str(service_request.user_id)
+            )
         ).order_by(desc(LcrRewards.transactiondate)).limit(page_size).offset(lcr_rewards_offset).all()
 
         lcr_rewards_total = db.query(LcrRewards).filter(
-            LcrRewards.reference_id == reference_id
+            or_(
+                LcrRewards.reference_id == reference_id,
+                LcrRewards.received_from == str(service_request.user_id),
+                LcrRewards.received_by == str(service_request.user_id)
+            )
         ).count()
 
         return {
@@ -272,14 +295,16 @@ async def get_other_transactions(
     status: str = Query(None),
     db: Session = Depends(get_db)
 ):
-    """Get other service transactions (Prime Activation, etc.) - excluding Mobile and DTH"""
+    """Get other service transactions (Prime Activation, BBPS, etc.) - excluding Mobile Recharge and DTH"""
     try:
-        # Base query excluding pending, mobile, and DTH services
+        # Base query - Prime Activation, BBPS and other services (NOT mobile recharge or DTH)
         query = db.query(Service_Request).filter(
             Service_Request.status.in_(['completed', 'failed', 'processing', 'paid']),
-            ~Service_Request.service_type.ilike('%mobile%'),
-            ~Service_Request.service_type.ilike('%recharge%'),
-            ~Service_Request.service_type.ilike('%dth%')
+            or_(
+                Service_Request.service_type.ilike('%prime%'),
+                Service_Request.service_type.ilike('%bbps%'),
+                Service_Request.service_type.ilike('%bill%')
+            )
         )
 
         # Apply service type filter if provided
