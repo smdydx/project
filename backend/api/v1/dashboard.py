@@ -36,12 +36,7 @@ async def get_dashboard_stats(db: Session = Depends(get_db)):
         ).scalar() or Decimal("0.00")
 
         stats = DashboardService.get_dashboard_stats(db)
-        return DashboardStatsResponse(**stats,
-        "total_verified_users": total_verified_users,
-        "total_payment_requests": total_payment_requests,
-        "total_lcr_money": float(total_lcr_money),
-        "total_lcr_rewards": float(total_lcr_rewards)
-    }
+        return DashboardStatsResponse(**stats)
     except Exception as e:
         error_msg = str(e).lower()
         if 'database' in error_msg or 'connection' in error_msg or 'operational' in error_msg:
