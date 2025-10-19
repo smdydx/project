@@ -1,11 +1,29 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
+import { createProxyMiddleware } from 'http-proxy-middleware';
+// import { registerRoutes } from "./routes"; // Using FastAPI backend instead
 import { setupVite, serveStatic } from "./vite";
 import { setupWebSocket } from "./websocket";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Proxy all /api requests to FastAPI backend on port 8000
+app.use('/api', createProxyMiddleware({
+  target: 'http://localhost:8000',
+  changeOrigin: true,
+  logLevel: 'debug',
+  onProxyReq: (proxyReq, req, res) => {
+    console.log(`[Proxy] ${req.method} ${req.url} -> http://localhost:8000${req.url}`);
+  },
+  onError: (err, req, res) => {
+    console.error('[Proxy Error]:', err.message);
+    res.status(500).json({ 
+      error: 'FastAPI backend connection failed. Make sure FastAPI is running on port 8000.',
+      detail: err.message 
+    });
+  }
+}));
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -55,7 +73,8 @@ app.use((req, res, next) => {
   //   process.exit();
   // });
 
-  registerRoutes(app);
+  // Node.js routes disabled - using FastAPI backend on port 8000
+  // registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
