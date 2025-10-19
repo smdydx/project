@@ -7,8 +7,7 @@ import {
 import AdvancedRealtimeTable from '../common/AdvancedRealtimeTable';
 import Card from '../common/Card';
 
-const userTypeOptionsForKyc = ['All', 'Verified', 'Partial Verified', 'Not Verified'];
-const userTypeOptionsForUsers = ['All', 'Prime Member', 'Normal User'];
+const userTypeOptionsForUsers = ['All', 'Prime User', 'Normal User'];
 
 export default function AllUsers() {
   const [userTypeFilter, setUserTypeFilter] = useState('All');
@@ -28,15 +27,7 @@ export default function AllUsers() {
       
       // Filter logic for All Users page
       if (userTypeFilter !== 'All') {
-        if (userTypeFilter === 'Prime Member' && userTypeOptionsForUsers.includes('Prime Member')) {
-          params.append('user_type', 'Prime User');
-        } else if (userTypeFilter === 'Normal User' && userTypeOptionsForUsers.includes('Normal User')) {
-          params.append('user_type', 'Normal User');
-        }
-      }
-      
-      if (verificationFilter !== 'All') {
-        params.append('verification_status', verificationFilter);
+        params.append('user_type', userTypeFilter);
       }
       params.append('limit', '100');
 
@@ -306,9 +297,9 @@ export default function AllUsers() {
       </div>
 
       <Card className="hover-lift">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4">
           <div>
-            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">User Type</label>
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">User Type Filter</label>
             <select
               value={userTypeFilter}
               onChange={(e) => setUserTypeFilter(e.target.value)}

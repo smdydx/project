@@ -32,7 +32,8 @@ async def get_kyc_verification(
             User_Aadhar_Address, Aadhar_User.address_id == User_Aadhar_Address.id
         ).filter(User.IsDeleted == False)
 
-        if status:
+        # Apply KYC status filter only if provided and not "All"
+        if status and status.lower() != 'all':
             if status.lower() == 'verified':
                 # Both Aadhaar and PAN verified
                 query = query.filter(

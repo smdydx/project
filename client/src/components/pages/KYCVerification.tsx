@@ -6,10 +6,10 @@ import {
 import AdvancedRealtimeTable from '../common/AdvancedRealtimeTable';
 import Card from '../common/Card';
 
-const kycStatusOptions = ['Verified', 'Partially Verified', 'Not Verified'];
+const kycStatusOptions = ['All', 'Verified', 'Partially Verified', 'Not Verified'];
 
 export default function KYCVerification() {
-  const [kycStatusFilter, setKycStatusFilter] = useState('Verified');
+  const [kycStatusFilter, setKycStatusFilter] = useState('All');
   const [showUserModal, setShowUserModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
@@ -17,8 +17,10 @@ export default function KYCVerification() {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const params = new URLSearchParams();
-      params.append('status', kycStatusFilter.toLowerCase());
-      params.append('limit', '1000'); // Increased limit to get all data
+      if (kycStatusFilter !== 'All') {
+        params.append('status', kycStatusFilter.toLowerCase());
+      }
+      params.append('limit', '1000');
 
       const token = localStorage.getItem('access_token');
       const headers: HeadersInit = {};
