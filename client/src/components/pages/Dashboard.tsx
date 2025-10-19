@@ -4,20 +4,16 @@ import {
   Users,
   UserPlus,
   Activity,
-  Zap,
   AlertTriangle,
   CheckCircle,
   Clock,
   XCircle,
   Smartphone,
   Globe,
-  TrendingUp,
 } from "lucide-react";
-import AdvancedStatCard from "../common/AdvancedStatCard";
 import Card from "../common/Card";
 import AdvancedRealtimeTable from "../common/RealtimeTable";
 import RealtimeUserRegistrations from "../common/RealtimeUserRegistrations";
-import { useWebSocket } from "../../hooks/useWebSocket";
 import { apiService } from "../../services/api";
 
 export default function Dashboard() {
@@ -25,8 +21,6 @@ export default function Dashboard() {
   const [stats, setStats] = useState<any>({});
   const [transactions, setTransactions] = useState<any[]>([]);
   const [charts, setCharts] = useState<any>({});
-  const { data: wsStats, isConnected: wsConnected } = useWebSocket("dashboard-stats");
-  const { data: wsTransaction } = useWebSocket("transactions");
 
   // Initial data fetch - Optimized with sequential loading
   useEffect(() => {

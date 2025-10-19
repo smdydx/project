@@ -8,12 +8,7 @@ from core.database import engine
 from core.base import Base
 
 # Import all models to register them with Base
-from models import (
-    auto_loan, banner, business_loan, device, home_loan,
-    loan_against_property, machine_loan, models, payment_gateway,
-    personal_loan, private_funding, service_job_log,
-    service_registration, service_request, setting
-)
+import models
 
 # Create all database tables
 Base.metadata.create_all(bind=engine)
