@@ -13,48 +13,20 @@ router = APIRouter(tags=["users"])
 
 @router.get("/all")
 async def get_all_users(
-    user_type: Optional[str] = Query(None),
-    verification_status: Optional[str] = Query(None),
+    user_type: Optional[str] = Query(None, description="Filter by Prime or Normal"),
     limit: int = Query(100, le=500),
     db: Session = Depends(get_db)
 ):
-    """Get all users with filters"""
+    """Get all users with Prime/Normal filter only (NO KYC status column)"""
     try:
         query = db.query(User).filter(User.IsDeleted == False)
 
+        # User Type Filter (Prime or Normal ONLY)
         if user_type and user_type != 'All':
-            if user_type == 'Prime User':
+            if user_type == 'Prime' or user_type == 'Prime User':
                 query = query.filter(User.prime_status == True)
-            elif user_type == 'Normal User':
+            elif user_type == 'Normal' or user_type == 'Normal User':
                 query = query.filter(User.prime_status == False)
-            elif user_type == 'KYC Completed':
-                query = query.filter(User.IsKYCCompleted == True)
-            elif user_type == 'Device Verified':
-                query = query.filter(User.DeviceVerified == True)
-            elif user_type == 'Email Verified':
-                query = query.filter(User.email_verification_status == True)
-
-        # Verification Status Filter
-        if verification_status and verification_status != 'All':
-            if verification_status == 'Verified':
-                # Both Aadhaar and PAN verified
-                query = query.filter(
-                    User.aadhar_verification_status == True,
-                    User.pan_verification_status == True
-                )
-            elif verification_status == 'Partial Verified':
-                # Only one verified (either Aadhaar OR PAN, but not both)
-                query = query.filter(
-                    (User.aadhar_verification_status == True) | (User.pan_verification_status == True)
-                ).filter(
-                    ~((User.aadhar_verification_status == True) & (User.pan_verification_status == True))
-                )
-            elif verification_status == 'Not Verified':
-                # Neither Aadhaar nor PAN verified
-                query = query.filter(
-                    User.aadhar_verification_status == False,
-                    User.pan_verification_status == False
-                )
 
         users = query.order_by(desc(User.CreatedAt)).limit(limit).all()
 
@@ -75,17 +47,6 @@ async def get_all_users(
             # Get transaction count from dictionary (O(1) lookup)
             txn_count = txn_counts.get(user.MobileNumber, 0)
 
-            # Determine verification status
-            aadhaar_verified = user.aadhar_verification_status or False
-            pan_verified = user.pan_verification_status or False
-
-            if aadhaar_verified and pan_verified:
-                verification_status = "Verified"
-            elif aadhaar_verified or pan_verified:
-                verification_status = "Partial Verified"
-            else:
-                verification_status = "Not Verified"
-
             result.append({
                 "UserID": user.UserID,
                 "fullname": user.fullname or f"User {user.UserID}",
@@ -95,17 +56,12 @@ async def get_all_users(
                 "introducer_id": user.introducer_id,
                 "prime_status": user.prime_status,
                 "DeviceVerified": user.DeviceVerified,
-                "IsKYCCompleted": user.IsKYCCompleted,
-                "aadhar_verification_status": aadhaar_verified,
-                "pan_verification_status": pan_verified,
-                "verification_status": verification_status,
-                "userType": "Prime User" if user.prime_status else "Normal User",
+                "userType": "Prime" if user.prime_status else "Normal",
                 "transaction_count": txn_count,
                 "INRWalletBalance": float(user.INRWalletBalance) if user.INRWalletBalance else 0,
                 "RewardWalletBalance": float(user.RewardWalletBalance) if user.RewardWalletBalance else 0,
                 "CreatedAt": user.CreatedAt.isoformat() if user.CreatedAt else None,
                 "UpdatedAt": user.UpdatedAt.isoformat() if user.UpdatedAt else None,
-                "DeletedAt": user.DeletedAt.isoformat() if user.DeletedAt else None,
                 "prime_activation_date": user.prime_activation_date.isoformat() if user.prime_activation_date else None
             })
 

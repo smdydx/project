@@ -7,15 +7,12 @@ import {
 import AdvancedRealtimeTable from '../common/AdvancedRealtimeTable';
 import Card from '../common/Card';
 
-const userTypeOptionsForUsers = ['All', 'Prime User', 'Normal User'];
+const userTypeOptionsForUsers = ['All', 'Prime', 'Normal'];
 
 export default function AllUsers() {
   const [userTypeFilter, setUserTypeFilter] = useState('All');
-  const [verificationFilter, setVerificationFilter] = useState('All');
   const [, setLocation] = useLocation();
   const [data, setData] = useState<any[]>([]);
-  const [showUserModal, setShowUserModal] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   const generateRealtimeUsers = async () => {
@@ -66,7 +63,7 @@ export default function AllUsers() {
 
   useEffect(() => {
     generateRealtimeUsers();
-  }, [userTypeFilter, verificationFilter]);
+  }, [userTypeFilter]);
 
   const getStatusBadge = (status: string) => {
     const baseClasses = "px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 shadow-lg";
@@ -92,7 +89,7 @@ export default function AllUsers() {
 
   const getUserTypeBadge = (userType: string) => {
     const baseClasses = "px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 shadow-lg";
-    if (userType === 'Prime User') {
+    if (userType === 'Prime' || userType === 'Prime User') {
       return (
         <span className={`${baseClasses} bg-gradient-to-r from-purple-500 to-indigo-600 text-white`}>
           <Crown className="w-3 h-3" />
@@ -152,20 +149,14 @@ export default function AllUsers() {
       sortable: true,
       render: (value: string, row: any) => {
         return (
-          <div 
-            className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-all"
-            onClick={() => {
-              setSelectedUserId(row.UserID);
-              setShowUserModal(true);
-            }}
-          >
+          <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-sm">
                 {value.split(' ').map(n => n[0]).join('')}
               </span>
             </div>
             <div>
-              <p className="font-medium text-blue-600 dark:text-blue-400 hover:underline">{value}</p>
+              <p className="font-medium text-gray-900 dark:text-white">{value}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">{row.Email}</p>
             </div>
           </div>
@@ -203,34 +194,22 @@ export default function AllUsers() {
       render: (value: string) => getUserTypeBadge(value)
     },
     {
-      key: 'verification_status',
-      title: 'KYC Verification',
-      sortable: true,
-      render: (value: string, row: any) => {
-        return (
-          <div className="flex items-center space-x-2">
-            {getVerificationBadge(value)}
-            <button 
-              className="p-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200" 
-              title="View Details"
-              onClick={() => {
-                setSelectedUserId(row.UserID);
-                setShowUserModal(true);
-              }}
-            >
-              <Eye className="w-4 h-4" />
-            </button>
-          </div>
-        );
-      }
-    },
-    {
       key: 'DeviceVerified',
       title: 'Device',
       sortable: true,
       render: (value: boolean) => (
         <span className={`px-2 py-1 rounded-full text-xs font-bold ${value ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}`}>
           {value ? 'Verified' : 'Not Verified'}
+        </span>
+      )
+    },
+    {
+      key: 'INRWalletBalance',
+      title: 'Wallet Balance',
+      sortable: true,
+      render: (value: number) => (
+        <span className="font-bold text-green-600 dark:text-green-400">
+          ₹{value ? value.toLocaleString() : '0'}
         </span>
       )
     },
@@ -333,10 +312,6 @@ export default function AllUsers() {
           </div>
         </Card>
       )}
-
-      {/* User Detail Modal - Removed as per request */}
     </div>
   );
 }
-
-// User Detail Modal Component - Removed as per request

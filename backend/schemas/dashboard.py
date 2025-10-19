@@ -6,10 +6,14 @@ from decimal import Decimal
 class DashboardStatsResponse(BaseModel):
     total_users: int = 0
     new_signups_today: int = 0
+    new_signups_last_7_days: int = 0
     kyc_verified_users: int = 0
     verified_accounts: int = 0
     kyc_verification_percentage: float = 0.0
     prime_users: int = 0
+    total_lcr_money: float = 0.0
+    total_lcr_reward_distributed: float = 0.0
+    total_payment_requests: int = 0
     total_distributor_lcr_money: float = 0.0
     total_distributor_prime_reward: float = 0.0
     total_mobile_recharge: int = 0

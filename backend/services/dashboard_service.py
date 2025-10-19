@@ -27,6 +27,13 @@ class DashboardService:
                 or_(User.IsDeleted == False, User.IsDeleted == None)
             ).count()
             
+            # New signups in last 7 days
+            seven_days_ago = datetime.now() - timedelta(days=7)
+            new_signups_last_7_days = db.query(User).filter(
+                User.CreatedAt >= seven_days_ago,
+                or_(User.IsDeleted == False, User.IsDeleted == None)
+            ).count()
+            
             # KYC verified users
             kyc_verified_users = db.query(User).filter(
                 User.IsKYCCompleted == True,
@@ -45,20 +52,33 @@ class DashboardService:
             ).count()
             
             # ============ INCOME STATS - COUNT FROM INCOME TABLES ============
-            # Total LCR Money - count of users who have received LCR money
+            # Total LCR Money - SUM of all INR wallet balances
             from models.models import DirectIncome, LevelIncome
+            
+            # Total LCR Money = Sum of all INR Wallet Balances
+            total_lcr_money = db.query(
+                func.coalesce(func.sum(cast(User.INRWalletBalance, Numeric)), 0)
+            ).filter(
+                or_(User.IsDeleted == False, User.IsDeleted == None)
+            ).scalar() or 0
+            total_lcr_money = float(total_lcr_money)
+            
+            # Total LCR Reward Distributed = Sum of all direct and level income
+            direct_income_sum = db.query(
+                func.coalesce(func.sum(DirectIncome.amount), 0)
+            ).scalar() or 0
+            
+            level_income_sum = db.query(
+                func.coalesce(func.sum(LevelIncome.amount), 0)
+            ).scalar() or 0
+            
+            total_lcr_reward_distributed = float(direct_income_sum) + float(level_income_sum)
             
             # Count unique users who received direct income
             direct_income_users = db.query(func.count(func.distinct(DirectIncome.receiver_member))).scalar() or 0
             
             # Count unique users who received level income
             level_income_users = db.query(func.count(func.distinct(LevelIncome.receiver_member))).scalar() or 0
-            
-            # Total LCR Money = Users with INR Wallet Balance > 0
-            total_lcr_money = db.query(User).filter(
-                User.INRWalletBalance > 0,
-                or_(User.IsDeleted == False, User.IsDeleted == None)
-            ).count()
             
             # Total Distributor LCR Money = Users with any wallet balance
             total_distributor_lcr_money = db.query(User).filter(
@@ -84,6 +104,9 @@ class DashboardService:
                 Payment_Gateway.purpose.ilike('%dth%'),
                 Payment_Gateway.status == 'SUCCESS'
             ).scalar() or 0
+            
+            # Total Payment Requests - ALL payment gateway records
+            total_payment_requests = db.query(func.count(Payment_Gateway.id)).scalar() or 0
 
             # Calculate verified accounts (KYC completed users)
             verified_accounts = kyc_verified_users
@@ -91,9 +114,12 @@ class DashboardService:
             print(f"📊 Dashboard Stats Debug (USER COUNTS FROM TABLES):")
             print(f"   Total Users: {total_users}")
             print(f"   New Signups Today: {new_signups_today}")
+            print(f"   New Signups Last 7 Days: {new_signups_last_7_days}")
             print(f"   KYC Verified: {kyc_verified_users}")
             print(f"   Prime Users: {prime_users}")
-            print(f"   Total LCR Money (users with INR wallet > 0): {total_lcr_money}")
+            print(f"   Total LCR Money (sum of INR wallets): {total_lcr_money}")
+            print(f"   Total LCR Reward Distributed: {total_lcr_reward_distributed}")
+            print(f"   Total Payment Requests: {total_payment_requests}")
             print(f"   Total Distributor LCR Money (users with any wallet balance): {total_distributor_lcr_money}")
             print(f"   Total Distributor Prime Reward (DirectIncome + LevelIncome users): {total_prime_reward}")
             print(f"   Mobile Recharge (payment_gateway count): {total_mobile_recharge}")
@@ -102,10 +128,14 @@ class DashboardService:
             return {
                 "total_users": total_users,
                 "new_signups_today": new_signups_today,
+                "new_signups_last_7_days": new_signups_last_7_days,
                 "kyc_verified_users": kyc_verified_users,
                 "verified_accounts": verified_accounts,
                 "kyc_verification_percentage": round(kyc_verification_percentage, 2),
                 "prime_users": prime_users,
+                "total_lcr_money": total_lcr_money,
+                "total_lcr_reward_distributed": total_lcr_reward_distributed,
+                "total_payment_requests": total_payment_requests,
                 "total_distributor_lcr_money": total_distributor_lcr_money,
                 "total_distributor_prime_reward": total_prime_reward,
                 "total_mobile_recharge": total_mobile_recharge,
@@ -118,10 +148,14 @@ class DashboardService:
             return {
                 "total_users": 0,
                 "new_signups_today": 0,
+                "new_signups_last_7_days": 0,
                 "kyc_verified_users": 0,
                 "verified_accounts": 0,
                 "kyc_verification_percentage": 0.0,
                 "prime_users": 0,
+                "total_lcr_money": 0.0,
+                "total_lcr_reward_distributed": 0.0,
+                "total_payment_requests": 0,
                 "total_distributor_lcr_money": 0.0,
                 "total_distributor_prime_reward": 0.0,
                 "total_mobile_recharge": 0,
