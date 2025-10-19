@@ -8,6 +8,16 @@ interface PaymentDetail {
   user: any;
   lcr_money_transactions: any[];
   lcr_rewards_transactions: any[];
+  pagination?: {
+    lcr_money?: {
+      total_pages: number;
+      total_records: number;
+    };
+    lcr_rewards?: {
+      total_pages: number;
+      total_records: number;
+    };
+  };
 }
 
 export default function ReferenceDetailPage() {
@@ -38,7 +48,7 @@ export default function ReferenceDetailPage() {
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
         }
-        
+
         // SERVER-SIDE PAGINATION - Fetch only current page
         const response = await fetch(
           `${API_URL}/api/v1/transactions/payment-details/${referenceId}?lcr_money_page=${lcrMoneyPage}&lcr_rewards_page=${lcrRewardsPage}&page_size=${itemsPerPage}`, 
@@ -47,7 +57,7 @@ export default function ReferenceDetailPage() {
             signal: AbortSignal.timeout(10000) // 10 second timeout
           }
         );
-        
+
         if (!response.ok) {
           throw new Error(`Failed to fetch payment details (${response.status})`);
         }
@@ -66,11 +76,11 @@ export default function ReferenceDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-gray-500 dark:text-gray-400 font-medium">Loading transaction details...</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">Fetching data from database</p>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center p-8 bg-white rounded-lg shadow-lg">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto"></div>
+          <p className="mt-6 text-gray-700 font-medium">Fetching Real Database Data...</p>
+          <p className="mt-2 text-sm text-gray-500">Reference: {referenceId}</p>
         </div>
       </div>
     );
@@ -149,6 +159,10 @@ export default function ReferenceDetailPage() {
     );
   };
 
+  // Dummy arrays for placeholder if data is missing, ensuring UI renders correctly
+  const sortedLcrMoney = paginatedLcrMoney || [];
+  const sortedLcrRewards = paginatedLcrRewards || [];
+
   return (
     <div className="space-y-6 p-6">
       {/* Header with Back Button */}
@@ -225,7 +239,7 @@ export default function ReferenceDetailPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedLcrMoney.map((lm, index) => (
+                  {sortedLcrMoney.map((lm, index) => (
                     <tr key={lm.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="px-3 py-3 text-gray-600 dark:text-gray-300">{(lcrMoneyPage - 1) * itemsPerPage + index + 1}</td>
                       <td className="px-3 py-3 font-semibold text-gray-900 dark:text-white">₹{parseFloat(lm.amount).toLocaleString()}</td>
@@ -288,7 +302,7 @@ export default function ReferenceDetailPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedLcrRewards.map((lr, index) => (
+                  {sortedLcrRewards.map((lr, index) => (
                     <tr key={lr.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="px-3 py-3 text-gray-600 dark:text-gray-300">{(lcrRewardsPage - 1) * itemsPerPage + index + 1}</td>
                       <td className="px-3 py-3 font-semibold text-gray-900 dark:text-white">₹{parseFloat(lr.amount).toLocaleString()}</td>
