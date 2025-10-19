@@ -50,25 +50,31 @@ interface ApiRequestOptions {
 }
 
 export async function apiRequest(
-  endpoint: string,
-  options: RequestInit = {}
+  url: string,
+  options?: RequestInit
 ): Promise<any> {
-  const token = localStorage.getItem("lcrpay_auth_token");
+  const token = localStorage.getItem('lcrpay_auth_token');
 
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
-    ...options.headers,
-  };
-
-  const response = await fetch(endpoint, {
+  const response = await fetch(`${API_BASE_URL}${url}`, {
     ...options,
-    headers,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+      ...options?.headers,
+    },
   });
 
+  if (response.status === 401) {
+    // Token expired or invalid
+    localStorage.removeItem('lcrpay_auth_token');
+    localStorage.removeItem('lcrpay_refresh_token');
+    localStorage.removeItem('lcrpay_username');
+    window.location.href = '/login';
+    throw new Error('Authentication failed');
+  }
+
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || `API Error: ${response.statusText}`);
+    throw new Error(`API request failed: ${response.statusText}`);
   }
 
   return response.json();
