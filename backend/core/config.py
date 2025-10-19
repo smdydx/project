@@ -10,6 +10,11 @@ class Settings(BaseSettings):
     # Database - PostgreSQL (from .env file) or fallback to SQLite
     DATABASE_URL: str = "sqlite:///./lcrpay.db"
     
+    # JWT Authentication
+    SECRET_KEY: str = "your-secret-key-change-in-production"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    
     # Upload/Static file settings
     UPLOAD_FOLDER: str = os.getenv("UPLOAD_FOLDER", "./uploads")
     STATIC_URL_PATH: str = os.getenv("STATIC_URL_PATH", "/uploads")
