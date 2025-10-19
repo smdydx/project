@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Search, Smartphone, Filter, ChevronDown, Download, X } from 'lucide-react';
+import { Search, Smartphone, Filter, ChevronDown, Download, X, Eye } from 'lucide-react';
 import Card from '@/components/common/Card';
+import TransactionDetailModal from '@/components/common/TransactionDetailModal';
 
 interface ServiceRequestTransaction {
   id: number;
@@ -86,7 +87,7 @@ export default function MobileTransactions() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterServiceType, setFilterServiceType] = useState('all');
-  const [selectedPaymentDetail, setSelectedPaymentDetail] = useState<PaymentDetail | null>(null);
+  const [selectedReferenceId, setSelectedReferenceId] = useState<string | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
@@ -117,7 +118,8 @@ export default function MobileTransactions() {
   }, [filterStatus, filterServiceType]);
 
   const handleReferenceClick = (referenceId: string) => {
-    window.location.href = `/reference/${referenceId}`;
+    setSelectedReferenceId(referenceId);
+    setShowDetailModal(true);
   };
 
   const filteredTransactions = transactions.filter(txn => {
@@ -302,10 +304,11 @@ export default function MobileTransactions() {
                       <td className="px-4 py-3">
                         <button
                           onClick={() => handleReferenceClick(txn.reference_id)}
-                          className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-xs font-semibold"
+                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
                           data-testid={`btn-view-${txn.id}`}
+                          title="View Details"
                         >
-                          View Details
+                          <Eye className="w-5 h-5" />
                         </button>
                       </td>
                       <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-gray-300" data-testid={`text-paymenttxn-${txn.id}`}>{txn.payment_txn_id || '-'}</td>
@@ -385,6 +388,17 @@ export default function MobileTransactions() {
           </div>
         )}
       </Card>
+
+      {/* Transaction Detail Modal */}
+      {showDetailModal && selectedReferenceId && (
+        <TransactionDetailModal
+          referenceId={selectedReferenceId}
+          onClose={() => {
+            setShowDetailModal(false);
+            setSelectedReferenceId(null);
+          }}
+        />
+      )}
     </div>
   );
 }

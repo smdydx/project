@@ -1,7 +1,8 @@
 
 import { useState, useEffect } from 'react';
-import { Search, Activity, Filter, Download, ChevronDown } from 'lucide-react';
+import { Search, Activity, Filter, Download, ChevronDown, Eye } from 'lucide-react';
 import Card from '@/components/common/Card';
+import TransactionDetailModal from '@/components/common/TransactionDetailModal';
 
 interface OtherTransaction {
   id: number;
@@ -63,6 +64,8 @@ export default function OtherTransactions() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterServiceType, setFilterServiceType] = useState('all');
+  const [selectedReferenceId, setSelectedReferenceId] = useState<string | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
@@ -92,7 +95,8 @@ export default function OtherTransactions() {
   }, [filterStatus, filterServiceType]);
 
   const handleReferenceClick = (referenceId: string) => {
-    window.location.href = `/reference/${referenceId}`;
+    setSelectedReferenceId(referenceId);
+    setShowDetailModal(true);
   };
 
   const filteredTransactions = transactions.filter(txn => {
@@ -247,9 +251,10 @@ export default function OtherTransactions() {
                       <td className="px-4 py-3">
                         <button
                           onClick={() => handleReferenceClick(txn.reference_id)}
-                          className="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-xs font-semibold"
+                          className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-all"
+                          title="View Details"
                         >
-                          View Details
+                          <Eye className="w-5 h-5" />
                         </button>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{formatDate(txn.created_at)}</td>
@@ -304,6 +309,17 @@ export default function OtherTransactions() {
           </div>
         )}
       </Card>
+
+      {/* Transaction Detail Modal */}
+      {showDetailModal && selectedReferenceId && (
+        <TransactionDetailModal
+          referenceId={selectedReferenceId}
+          onClose={() => {
+            setShowDetailModal(false);
+            setSelectedReferenceId(null);
+          }}
+        />
+      )}
     </div>
   );
 }

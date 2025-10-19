@@ -108,12 +108,12 @@ export default function KYCVerification() {
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
             <span className="text-white font-bold text-sm">
-              {value.split(' ').map(n => n[0]).join('')}
+              {value ? value.split(' ').map(n => n[0]).join('') : 'U'}
             </span>
           </div>
           <div>
-            <p className="font-medium text-gray-900 dark:text-white">{value}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{row.userId}</p>
+            <p className="font-medium text-gray-900 dark:text-white">{value || 'Unknown'}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{row.userId || 'N/A'}</p>
           </div>
         </div>
       )
@@ -124,8 +124,8 @@ export default function KYCVerification() {
       sortable: true,
       render: (value: string, row: any) => (
         <div className="space-y-1">
-          <p className="text-sm font-mono">{value}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{row.email}</p>
+          <p className="text-sm font-mono">{value || 'N/A'}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{row.email || 'N/A'}</p>
         </div>
       )
     },
@@ -137,11 +137,17 @@ export default function KYCVerification() {
         <div className="space-y-1">
           <div className="flex items-center space-x-2">
             <FileText className="w-4 h-4 text-blue-500" />
-            <span className="text-sm font-medium">{value}</span>
+            <span className="text-sm font-medium">{value || 'N/A'}</span>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{row.documentNumber}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{row.documentNumber || 'N/A'}</p>
         </div>
       )
+    },
+    {
+      key: 'kycStatus',
+      title: 'Status',
+      sortable: true,
+      render: (value: string) => getKYCStatusBadge(value)
     },
     {
       key: 'submittedOn',
@@ -149,8 +155,8 @@ export default function KYCVerification() {
       sortable: true,
       render: (value: string, row: any) => (
         <div className="space-y-1">
-          <p className="text-sm">{value}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{row.submittedTime}</p>
+          <p className="text-sm">{value || 'N/A'}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{row.submittedTime || ''}</p>
         </div>
       )
     },
@@ -165,7 +171,8 @@ export default function KYCVerification() {
             data-testid="button-view-user"
             onClick={(e) => {
               e.stopPropagation();
-              handleViewDetails(row.userId ? parseInt(row.userId.replace('USR', ''), 10) : row.id);
+              const userId = row.userId ? parseInt(row.userId, 10) : null;
+              handleViewDetails(userId);
             }}
           >
             View Details
@@ -180,9 +187,6 @@ export default function KYCVerification() {
               </button>
             </>
           )}
-          <button className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-all duration-200" title="Download Documents">
-            <Download className="w-4 h-4" />
-          </button>
         </div>
       )
     }
