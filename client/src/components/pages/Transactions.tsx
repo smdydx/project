@@ -261,44 +261,7 @@ export default function Transactions() {
                 </div>
               </Card>
 
-              {/* Wallet & LCR Details */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Wallet Balance</p>
-                      <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">
-                        ₹{selectedUser.walletBalance.toLocaleString()}
-                      </p>
-                    </div>
-                    <Wallet className="w-10 h-10 text-green-500" />
-                  </div>
-                </Card>
-
-                <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200 dark:border-yellow-800">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Reward Balance</p>
-                      <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">
-                        ₹{selectedUser.rewardBalance.toLocaleString()}
-                      </p>
-                    </div>
-                    <Award className="w-10 h-10 text-yellow-500" />
-                  </div>
-                </Card>
-
-                <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">LCR Money</p>
-                      <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
-                        ₹{selectedUser.lcrMoney.toLocaleString()}
-                      </p>
-                    </div>
-                    <DollarSign className="w-10 h-10 text-blue-500" />
-                  </div>
-                </Card>
-              </div>
+              {/* Note: Wallet details will be fetched from backend when user detail API is implemented */}
 
               {/* Transaction Stats */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

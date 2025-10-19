@@ -205,11 +205,11 @@ export default function AllUsers() {
     },
     {
       key: 'INRWalletBalance',
-      title: 'Wallet Balance',
+      title: 'INR Wallet',
       sortable: true,
       render: (value: number) => (
         <span className="font-bold text-green-600 dark:text-green-400">
-          ₹{value ? value.toLocaleString() : '0'}
+          ₹{value ? parseFloat(value.toString()).toFixed(2) : '0.00'}
         </span>
       )
     },

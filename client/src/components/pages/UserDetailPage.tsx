@@ -206,8 +206,8 @@ export default function UserDetailPage() {
         <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-green-100 text-sm">Wallet Balance</p>
-              <p className="text-2xl font-bold mt-1">₹{userDetail.INRWalletBalance.toLocaleString()}</p>
+              <p className="text-green-100 text-sm">INR Wallet</p>
+              <p className="text-2xl font-bold mt-1">₹{parseFloat(userDetail.INRWalletBalance).toFixed(2)}</p>
             </div>
             <Wallet className="w-12 h-12 text-green-200" />
           </div>
@@ -405,15 +405,15 @@ export default function UserDetailPage() {
           <div className="space-y-4">
             <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <span className="text-gray-600 dark:text-gray-400">INR Wallet</span>
-              <span className="text-xl font-bold text-green-600 dark:text-green-400">₹{userDetail.INRWalletBalance.toLocaleString()}</span>
+              <span className="text-xl font-bold text-green-600 dark:text-green-400">₹{parseFloat(userDetail.INRWalletBalance).toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <span className="text-gray-600 dark:text-gray-400">Reward Wallet</span>
-              <span className="text-xl font-bold text-purple-600 dark:text-purple-400">₹{userDetail.RewardWalletBalance.toLocaleString()}</span>
+              <span className="text-xl font-bold text-purple-600 dark:text-purple-400">₹{parseFloat(userDetail.RewardWalletBalance).toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <span className="text-gray-600 dark:text-gray-400">Total Packages</span>
-              <span className="text-xl font-bold text-blue-600 dark:text-blue-400">₹{userDetail.total_packages.toLocaleString()}</span>
+              <span className="text-xl font-bold text-blue-600 dark:text-blue-400">₹{parseFloat(userDetail.total_packages).toFixed(2)}</span>
             </div>
           </div>
         </Card>
