@@ -13,19 +13,12 @@ interface ApiResponse<T> {
 
 class ApiService {
   private baseUrl: string;
-  private cache: Map<string, {data: any, timestamp: number}> = new Map();
-  private cacheDuration = 5000; // 5 seconds cache
 
   constructor() {
     this.baseUrl = API_BASE_URL;
   }
 
-  private async fetchWithCache(url: string): Promise<any> {
-    const cached = this.cache.get(url);
-    if (cached && Date.now() - cached.timestamp < this.cacheDuration) {
-      return cached.data;
-    }
-
+  private async fetchFreshData(url: string): Promise<any> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
@@ -34,33 +27,37 @@ class ApiService {
         signal: controller.signal,
         headers: {
           'Accept': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
       });
       clearTimeout(timeoutId);
 
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
-
-      this.cache.set(url, { data, timestamp: Date.now() });
+      
+      console.log(`✅ Fresh data fetched from: ${url}`, data);
       return data;
     } catch (error) {
       clearTimeout(timeoutId);
+      console.error(`❌ Error fetching from: ${url}`, error);
       throw error;
     }
   }
 
-  // Dashboard Stats
+  // Dashboard Stats - NO CACHE, always fresh
   async getDashboardStats() {
-    return this.fetchWithCache(`${this.baseUrl}/api/v1/dashboard/stats`);
+    return this.fetchFreshData(`${this.baseUrl}/api/v1/dashboard/stats`);
   }
 
   async getChartData() {
-    return this.fetchWithCache(`${this.baseUrl}/api/v1/dashboard/charts`);
+    return this.fetchFreshData(`${this.baseUrl}/api/v1/dashboard/charts`);
   }
 
-  // Transactions
+  // Transactions - NO CACHE
   async getLiveTransactions(limit: number = 50) {
-    return this.fetchWithCache(`${this.baseUrl}/api/v1/dashboard/transactions?limit=${limit}`);
+    return this.fetchFreshData(`${this.baseUrl}/api/v1/dashboard/transactions?limit=${limit}`);
   }
 
   async getAllTransactions(page: number = 1, limit: number = 100) {
@@ -69,24 +66,22 @@ class ApiService {
     return response.json();
   }
 
-  // Users
+  // Users - NO CACHE
   async getRecentUsers(limit: number = 20) {
-    return this.fetchWithCache(`${this.baseUrl}/api/v1/dashboard/users/recent?limit=${limit}`);
+    return this.fetchFreshData(`${this.baseUrl}/api/v1/dashboard/users/recent?limit=${limit}`);
   }
 
   async getAllUsers(page: number = 1, limit: number = 100) {
-    const response = await fetch(`${this.baseUrl}/api/v1/dashboard/users?page=${page}&limit=${limit}`);
-    if (!response.ok) throw new Error('Failed to fetch users');
-    return response.json();
+    return this.fetchFreshData(`${this.baseUrl}/api/v1/dashboard/users?page=${page}&limit=${limit}`);
   }
 
-  // Specific Data Tables
+  // Specific Data Tables - NO CACHE
   async getTableData(endpoint: string, params?: Record<string, any>) {
     const queryString = params
       ? '?' + new URLSearchParams(params).toString()
       : '';
     const url = `${this.baseUrl}${endpoint}${queryString}`;
-    return this.fetchWithCache(url);
+    return this.fetchFreshData(url);
   }
 }
 
