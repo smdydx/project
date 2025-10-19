@@ -177,7 +177,7 @@ export default function UserDetailPage() {
       </div>
 
       {/* Status Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
           <div className="flex items-center justify-between">
             <div>
@@ -203,20 +203,10 @@ export default function UserDetailPage() {
           </div>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-green-100 text-sm">INR Wallet</p>
-              <p className="text-2xl font-bold mt-1">₹{parseFloat(userDetail.INRWalletBalance).toFixed(2)}</p>
-            </div>
-            <Wallet className="w-12 h-12 text-green-200" />
-          </div>
-        </Card>
-
         <Card className="bg-gradient-to-br from-orange-500 to-red-600 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-orange-100 text-sm">Total Transactions</p>
+              <p className="text-orange-100 text-sm">Total Services</p>
               <p className="text-2xl font-bold mt-1">{userDetail.totalTransactions}</p>
             </div>
             <TrendingUp className="w-12 h-12 text-orange-200" />
@@ -395,50 +385,7 @@ export default function UserDetailPage() {
         </Card>
       )}
 
-      {/* Wallet & Transactions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-            <Wallet className="w-5 h-5 mr-2" />
-            Wallet Information
-          </h2>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <span className="text-gray-600 dark:text-gray-400">INR Wallet</span>
-              <span className="text-xl font-bold text-green-600 dark:text-green-400">₹{parseFloat(userDetail.INRWalletBalance).toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <span className="text-gray-600 dark:text-gray-400">Reward Wallet</span>
-              <span className="text-xl font-bold text-purple-600 dark:text-purple-400">₹{parseFloat(userDetail.RewardWalletBalance).toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <span className="text-gray-600 dark:text-gray-400">Total Packages</span>
-              <span className="text-xl font-bold text-blue-600 dark:text-blue-400">₹{parseFloat(userDetail.total_packages).toFixed(2)}</span>
-            </div>
-          </div>
-        </Card>
-
-        <Card>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-            <TrendingUp className="w-5 h-5 mr-2" />
-            Transaction Summary
-          </h2>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <span className="text-gray-600 dark:text-gray-400">Total Transactions</span>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">{userDetail.totalTransactions}</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <span className="text-gray-600 dark:text-gray-400">Total Recharges</span>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">{userDetail.totalRecharges || 0}</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <span className="text-gray-600 dark:text-gray-400">Total Withdrawals</span>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">{userDetail.totalWithdrawals || 0}</span>
-            </div>
-          </div>
-        </Card>
-      </div>
+      {/* Note: Wallet details removed. Use UserTransactionDetail page to view all services, LCR Money and LCR Rewards */}
     </div>
   );
 }

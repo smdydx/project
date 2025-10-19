@@ -204,16 +204,6 @@ export default function AllUsers() {
       )
     },
     {
-      key: 'INRWalletBalance',
-      title: 'INR Wallet',
-      sortable: true,
-      render: (value: number) => (
-        <span className="font-bold text-green-600 dark:text-green-400">
-          ₹{value ? parseFloat(value.toString()).toFixed(2) : '0.00'}
-        </span>
-      )
-    },
-    {
       key: 'CreatedAt',
       title: 'Joined Date',
       sortable: true,

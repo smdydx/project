@@ -64,7 +64,6 @@ const menuItems: MenuItem[] = [
     ]
   },
   { path: '/loans', label: 'Loan Applications', icon: Banknote },
-  { path: '/payments', label: 'Payment Gateway', icon: Wallet },
   { path: '/services', label: 'Services', icon: Briefcase },
   { path: '/banners', label: 'App Banners', icon: Image },
   { path: '/devices', label: 'User Devices', icon: Monitor },
