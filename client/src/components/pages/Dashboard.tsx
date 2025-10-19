@@ -11,6 +11,7 @@ import {
   Zap,
   Database,
   RefreshCw,
+  UserPlus,
 } from "lucide-react";
 import Card from "../common/Card";
 import AdvancedRealtimeTable from "../common/RealtimeTable";

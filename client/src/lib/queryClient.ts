@@ -1,5 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://0.0.0.0:8000';
+
 async function throwIfNotOk(response: Response) {
   if (!response.ok) {
     const body = await response.text();
