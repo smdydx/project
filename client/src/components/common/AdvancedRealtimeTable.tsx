@@ -15,6 +15,11 @@ interface AdvancedRealtimeTableProps {
   searchable?: boolean;
   searchPlaceholder?: string;
   title?: string;
+  onDataUpdate?: () => Promise<any[]>;
+  updateInterval?: number;
+  showStats?: boolean;
+  enableAnimations?: boolean;
+  dataTestId?: string;
 }
 
 export default function AdvancedRealtimeTable({
@@ -23,6 +28,11 @@ export default function AdvancedRealtimeTable({
   searchable = true,
   searchPlaceholder = "Search...",
   title,
+  onDataUpdate,
+  updateInterval = 5000,
+  showStats = false,
+  enableAnimations = false,
+  dataTestId = "advanced-table",
 }: AdvancedRealtimeTableProps) {
   const [data, setData] = useState(initialData);
   const [sortColumn, setSortColumn] = useState<string>('');
@@ -51,6 +61,25 @@ export default function AdvancedRealtimeTable({
   useEffect(() => {
     setData(initialData);
   }, [initialData]);
+
+  // Real-time data updates
+  useEffect(() => {
+    if (!onDataUpdate) return;
+
+    const updateData = async () => {
+      try {
+        const newData = await onDataUpdate();
+        if (Array.isArray(newData)) {
+          setData(newData);
+        }
+      } catch (error) {
+        console.error('Error updating table data:', error);
+      }
+    };
+
+    const interval = setInterval(updateData, updateInterval);
+    return () => clearInterval(interval);
+  }, [onDataUpdate, updateInterval]);
 
   const handleSort = (columnKey: string) => {
     if (sortColumn === columnKey) {
@@ -86,7 +115,7 @@ export default function AdvancedRealtimeTable({
   const paginatedData = sortedData.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover-lift">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover-lift" data-testid={dataTestId}>
       {title && (
         <div className="px-4 lg:px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
