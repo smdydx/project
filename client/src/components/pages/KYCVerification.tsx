@@ -25,11 +25,12 @@ export default function KYCVerification() {
       }
       
       const params = new URLSearchParams();
-      if (kycStatusFilter !== 'All') {
+      if (kycStatusFilter && kycStatusFilter !== 'All') {
         params.append('kyc_status', kycStatusFilter);
       }
       
       const apiUrl = `${API_URL}/api/v1/kyc/verification?${params}`;
+      console.log('🔍 Fetching KYC data from:', apiUrl);
       
       const response = await fetch(apiUrl, { headers });
       
@@ -41,6 +42,14 @@ export default function KYCVerification() {
       }
 
       const data = await response.json();
+      console.log('✅ KYC Data received:', data);
+      
+      // Ensure data is an array
+      if (!Array.isArray(data)) {
+        console.error('❌ Expected array but got:', typeof data);
+        return [];
+      }
+      
       return data;
     } catch (error) {
       console.error('❌ Error fetching KYC data:', error);
@@ -251,7 +260,7 @@ export default function KYCVerification() {
         columns={columns}
         data={[]}
         onDataUpdate={generateKYCData}
-        updateInterval={10000}
+        updateInterval={5000}
         searchPlaceholder="Search by name, KYC ID, or document number..."
         showStats={true}
         enableAnimations={true}

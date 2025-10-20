@@ -21,7 +21,11 @@ async def get_kyc_verification(
     try:
         from models.models import Aadhar_User, User_Aadhar_Address
         
-        print(f"🔍 KYC Verification API called with kyc_status: {kyc_status}, limit: {limit}")
+        print(f"\n{'='*80}")
+        print(f"🔍 KYC Verification API called")
+        print(f"   kyc_status filter: {kyc_status}")
+        print(f"   limit: {limit}")
+        print(f"{'='*80}\n")
         
         # Get ALL users with left outer joins
         query = db.query(User, OfflineKYC, PanOfflineKYC, Aadhar_User, User_Aadhar_Address).outerjoin(
@@ -127,7 +131,14 @@ async def get_kyc_verification(
             
             kyc_data.append(kyc_record)
 
-        print(f"📊 Returning {len(kyc_data)} KYC records to frontend")
+        print(f"\n{'='*80}")
+        print(f"📊 Final Response Summary:")
+        print(f"   Total records: {len(kyc_data)}")
+        if len(kyc_data) > 0:
+            print(f"   Sample record keys: {list(kyc_data[0].keys())}")
+            print(f"   First record ID: {kyc_data[0]['id']}")
+        print(f"{'='*80}\n")
+        
         return kyc_data
     except Exception as e:
         print(f"❌ KYC API Error: {str(e)}")
