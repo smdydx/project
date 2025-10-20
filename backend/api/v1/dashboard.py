@@ -5,6 +5,7 @@ from typing import List
 from decimal import Decimal
 from core.database import get_db
 from services.dashboard_service import DashboardService
+from models.models import User
 from schemas.dashboard import (
     DashboardStatsResponse,
     ChartDataResponse,
