@@ -67,9 +67,13 @@ export default function Login() {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ Login successful, redirecting...');
         setIsLoggedIn(true);
         login(data.access_token, { username: data.username });
-        setLocation('/');
+        // Keep loading state until navigation completes
+        setTimeout(() => {
+          setLocation('/');
+        }, 100);
       } else {
         const errorData = await response.json().catch(() => ({ detail: 'Login failed' }));
         setError(errorData.detail || 'Invalid credentials. Please check your username and password.');
@@ -287,8 +291,8 @@ export default function Login() {
             {/* Submit Button - PhonePe Style */}
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-700 text-white py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg hover:from-purple-700 hover:via-purple-800 hover:to-indigo-800 focus:outline-none focus:ring-4 focus:ring-purple-500/50 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:gap-3 shadow-2xl relative overflow-hidden group tap-target"
+              disabled={isLoading || isLoggedIn}
+              className="w-full bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-700 text-white py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg hover:from-purple-700 hover:via-purple-800 hover:to-indigo-800 focus:outline-none focus:ring-4 focus:ring-purple-500/50 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 sm:gap-3 shadow-2xl relative overflow-hidden group tap-target"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
               {isLoading ? (
