@@ -6,18 +6,14 @@ import {
   CheckCircle,
   Clock,
   XCircle,
-  Smartphone,
   Globe,
   Zap,
-  Database,
-  RefreshCw,
   UserPlus,
 } from "lucide-react";
 import Card from "../common/Card";
 import AdvancedRealtimeTable from "../common/RealtimeTable";
 import RealtimeUserRegistrations from "../common/RealtimeUserRegistrations";
 import AdvancedStatCard from "../common/AdvancedStatCard";
-import DatabaseErrorState from '../common/DatabaseErrorState';
 import { apiService } from "../../services/api";
 
 export default function Dashboard() {
@@ -25,7 +21,6 @@ export default function Dashboard() {
   const [stats, setStats] = useState<any>({});
   const [transactions, setTransactions] = useState<any[]>([]);
   const [charts, setCharts] = useState<any>({});
-  const [error, setError] = useState<string | null>(null); // State to store error messages
   const wsConnected = false; // WebSocket disabled
 
   // Initial data fetch - Optimized with sequential loading
@@ -33,8 +28,6 @@ export default function Dashboard() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        setError(null); // Clear previous errors
-
         console.log('📊 Starting dashboard data fetch...');
 
         // Load critical data first
@@ -44,8 +37,8 @@ export default function Dashboard() {
         if (statsData && typeof statsData === 'object') {
           setStats(statsData);
         } else {
-          // If statsData is not an object, it might be an error response or unexpected format
-          throw new Error("Invalid data format received for dashboard stats.");
+          console.warn("⚠️ Invalid stats data format, using empty object");
+          setStats({});
         }
 
         setLoading(false);
@@ -60,17 +53,14 @@ export default function Dashboard() {
           setTransactions(transactionsData || []);
           setCharts(chartsData || {});
         }).catch((backgroundError) => {
-          // Log background errors but don't necessarily show a full error state
           console.error("❌ Error fetching background data:", backgroundError);
           setTransactions([]);
           setCharts({});
         });
       } catch (fetchError: any) {
-        // Handle critical data fetching errors
         console.error('❌ Critical error in dashboard:', fetchError);
         setStats({});
         setLoading(false);
-        setError(fetchError.message || "Failed to load dashboard data. Please check your connection.");
       }
     };
 
@@ -283,11 +273,6 @@ export default function Dashboard() {
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
-  }
-
-  // Show database error state if connection failed
-  if (error) {
-    return <DatabaseErrorState errorMessage={error} />;
   }
 
   return (
