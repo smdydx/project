@@ -4,6 +4,7 @@ from sqlalchemy import func
 from typing import List
 from decimal import Decimal
 from core.database import get_db
+from core.auth import get_current_user, TokenData
 from services.dashboard_service import DashboardService
 from models.models import User
 from schemas.dashboard import (
@@ -16,7 +17,10 @@ from schemas.dashboard import (
 router = APIRouter(tags=["dashboard"])
 
 @router.get("/stats", response_model=DashboardStatsResponse)
-async def get_dashboard_stats(db: Session = Depends(get_db)):
+async def get_dashboard_stats(
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """Get comprehensive dashboard statistics"""
     try:
         # Total Prime Users
@@ -49,7 +53,10 @@ async def get_dashboard_stats(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/charts", response_model=ChartDataResponse)
-async def get_chart_data(db: Session = Depends(get_db)):
+async def get_chart_data(
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """Get chart data for daily volume and service distribution"""
     try:
         charts = DashboardService.get_chart_data(db)
@@ -65,6 +72,7 @@ async def get_chart_data(db: Session = Depends(get_db)):
 
 @router.get("/transactions", response_model=List[LiveTransactionResponse])
 async def get_transactions(
+    current_user: TokenData = Depends(get_current_user),
     limit: int = 50,
     db: Session = Depends(get_db)
 ):
@@ -83,6 +91,7 @@ async def get_transactions(
 
 @router.get("/users/recent", response_model=List[RecentUserResponse])
 async def get_recent_users(
+    current_user: TokenData = Depends(get_current_user),
     limit: int = 100,
     db: Session = Depends(get_db)
 ):

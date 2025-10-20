@@ -5,6 +5,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from core.database import get_db
+from core.auth import get_current_user, TokenData
 from models.payment_gateway import Payment_Gateway
 from models.models import User, LcrMoney, LcrRewards
 from models.service_request import Service_Request
@@ -13,7 +14,10 @@ router = APIRouter(tags=["transactions"])
 
 
 @router.get("/service-types")
-async def get_service_types(db: Session = Depends(get_db)):
+async def get_service_types(
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """Get all unique service types"""
     try:
         service_types = db.query(Service_Request.service_type).distinct().all()
@@ -24,6 +28,7 @@ async def get_service_types(db: Session = Depends(get_db)):
 
 @router.get("/mobile")
 async def get_mobile_transactions(
+    current_user: TokenData = Depends(get_current_user),
     limit: int = Query(500, le=1000),
     service_type: str = Query(None),
     status: str = Query(None),
@@ -80,6 +85,7 @@ async def get_mobile_transactions(
 @router.get("/payment-details/{reference_id}")
 async def get_payment_details(
     reference_id: str,
+    current_user: TokenData = Depends(get_current_user),
     lcr_money_page: int = Query(1, ge=1),
     lcr_rewards_page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=10, le=50),
@@ -241,6 +247,7 @@ async def get_payment_details(
 
 @router.get("/dth")
 async def get_dth_transactions(
+    current_user: TokenData = Depends(get_current_user),
     limit: int = Query(100, le=500),
     db: Session = Depends(get_db)
 ):
@@ -276,6 +283,7 @@ async def get_dth_transactions(
 
 @router.get("/other")
 async def get_other_transactions(
+    current_user: TokenData = Depends(get_current_user),
     limit: int = Query(500, le=1000),
     service_type: str = Query(None),
     status: str = Query(None),
@@ -334,6 +342,7 @@ async def get_other_transactions(
 @router.get("/user/{user_id}/all")
 async def get_user_all_transactions(
     user_id: int,
+    current_user: TokenData = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get all transactions for a specific user - Service Requests + LCR Money + LCR Rewards (joined by reference_id)"""

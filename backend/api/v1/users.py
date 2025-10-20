@@ -5,7 +5,7 @@ from typing import Optional
 from datetime import datetime
 
 from core.database import get_db
-from core.auth import require_admin, TokenData
+from core.auth import get_current_user, TokenData
 from models.models import User
 from models.payment_gateway import Payment_Gateway
 
@@ -13,6 +13,7 @@ router = APIRouter(tags=["users"])
 
 @router.get("/all")
 async def get_all_users(
+    current_user: TokenData = Depends(get_current_user),
     user_type: Optional[str] = Query(None, description="Filter by Prime or Normal"),
     limit: int = Query(100, le=500),
     db: Session = Depends(get_db)
@@ -71,6 +72,7 @@ async def get_all_users(
 
 @router.get("/signups")
 async def get_new_signups(
+    current_user: TokenData = Depends(get_current_user),
     limit: int = Query(100, le=500),
     db: Session = Depends(get_db)
 ):
@@ -104,6 +106,7 @@ async def get_new_signups(
 @router.get("/detail/{user_id}")
 async def get_user_detail(
     user_id: int,
+    current_user: TokenData = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get complete user details with PAN and Aadhaar information"""

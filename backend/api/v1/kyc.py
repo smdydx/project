@@ -6,6 +6,7 @@ import os
 
 from core.database import get_db
 from core.config import settings
+from core.auth import get_current_user, TokenData
 from models.models import User, OfflineKYC, PanOfflineKYC
 
 router = APIRouter(tags=["kyc"])
@@ -13,6 +14,7 @@ router = APIRouter(tags=["kyc"])
 @router.get("/verification")
 async def get_kyc_verification(
     request: Request,
+    current_user: TokenData = Depends(get_current_user),
     kyc_status: Optional[str] = Query(None),
     limit: int = Query(500, le=1000),
     db: Session = Depends(get_db)
