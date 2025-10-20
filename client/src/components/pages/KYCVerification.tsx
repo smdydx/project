@@ -154,26 +154,18 @@ export default function KYCVerification() {
       key: 'actions',
       title: 'Actions',
       render: (value: any, row: any) => (
-        <div className="flex items-center space-x-2">
-          <button 
-            className="px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md" 
-            title="View User Details"
-            data-testid="button-view-user"
-            onClick={(e) => {
-              e.stopPropagation();
-              const userId = row.userId ? parseInt(row.userId, 10) : null;
-              handleViewDetails(userId);
-            }}
-          >
-            View Details
-          </button>
-          <button className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all duration-200" title="Approve KYC">
-            <CheckCircle className="w-4 h-4" />
-          </button>
-          <button className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200" title="Reject KYC">
-            <XCircle className="w-4 h-4" />
-          </button>
-        </div>
+        <button 
+          className="px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md" 
+          title="View User Details"
+          data-testid="button-view-user"
+          onClick={(e) => {
+            e.stopPropagation();
+            const userId = row.userId ? parseInt(row.userId, 10) : null;
+            handleViewDetails(userId);
+          }}
+        >
+          View Details
+        </button>
       )
     }
   ];
