@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session, func
+from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List
 from decimal import Decimal
 from core.database import get_db

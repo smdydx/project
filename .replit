@@ -1,4 +1,4 @@
-modules = ["python-3.12", "nodejs-20", "cpp-clang14", "c-clang14"]
+modules = ["python-3.12", "nodejs-20", "cpp-clang14", "c-clang14", "python3"]
 
 [agent]
 expertMode = true
@@ -44,7 +44,6 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd backend && uvicorn main:app --reload --host 0.0.0.0 --port 8000"
-waitForPort = 8000
 
 [workflows.workflow.metadata]
 outputType = "console"
@@ -64,3 +63,7 @@ externalPort = 3000
 [[ports]]
 localPort = 37663
 externalPort = 3001
+
+[[ports]]
+localPort = 41941
+externalPort = 3002
