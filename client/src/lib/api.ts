@@ -3,10 +3,10 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
 console.log('🔗 API_BASE_URL:', API_BASE_URL || 'EMPTY - Check client/.env file!');
 
-// Token management
-const TOKEN_KEY = 'lcrpay_auth_token';
-const REFRESH_TOKEN_KEY = 'lcrpay_refresh_token';
-const USERNAME_KEY = 'lcrpay_username';
+// Token management - Consistent keys across app
+const TOKEN_KEY = 'access_token';
+const REFRESH_TOKEN_KEY = 'refresh_token';
+const USERNAME_KEY = 'username';
 
 export const authStorage = {
   getToken: () => localStorage.getItem(TOKEN_KEY),
@@ -26,6 +26,8 @@ export const authStorage = {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(USERNAME_KEY);
+    localStorage.removeItem('user');
+    console.log('🧹 All auth tokens cleared');
   }
 };
 

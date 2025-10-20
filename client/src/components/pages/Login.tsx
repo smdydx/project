@@ -56,12 +56,13 @@ export default function Login({ onLogin }: LoginProps) {
         const data = await response.json();
         console.log('✅ Login successful, saving token...');
 
-        // Store JWT tokens
-        localStorage.setItem('lcrpay_auth_token', data.access_token);
-        localStorage.setItem('lcrpay_refresh_token', data.refresh_token);
-        localStorage.setItem('lcrpay_username', data.username);
+        // Store JWT tokens - MUST match api.ts key names
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('refresh_token', data.refresh_token);
+        localStorage.setItem('username', data.username);
 
-        console.log('✅ Token saved to localStorage');
+        console.log('✅ Token saved to localStorage with correct keys');
+        console.log('🔑 Token:', data.access_token.substring(0, 20) + '...');
 
         // Successful login - redirect to dashboard
         onLogin(username, password);
