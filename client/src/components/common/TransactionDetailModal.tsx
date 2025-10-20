@@ -54,9 +54,24 @@ export default function TransactionDetailModal({ referenceId, onClose }: Transac
       const response = await fetch(url, { headers });
 
       console.log('📡 Response status:', response.status);
+      console.log('📡 Response ok:', response.ok);
 
-      if (!response.ok) throw new Error('Failed to fetch payment details');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ API Error Response:', errorText);
+        
+        if (response.status === 401) {
+          console.error('❌ 401 Unauthorized - Token may be invalid or expired');
+          localStorage.clear();
+          window.location.href = '/login';
+          throw new Error('Session expired. Please login again.');
+        }
+        
+        throw new Error(`Failed to fetch payment details (${response.status}): ${errorText}`);
+      }
+      
       const data = await response.json();
+      console.log('✅ Payment details fetched successfully');
       setPaymentDetail(data);
     } catch (err: any) {
       setError(err.message);

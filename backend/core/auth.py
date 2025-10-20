@@ -121,42 +121,57 @@ async def get_current_user(
     """Validate JWT token and return user data"""
     token = None
 
-    # Try to get token from Authorization header
+    print(f"🔍 Auth Debug - credentials: {credentials is not None}, authorization header: {authorization is not None}")
+    
+    # Try to get token from HTTPBearer security first
     if credentials:
         token = credentials.credentials
-        print(f"🔑 Token from credentials: {token[:30]}...")
+        print(f"🔑 Token from HTTPBearer credentials (first 30 chars): {token[:30]}...")
+    # Fallback to manual Authorization header parsing
     elif authorization:
         # Handle "Bearer <token>" format
-        parts = authorization.split()
-        if len(parts) == 2 and parts[0].lower() == "bearer":
-            token = parts[1]
-            print(f"🔑 Token from authorization header: {token[:30]}...")
+        if authorization.startswith("Bearer "):
+            token = authorization[7:].strip()  # Remove "Bearer " prefix
+            print(f"🔑 Token from Authorization header (first 30 chars): {token[:30]}...")
         else:
-            print(f"❌ Invalid authorization header format: {authorization}")
-    else:
-        print("❌ No credentials or authorization header found")
-
+            print(f"❌ Invalid authorization header format (must start with 'Bearer '): {authorization[:50]}...")
+    
     if not token:
-        print("❌ Authentication failed: No token")
+        print("❌ Authentication failed: No token found in request")
+        print(f"   - HTTPBearer credentials present: {credentials is not None}")
+        print(f"   - Authorization header present: {authorization is not None}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing or invalid authorization header",
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-    print(f"🔍 Verifying token...")
-    token_data = verify_token(token, "access")
-
-    if token_data is None:
-        print("❌ Token verification failed: Invalid token")
+    print(f"🔍 Verifying token (length: {len(token)})...")
+    print(f"🔍 SECRET_KEY length: {len(SECRET_KEY)}")
+    print(f"🔍 Algorithm: {ALGORITHM}")
+    
+    try:
+        token_data = verify_token(token, "access")
+        
+        if token_data is None:
+            print("❌ Token verification returned None")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired token",
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+        
+        print(f"✅ Token verified successfully for user: {token_data.username}")
+        return token_data
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Unexpected error during token verification: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
+            detail="Token verification failed",
             headers={"WWW-Authenticate": "Bearer"}
         )
-
-    print(f"✅ Token verified for user: {token_data.username}")
-    return token_data
 
 async def require_admin(current_user: TokenData = Depends(get_current_user)) -> TokenData:
     """Require admin role for protected operations"""
