@@ -34,47 +34,54 @@ export default function TransactionDetailModal({ referenceId, onClose }: Transac
   const fetchPaymentDetails = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
       const API_URL = import.meta.env.VITE_API_URL || 'http://0.0.0.0:8000';
       const token = localStorage.getItem('access_token');
-      const headers: HeadersInit = {
-        'Accept': 'application/json',
-      };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-        console.log('🔑 TransactionDetailModal - Token found, length:', token.length);
-        console.log('🔑 Full token:', token);
-      } else {
-        console.error('❌ TransactionDetailModal - No access token found');
+      
+      if (!token) {
+        console.error('❌ No access token found - redirecting to login');
+        localStorage.clear();
+        window.location.href = '/login';
+        return;
       }
 
-      const url = `${API_URL}/api/v1/transactions/payment-details/${referenceId}?lcr_money_page=${lcrMoneyPage}&lcr_rewards_page=${lcrRewardsPage}`;
-      console.log('📡 Fetching URL:', url);
-      console.log('📡 Request headers:', headers);
+      const headers: HeadersInit = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      };
 
-      const response = await fetch(url, { headers });
+      const url = `${API_URL}/api/v1/transactions/payment-details/${referenceId}?lcr_money_page=${lcrMoneyPage}&lcr_rewards_page=${lcrRewardsPage}`;
+      console.log('📡 TransactionDetailModal - Fetching:', url);
+
+      const response = await fetch(url, { 
+        method: 'GET',
+        headers,
+        credentials: 'include'
+      });
 
       console.log('📡 Response status:', response.status);
-      console.log('📡 Response ok:', response.ok);
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ API Error Response:', errorText);
-        
         if (response.status === 401) {
-          console.error('❌ 401 Unauthorized - Token may be invalid or expired');
+          console.error('❌ Authentication failed - redirecting to login');
           localStorage.clear();
           window.location.href = '/login';
-          throw new Error('Session expired. Please login again.');
+          return;
         }
         
-        throw new Error(`Failed to fetch payment details (${response.status}): ${errorText}`);
+        const errorText = await response.text();
+        console.error('❌ API Error:', errorText);
+        throw new Error(`Failed to fetch payment details: ${response.status}`);
       }
       
       const data = await response.json();
-      console.log('✅ Payment details fetched successfully');
+      console.log('✅ Payment details loaded successfully');
       setPaymentDetail(data);
     } catch (err: any) {
-      setError(err.message);
+      console.error('❌ Error in fetchPaymentDetails:', err);
+      setError(err.message || 'Failed to load transaction details');
     } finally {
       setLoading(false);
     }

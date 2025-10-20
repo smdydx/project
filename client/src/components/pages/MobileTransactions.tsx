@@ -305,12 +305,22 @@ export default function MobileTransactions() {
                       </td>
                       <td className="px-4 py-3">
                         <button
-                          onClick={() => handleReferenceClick(txn.reference_id)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
-                          data-testid={`btn-view-${txn.id}`}
+                          onClick={() => {
+                            const token = localStorage.getItem('access_token');
+                            if (!token) {
+                              console.error('❌ No token found - redirecting to login');
+                              localStorage.clear();
+                              window.location.href = '/login';
+                              return;
+                            }
+                            console.log('✅ Opening detail modal for:', txn.reference_id);
+                            setSelectedReferenceId(txn.reference_id);
+                            setShowDetailModal(true);
+                          }}
+                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors group"
                           title="View Details"
                         >
-                          <Eye className="w-5 h-5" />
+                          <Eye className="w-4 h-4 text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
                         </button>
                       </td>
                       <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-gray-300" data-testid={`text-paymenttxn-${txn.id}`}>{txn.payment_txn_id || '-'}</td>

@@ -121,20 +121,29 @@ async def get_current_user(
     """Validate JWT token and return user data"""
     token = None
 
-    print(f"🔍 Auth Debug - credentials: {credentials is not None}, authorization header: {authorization is not None}")
+    print(f"\n{'='*60}")
+    print(f"🔍 AUTH REQUEST DEBUG")
+    print(f"{'='*60}")
+    print(f"  HTTPBearer credentials present: {credentials is not None}")
+    print(f"  Authorization header present: {authorization is not None}")
     
     # Try to get token from HTTPBearer security first
     if credentials:
         token = credentials.credentials
-        print(f"🔑 Token from HTTPBearer credentials (first 30 chars): {token[:30]}...")
+        print(f"  ✓ Token source: HTTPBearer")
+        print(f"  ✓ Token length: {len(token)}")
+        print(f"  ✓ Token preview: {token[:30]}...")
     # Fallback to manual Authorization header parsing
     elif authorization:
         # Handle "Bearer <token>" format
         if authorization.startswith("Bearer "):
             token = authorization[7:].strip()  # Remove "Bearer " prefix
-            print(f"🔑 Token from Authorization header (first 30 chars): {token[:30]}...")
+            print(f"  ✓ Token source: Authorization Header")
+            print(f"  ✓ Token length: {len(token)}")
+            print(f"  ✓ Token preview: {token[:30]}...")
         else:
-            print(f"❌ Invalid authorization header format (must start with 'Bearer '): {authorization[:50]}...")
+            print(f"  ✗ Invalid header format: {authorization[:50]}...")
+            print(f"  ✗ Expected: 'Bearer <token>'")
     
     if not token:
         print("❌ Authentication failed: No token found in request")
@@ -146,22 +155,25 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-    print(f"🔍 Verifying token (length: {len(token)})...")
-    print(f"🔍 SECRET_KEY length: {len(SECRET_KEY)}")
-    print(f"🔍 Algorithm: {ALGORITHM}")
+    print(f"  🔐 Starting token verification...")
+    print(f"  📏 Token length: {len(token)}")
+    print(f"  🔑 Using algorithm: {ALGORITHM}")
     
     try:
         token_data = verify_token(token, "access")
         
         if token_data is None:
-            print("❌ Token verification returned None")
+            print(f"  ✗ Token verification returned None")
+            print(f"{'='*60}\n")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid or expired token",
                 headers={"WWW-Authenticate": "Bearer"}
             )
         
-        print(f"✅ Token verified successfully for user: {token_data.username}")
+        print(f"  ✅ Token verified for user: {token_data.username}")
+        print(f"  ✅ Token expires: {token_data.exp}")
+        print(f"{'='*60}\n")
         return token_data
     except HTTPException:
         raise

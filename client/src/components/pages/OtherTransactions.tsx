@@ -61,7 +61,7 @@ const fetchOtherTransactions = async (filterServiceType: string, filterStatus: s
 const fetchServiceTypes = async () => {
   try {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-    
+
     // --- Token key fix applied here in the fetch logic ---
     const token = localStorage.getItem('access_token');
     const headers: HeadersInit = {};
@@ -271,11 +271,22 @@ export default function OtherTransactions() {
                       </td>
                       <td className="px-4 py-3">
                         <button
-                          onClick={() => handleReferenceClick(txn.reference_id)}
-                          className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-all"
+                          onClick={() => {
+                            const token = localStorage.getItem('access_token');
+                            if (!token) {
+                              console.error('❌ No token found - redirecting to login');
+                              localStorage.clear();
+                              window.location.href = '/login';
+                              return;
+                            }
+                            console.log('✅ Opening detail modal for:', txn.reference_id);
+                            setSelectedReferenceId(txn.reference_id);
+                            setShowDetailModal(true);
+                          }}
+                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors group"
                           title="View Details"
                         >
-                          <Eye className="w-5 h-5" />
+                          <Eye className="w-4 h-4 text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
                         </button>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{formatDate(txn.created_at)}</td>
