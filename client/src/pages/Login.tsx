@@ -12,9 +12,16 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [, setLocation] = useLocation();
   const { login } = useAuth();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent double submission
+    if (isLoading || isLoggedIn) {
+      return;
+    }
+    
     setError('');
     setIsLoading(true);
 
@@ -60,35 +67,37 @@ export default function Login() {
 
       if (response.ok) {
         const data = await response.json();
+        setIsLoggedIn(true);
         login(data.access_token, { username: data.username });
         setLocation('/');
       } else {
         const errorData = await response.json().catch(() => ({ detail: 'Login failed' }));
         setError(errorData.detail || 'Invalid credentials. Please check your username and password.');
         setPassword('');
+        setIsLoading(false);
       }
     } catch (err) {
       setError('Connection error. Please try again.');
       console.error('Login error:', err);
-    } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen min-h-screen-mobile relative overflow-hidden flex items-center justify-center p-3 sm:p-4 safe-area-padding">
-      {/* Animated Gradient Background - PhonePe/GPay Style */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-purple-700 to-indigo-900 animate-gradient-shift"></div>
+    <div className="fixed inset-0 w-full h-full overflow-y-auto overflow-x-hidden">
+      <div className="min-h-screen min-h-screen-mobile relative flex items-center justify-center p-3 sm:p-4 safe-area-padding">
+        {/* Animated Gradient Background - PhonePe/GPay Style */}
+        <div className="fixed inset-0 bg-gradient-to-br from-purple-900 via-purple-700 to-indigo-900 animate-gradient-shift"></div>
 
       {/* Animated Background Blobs */}
-      <div className="absolute inset-0 opacity-40">
+      <div className="fixed inset-0 opacity-40 pointer-events-none">
         <div className="absolute top-0 -left-4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
         <div className="absolute top-0 -right-4 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
         <div className="absolute -bottom-8 left-20 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
       </div>
 
       {/* Floating Payment Elements - PhonePe Style */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {/* Floating Card 1 */}
         <div className="absolute top-20 left-10 animate-float" style={{ animationDelay: '0s' }}>
           <div className="glass-card-dark rounded-2xl p-6 w-72 transform rotate-12 hover:rotate-0 transition-all duration-500">
@@ -309,6 +318,7 @@ export default function Login() {
             </p>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
