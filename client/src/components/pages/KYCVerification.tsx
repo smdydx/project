@@ -167,16 +167,12 @@ export default function KYCVerification() {
           >
             View Details
           </button>
-          {(row.kycStatus === 'Not Verified' || row.kycStatus === 'Partially Verified') && (
-            <>
-              <button className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all duration-200" title="Approve KYC">
-                <CheckCircle className="w-4 h-4" />
-              </button>
-              <button className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200" title="Reject KYC">
-                <XCircle className="w-4 h-4" />
-              </button>
-            </>
-          )}
+          <button className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all duration-200" title="Approve KYC">
+            <CheckCircle className="w-4 h-4" />
+          </button>
+          <button className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200" title="Reject KYC">
+            <XCircle className="w-4 h-4" />
+          </button>
         </div>
       )
     }
