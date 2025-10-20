@@ -24,10 +24,6 @@ author = "agent"
 task = "workflow.run"
 args = "Start application"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "FastAPI Backend"
-
 [[workflows.workflow]]
 name = "Start application"
 author = "agent"
@@ -36,17 +32,6 @@ author = "agent"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
-
-[[workflows.workflow]]
-name = "FastAPI Backend"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd backend && uvicorn main:app --reload --host 0.0.0.0 --port 8000"
-
-[workflows.workflow.metadata]
-outputType = "console"
 
 [[ports]]
 localPort = 5000
@@ -63,3 +48,7 @@ externalPort = 3000
 [[ports]]
 localPort = 37663
 externalPort = 3001
+
+[[ports]]
+localPort = 41963
+externalPort = 3002
