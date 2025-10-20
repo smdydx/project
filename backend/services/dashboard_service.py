@@ -52,27 +52,39 @@ class DashboardService:
             ).count()
             
             # ============ INCOME STATS - COUNT FROM INCOME TABLES ============
-            # Total LCR Money - SUM of all INR wallet balances
-            from models.models import DirectIncome, LevelIncome
+            # ============ LCR MONEY & REWARDS - CALCULATED FROM REFERENCE_ID ============
+            from models.models import DirectIncome, LevelIncome, LcrMoney, LcrRewards
+            from models.service_request import Service_Request
             
-            # Total LCR Money = Sum of all INR Wallet Balances
-            total_lcr_money = db.query(
-                func.coalesce(func.sum(cast(User.INRWalletBalance, Numeric)), 0)
-            ).filter(
-                or_(User.IsDeleted == False, User.IsDeleted == None)
-            ).scalar() or 0
+            # Get all valid reference_ids from service_request (paid/completed transactions)
+            valid_reference_ids = db.query(Service_Request.reference_id).filter(
+                Service_Request.status.in_(['paid', 'completed', 'success'])
+            ).all()
+            valid_refs = [ref[0] for ref in valid_reference_ids if ref[0]]
+            
+            # Total LCR Money Distributed - SUM from lcrmoney table by reference_id
+            if valid_refs:
+                total_lcr_money = db.query(
+                    func.coalesce(func.sum(LcrMoney.amount), 0)
+                ).filter(
+                    LcrMoney.reference_id.in_(valid_refs),
+                    LcrMoney.status == 1  # Active status
+                ).scalar() or 0
+            else:
+                total_lcr_money = 0
             total_lcr_money = float(total_lcr_money)
             
-            # Total LCR Reward Distributed = Sum of all direct and level income
-            direct_income_sum = db.query(
-                func.coalesce(func.sum(DirectIncome.amount), 0)
-            ).scalar() or 0
-            
-            level_income_sum = db.query(
-                func.coalesce(func.sum(LevelIncome.amount), 0)
-            ).scalar() or 0
-            
-            total_lcr_reward_distributed = float(direct_income_sum) + float(level_income_sum)
+            # Total LCR Reward Distributed - SUM from lcr_rewards table by reference_id
+            if valid_refs:
+                total_lcr_reward_distributed = db.query(
+                    func.coalesce(func.sum(LcrRewards.amount), 0)
+                ).filter(
+                    LcrRewards.reference_id.in_(valid_refs),
+                    LcrRewards.status == 1  # Active status
+                ).scalar() or 0
+            else:
+                total_lcr_reward_distributed = 0
+            total_lcr_reward_distributed = float(total_lcr_reward_distributed)
             
             # Count unique users who received direct income
             direct_income_users = db.query(func.count(func.distinct(DirectIncome.receiver_member))).scalar() or 0
@@ -117,8 +129,9 @@ class DashboardService:
             print(f"   New Signups Last 7 Days: {new_signups_last_7_days}")
             print(f"   KYC Verified: {kyc_verified_users}")
             print(f"   Prime Users: {prime_users}")
-            print(f"   Total LCR Money (sum of INR wallets): {total_lcr_money}")
-            print(f"   Total LCR Reward Distributed: {total_lcr_reward_distributed}")
+            print(f"   Valid Reference IDs: {len(valid_refs)}")
+            print(f"   Total LCR Money (from lcrmoney table): ₹{total_lcr_money}")
+            print(f"   Total LCR Reward Distributed (from lcr_rewards table): ₹{total_lcr_reward_distributed}")
             print(f"   Total Payment Requests: {total_payment_requests}")
             print(f"   Total Distributor LCR Money (users with any wallet balance): {total_distributor_lcr_money}")
             print(f"   Total Distributor Prime Reward (DirectIncome + LevelIncome users): {total_prime_reward}")
