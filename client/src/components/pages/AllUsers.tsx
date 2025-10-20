@@ -14,10 +14,12 @@ export default function AllUsers() {
   const [, setLocation] = useLocation();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   const generateRealtimeUsers = async () => {
     try {
       setLoading(true);
+      setHasError(false);
       // Use environment variable for backend URL
       const API_URL = import.meta.env.VITE_API_URL || 'http://0.0.0.0:8000';
       const params = new URLSearchParams();
@@ -43,6 +45,7 @@ export default function AllUsers() {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ API Error:', errorText);
+        setHasError(true);
         throw new Error(`Failed to fetch users: ${response.status} - ${errorText}`);
       }
 
@@ -53,6 +56,7 @@ export default function AllUsers() {
       return fetchedData;
     } catch (error) {
       console.error('❌ Error fetching all users:', error);
+      setHasError(true);
       // Show empty array if error
       setData([]);
       return [];
@@ -234,6 +238,35 @@ export default function AllUsers() {
       )
     }
   ];
+
+  if (hasError) {
+    return (
+      <div className="flex items-center justify-center min-h-[600px]">
+        <div className="text-center max-w-md">
+          <img 
+            src="/attached_assets/server-error.jpg" 
+            alt="Server Error" 
+            className="w-64 h-64 mx-auto mb-6 object-contain"
+          />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+            Server Error
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 text-lg">
+            Please wait, our backend team is handling the error.
+          </p>
+          <button 
+            onClick={() => {
+              setHasError(false);
+              generateRealtimeUsers();
+            }}
+            className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-indigo-700 transition-all"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading && data.length === 0) {
     return (
