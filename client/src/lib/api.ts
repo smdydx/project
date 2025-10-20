@@ -1,7 +1,12 @@
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://0.0.0.0:8000";
 
-console.log('🔗 API_BASE_URL:', API_BASE_URL || 'EMPTY - Check client/.env file!');
+console.log('🔗 API_BASE_URL:', API_BASE_URL);
+console.log('🔗 VITE_API_URL from env:', import.meta.env.VITE_API_URL);
+
+if (!import.meta.env.VITE_API_URL) {
+  console.warn('⚠️ VITE_API_URL not set in client/.env - using fallback:', API_BASE_URL);
+}
 
 // Token management - Consistent keys across app
 const TOKEN_KEY = 'access_token';
@@ -84,9 +89,15 @@ const makeAuthenticatedRequest = async (
   
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
+    console.log('🔑 Adding Authorization header for:', url);
+    console.log('🔑 Token preview:', token.substring(0, 20) + '...');
+  } else {
+    console.error('❌ No token found for request:', url);
   }
 
+  console.log('📡 Request URL:', url);
   let response = await fetch(url, { ...options, headers });
+  console.log('📡 Response status:', response.status, response.statusText);
 
   // Handle token expiration
   if (response.status === 401 && !isRefreshing) {

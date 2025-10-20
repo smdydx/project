@@ -25,8 +25,10 @@ async def get_kyc_verification(
         
         print(f"\n{'='*80}")
         print(f"🔍 KYC Verification API called")
+        print(f"   Authenticated user: {current_user.username}")
         print(f"   kyc_status filter: {kyc_status}")
         print(f"   limit: {limit}")
+        print(f"   Request URL: {request.url}")
         print(f"{'='*80}\n")
         
         # Get ALL users with left outer joins
