@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import desc, or_
+from sqlalchemy import desc, or_, func
 from datetime import datetime
 from decimal import Decimal
 
@@ -131,6 +131,11 @@ async def get_payment_details(
         ).limit(page_size).offset(lcr_money_offset).all()
 
         lcr_money_total = lcr_money_query.count()
+        
+        # Calculate total distributed LCRmoney
+        lcr_money_total_amount = db.query(func.sum(LcrMoney.amount)).filter(
+            LcrMoney.reference_id == reference_id
+        ).scalar() or Decimal('0.00000')
 
         # LCR Rewards - JOIN by reference_id (PRIMARY) + user_id fallback
         lcr_rewards_offset = (lcr_rewards_page - 1) * page_size
@@ -143,6 +148,11 @@ async def get_payment_details(
         ).limit(page_size).offset(lcr_rewards_offset).all()
 
         lcr_rewards_total = lcr_rewards_query.count()
+        
+        # Calculate total distributed LCR_rewards
+        lcr_rewards_total_amount = db.query(func.sum(LcrRewards.amount)).filter(
+            LcrRewards.reference_id == reference_id
+        ).scalar() or Decimal('0.00000')
 
         return {
             "service_request": {
@@ -237,6 +247,10 @@ async def get_payment_details(
                     "total_records": lcr_rewards_total,
                     "total_pages": (lcr_rewards_total + page_size - 1) // page_size
                 }
+            },
+            "totals": {
+                "lcr_money_distributed": float(lcr_money_total_amount),
+                "lcr_rewards_distributed": float(lcr_rewards_total_amount)
             }
         }
     except HTTPException:

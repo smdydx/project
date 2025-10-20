@@ -15,6 +15,10 @@ export default function KYCVerification() {
   const [hasError, setHasError] = useState(false);
   const [kycData, setKycData] = useState<any[]>([]);
 
+  useEffect(() => {
+    generateKYCData();
+  }, [kycStatusFilter]);
+
   const generateKYCData = async () => {
     try {
       setHasError(false);
@@ -262,11 +266,9 @@ export default function KYCVerification() {
       </Card>
 
       <AdvancedRealtimeTable
-        title="Live KYC Verification Queue"
+        title="KYC Verification Queue"
         columns={columns}
         data={kycData}
-        onDataUpdate={generateKYCData}
-        updateInterval={5000}
         searchPlaceholder="Search by name, KYC ID, or document number..."
         showStats={true}
         enableAnimations={true}

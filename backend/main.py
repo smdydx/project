@@ -49,7 +49,7 @@ os.makedirs(settings.UPLOAD_FOLDER, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_FOLDER), name="uploads")
 
 # Include API routes
-from api.v1 import auth, users, dashboard, test, transactions, websocket, kyc, auto_crud, payment_gateway
+from api.v1 import auth, users, dashboard, transactions, websocket, kyc, auto_crud, payment_gateway
 from api.v1.auto_crud import create_auto_crud_routers, get_models_list
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["authentication"])
@@ -57,7 +57,8 @@ app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboar
 app.include_router(kyc.router, prefix="/api/v1/kyc", tags=["kyc"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
 app.include_router(transactions.router, prefix="/api/v1/transactions", tags=["transactions"])
-app.include_router(test.router, prefix="/api/v1/test", tags=["test"])
+# Removed test router - not used in production
+# app.include_router(test.router, prefix="/api/v1/test", tags=["test"])
 app.include_router(websocket.router, tags=["websocket"])
 
 # Auto-generate CRUD endpoints for all models

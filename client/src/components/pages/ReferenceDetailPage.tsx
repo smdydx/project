@@ -18,6 +18,10 @@ interface PaymentDetail {
       total_records: number;
     };
   };
+  totals?: {
+    lcr_money_distributed: number;
+    lcr_rewards_distributed: number;
+  };
 }
 
 export default function ReferenceDetailPage() {
@@ -208,6 +212,39 @@ export default function ReferenceDetailPage() {
           </div>
         </Card>
       </div>
+
+      {/* Total Distributed Summary Cards */}
+      {paymentDetail.totals && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border-yellow-200 dark:border-yellow-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400 mb-1">Total LCRmoney Distributed</p>
+                <p className="text-3xl font-bold text-yellow-900 dark:text-yellow-300">
+                  ₹{paymentDetail.totals.lcr_money_distributed.toLocaleString()}
+                </p>
+              </div>
+              <div className="p-4 bg-yellow-200 dark:bg-yellow-800/40 rounded-full">
+                <Wallet className="w-8 h-8 text-yellow-700 dark:text-yellow-400" />
+              </div>
+            </div>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-purple-700 dark:text-purple-400 mb-1">Total LCR Rewards Distributed</p>
+                <p className="text-3xl font-bold text-purple-900 dark:text-purple-300">
+                  ₹{paymentDetail.totals.lcr_rewards_distributed.toLocaleString()}
+                </p>
+              </div>
+              <div className="p-4 bg-purple-200 dark:bg-purple-800/40 rounded-full">
+                <TrendingUp className="w-8 h-8 text-purple-700 dark:text-purple-400" />
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* LCR Money Transactions */}
       <Card>
