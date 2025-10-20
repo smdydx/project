@@ -13,6 +13,7 @@ export default function KYCVerification() {
   const [showUserModal, setShowUserModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [hasError, setHasError] = useState(false);
+  const [kycData, setKycData] = useState<any[]>([]);
 
   const generateKYCData = async () => {
     try {
@@ -50,9 +51,11 @@ export default function KYCVerification() {
       // Ensure data is an array
       if (!Array.isArray(data)) {
         console.error('❌ Expected array but got:', typeof data);
+        setKycData([]);
         return [];
       }
       
+      setKycData(data);
       return data;
     } catch (error) {
       console.error('❌ Error fetching KYC data:', error);
@@ -261,7 +264,7 @@ export default function KYCVerification() {
       <AdvancedRealtimeTable
         title="Live KYC Verification Queue"
         columns={columns}
-        data={[]}
+        data={kycData}
         onDataUpdate={generateKYCData}
         updateInterval={5000}
         searchPlaceholder="Search by name, KYC ID, or document number..."
