@@ -37,17 +37,40 @@ class ApiService {
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
     try {
+      // Get token from localStorage
+      const token = localStorage.getItem('access_token');
+      
+      const headers: Record<string, string> = {
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      };
+      
+      // Add Authorization header if token exists
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+        console.log('🔑 Adding Authorization header to request');
+      } else {
+        console.warn('⚠️ No token found in localStorage');
+      }
+      
       const response = await fetch(url, {
         signal: controller.signal,
-        headers: {
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
+        headers
       });
       clearTimeout(timeoutId);
 
+      // Handle 401 Unauthorized - token expired or invalid
+      if (response.status === 401) {
+        console.error('❌ 401 Unauthorized - Token expired or invalid');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('username');
+        window.location.href = '/login';
+        throw new Error('Authentication failed - Please login again');
+      }
+      
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
       

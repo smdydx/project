@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Lock, Mail, Eye, EyeOff, LogIn, Shield, CreditCard, ArrowRightLeft, Wallet } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 interface LoginProps {
   onLogin: (username: string, password: string) => void;
@@ -11,6 +12,7 @@ export default function Login({ onLogin }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate(); // Initialize navigate
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,12 +54,14 @@ export default function Login({ onLogin }: LoginProps) {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ Login successful:', data);
+        console.log('✅ Login successful, saving token...');
 
         // Store JWT tokens
         localStorage.setItem('lcrpay_auth_token', data.access_token);
         localStorage.setItem('lcrpay_refresh_token', data.refresh_token);
         localStorage.setItem('lcrpay_username', data.username);
+
+        console.log('✅ Token saved to localStorage');
 
         // Successful login - redirect to dashboard
         onLogin(username, password);
