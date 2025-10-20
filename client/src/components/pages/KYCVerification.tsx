@@ -6,7 +6,7 @@ import {
 import AdvancedRealtimeTable from '../common/AdvancedRealtimeTable';
 import Card from '../common/Card';
 
-const kycStatusOptions = ['All', 'Pending', 'Approved', 'Rejected'];
+const kycStatusOptions = ['All', 'Verified', 'Partially Verified', 'Not Verified'];
 
 export default function KYCVerification() {
   const [kycStatusFilter, setKycStatusFilter] = useState('All');
@@ -48,25 +48,25 @@ export default function KYCVerification() {
   const getKYCStatusBadge = (status: string) => {
     const baseClasses = "px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 shadow-lg";
     switch (status) {
-      case 'Approved':
+      case 'Verified':
         return (
           <span className={`${baseClasses} bg-gradient-to-r from-green-500 to-emerald-600 text-white`}>
             <CheckCircle className="w-3 h-3" />
-            <span>Approved</span>
+            <span>Verified</span>
           </span>
         );
-      case 'Pending':
+      case 'Partially Verified':
         return (
           <span className={`${baseClasses} bg-gradient-to-r from-yellow-500 to-orange-600 text-white`}>
             <AlertTriangle className="w-3 h-3" />
-            <span>Pending</span>
+            <span>Partially Verified</span>
           </span>
         );
-      case 'Rejected':
+      case 'Not Verified':
         return (
           <span className={`${baseClasses} bg-gradient-to-r from-red-500 to-pink-600 text-white`}>
             <XCircle className="w-3 h-3" />
-            <span>Rejected</span>
+            <span>Not Verified</span>
           </span>
         );
       default:
@@ -167,7 +167,7 @@ export default function KYCVerification() {
           >
             View Details
           </button>
-          {row.kycStatus === 'Pending' && (
+          {(row.kycStatus === 'Not Verified' || row.kycStatus === 'Partially Verified') && (
             <>
               <button className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all duration-200" title="Approve KYC">
                 <CheckCircle className="w-4 h-4" />
@@ -314,7 +314,7 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
               <UserCheck className="w-5 h-5 mr-2" />
               Personal Information
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Mobile</label>
                 <p className="text-gray-900 dark:text-white font-medium mt-1 flex items-center">
@@ -327,12 +327,6 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
                 <p className="text-gray-900 dark:text-white font-medium mt-1 flex items-center">
                   <Mail className="w-4 h-4 mr-2 text-blue-500" />
                   {userDetail.Email || 'N/A'}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Wallet Balance</label>
-                <p className="text-xl font-bold text-green-600 dark:text-green-400 mt-1">
-                  ₹{userDetail.INRWalletBalance?.toLocaleString()}
                 </p>
               </div>
             </div>

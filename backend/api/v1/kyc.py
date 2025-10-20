@@ -36,18 +36,24 @@ async def get_kyc_verification(
 
         # Apply KYC status filter if provided
         if kyc_status and kyc_status.lower() not in ['all', 'none', '']:
-            if kyc_status.lower() in ['verified', 'approved']:
+            if kyc_status.lower() == 'verified':
                 query = query.filter(
                     User.aadhar_verification_status == True,
                     User.pan_verification_status == True
                 )
-            elif kyc_status.lower() in ['pending', 'not verified', 'notverified']:
+            elif kyc_status.lower() == 'partially verified':
+                from sqlalchemy import or_, and_
+                query = query.filter(
+                    or_(
+                        and_(User.aadhar_verification_status == True, User.pan_verification_status == False),
+                        and_(User.aadhar_verification_status == False, User.pan_verification_status == True)
+                    )
+                )
+            elif kyc_status.lower() == 'not verified':
                 query = query.filter(
                     User.aadhar_verification_status == False,
                     User.pan_verification_status == False
                 )
-            elif kyc_status.lower() == 'rejected':
-                query = query.filter(User.IsKYCCompleted == False)
 
         results = query.order_by(desc(User.CreatedAt)).limit(limit).all()
         
@@ -55,16 +61,17 @@ async def get_kyc_verification(
 
         kyc_data = []
         for user, kyc, pan_data, aadhaar, address in results:
-            # Determine KYC status: Pending / Approved / Rejected
+            # Determine KYC status based on verification
             aadhaar_verified = user.aadhar_verification_status or False
             pan_verified = user.pan_verification_status or False
             
+            # Status logic: Verified (both), Partially Verified (one), Not Verified (none)
             if aadhaar_verified and pan_verified:
-                kyc_status = 'Approved'
-            elif user.IsKYCCompleted == False and (kyc or pan_data):
-                kyc_status = 'Rejected'
+                kyc_status = 'Verified'
+            elif aadhaar_verified or pan_verified:
+                kyc_status = 'Partially Verified'
             else:
-                kyc_status = 'Pending'
+                kyc_status = 'Not Verified'
 
             # Build full image URLs with proper base URL (optimized)
             base_url = str(request.base_url).rstrip('/')
