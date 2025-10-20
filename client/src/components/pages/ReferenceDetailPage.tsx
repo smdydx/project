@@ -51,6 +51,11 @@ export default function ReferenceDetailPage() {
         };
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
+          console.log('🔑 ReferenceDetailPage - Token found, length:', token.length);
+          console.log('🔑 Token preview:', token.substring(0, 30) + '...');
+        } else {
+          console.error('❌ ReferenceDetailPage - No access token found in localStorage');
+          console.log('📦 Available localStorage keys:', Object.keys(localStorage));
         }
 
         // SERVER-SIDE PAGINATION - Fetch only current page
@@ -63,6 +68,12 @@ export default function ReferenceDetailPage() {
         );
 
         if (!response.ok) {
+          if (response.status === 401) {
+            console.error('❌ 401 Unauthorized - Token invalid or expired');
+            localStorage.clear();
+            window.location.href = '/login';
+            throw new Error('Session expired. Please login again.');
+          }
           throw new Error(`Failed to fetch payment details (${response.status})`);
         }
         const data = await response.json();

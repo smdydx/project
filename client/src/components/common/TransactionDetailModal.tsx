@@ -35,10 +35,15 @@ export default function TransactionDetailModal({ referenceId, onClose }: Transac
     try {
       setLoading(true);
       const API_URL = import.meta.env.VITE_API_URL || 'http://0.0.0.0:8000';
-      const token = localStorage.getItem('lcrpay_auth_token');
-      const headers: HeadersInit = {};
+      const token = localStorage.getItem('access_token');
+      const headers: HeadersInit = {
+        'Accept': 'application/json',
+      };
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
+        console.log('🔑 TransactionDetailModal - Token found, length:', token.length);
+      } else {
+        console.error('❌ TransactionDetailModal - No access token found');
       }
 
       const response = await fetch(
