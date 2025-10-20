@@ -23,7 +23,7 @@ export default function AllUsers() {
       // Use environment variable for backend URL
       const API_URL = import.meta.env.VITE_API_URL || 'http://0.0.0.0:8000';
       const params = new URLSearchParams();
-      
+
       // Filter logic for All Users page
       if (userTypeFilter !== 'All') {
         params.append('user_type', userTypeFilter);
@@ -31,17 +31,18 @@ export default function AllUsers() {
       params.append('limit', '100');
 
       // Get JWT token from localStorage
-      const token = localStorage.getItem('lcrpay_auth_token');
+      const token = localStorage.getItem('access_token');
       const headers: HeadersInit = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
+        console.log('🔑 All Users: Authorization header added');
       }
 
       console.log('🔍 Fetching users from:', `${API_URL}/api/v1/users/all?${params}`);
       const response = await fetch(`${API_URL}/api/v1/users/all?${params}`, {
         headers
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ API Error:', errorText);

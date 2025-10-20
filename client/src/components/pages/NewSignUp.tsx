@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { 
   Eye, CheckCircle, XCircle, Shield, Mail, Phone, MapPin, Calendar, CreditCard
@@ -17,7 +16,7 @@ export default function NewSignUp() {
       }
       const response = await fetch(`${API_URL}/api/v1/users/signups?limit=100`, { headers });
       if (!response.ok) throw new Error('Failed to fetch signups');
-      
+
       const data = await response.json();
       return data;
     } catch (error) {

@@ -18,10 +18,13 @@ export default function KYCVerification() {
     try {
       setHasError(false);
       const API_URL = import.meta.env.VITE_API_URL || 'http://0.0.0.0:8000';
-      const token = localStorage.getItem('lcrpay_auth_token');
+      const token = localStorage.getItem('access_token');
       const headers: HeadersInit = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
+        console.log('🔑 KYC API: Adding Authorization header');
+      } else {
+        console.error('❌ KYC API: No token found!');
       }
       
       const params = new URLSearchParams();
@@ -290,10 +293,11 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
     const fetchUserDetail = async () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL || 'http://0.0.0.0:8000';
-        const token = localStorage.getItem('lcrpay_auth_token');
+        const token = localStorage.getItem('access_token');
         const headers: HeadersInit = {};
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
+          console.log('🔑 User Detail Modal: Adding Authorization header');
         }
         const response = await fetch(`${API_URL}/api/v1/users/detail/${userId}`, { headers });
         if (!response.ok) throw new Error('Failed to fetch user details');

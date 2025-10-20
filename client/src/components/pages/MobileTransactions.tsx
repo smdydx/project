@@ -27,7 +27,12 @@ interface PaymentDetail {
 const fetchServiceTypes = async () => {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      const response = await fetch(`${API_URL}/api/v1/transactions/service-types`);
+      const token = localStorage.getItem('access_token');
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const response = await fetch(`${API_URL}/api/v1/transactions/service-types`, { headers });
       if (!response.ok) return [];
       const data = await response.json();
       return data;
@@ -40,6 +45,11 @@ const fetchServiceTypes = async () => {
 const fetchServiceRequests = async (filterServiceType: string, filterStatus: string) => {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const token = localStorage.getItem('access_token');
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
       const params = new URLSearchParams();
       if (filterServiceType && filterServiceType !== 'all') {
         params.append('service_type', filterServiceType);
@@ -48,7 +58,7 @@ const fetchServiceRequests = async (filterServiceType: string, filterStatus: str
         params.append('status', filterStatus);
       }
 
-      const response = await fetch(`${API_URL}/api/v1/transactions/mobile?${params.toString()}`);
+      const response = await fetch(`${API_URL}/api/v1/transactions/mobile?${params.toString()}`, { headers });
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ API Error Response:', errorText);
@@ -67,7 +77,12 @@ const fetchServiceRequests = async (filterServiceType: string, filterStatus: str
 const fetchPaymentDetails = async (referenceId: string) => {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      const response = await fetch(`${API_URL}/api/v1/transactions/payment-details/${referenceId}`);
+      const token = localStorage.getItem('access_token');
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const response = await fetch(`${API_URL}/api/v1/transactions/payment-details/${referenceId}`, { headers });
       if (!response.ok) {
         throw new Error('Failed to fetch payment details');
       }
@@ -124,7 +139,7 @@ export default function MobileTransactions() {
 
   const filteredTransactions = transactions.filter(txn => {
     const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = 
+    const matchesSearch =
       txn.reference_id?.toLowerCase().includes(searchLower) ||
       txn.mobile_number?.toLowerCase().includes(searchLower) ||
       txn.payment_txn_id?.toLowerCase().includes(searchLower) ||
@@ -189,7 +204,7 @@ export default function MobileTransactions() {
           <div className="flex flex-col justify-center items-center py-12 space-y-4">
             <p className="text-red-500 dark:text-red-400" data-testid="text-error">{error}</p>
             <p className="text-sm text-gray-500 dark:text-gray-400">Please ensure the backend server is running on port 8000</p>
-            <button 
+            <button
               onClick={async () => {
                 setLoading(true);
                 setError(null);
@@ -222,7 +237,7 @@ export default function MobileTransactions() {
                   data-testid="input-search"
                 />
               </div>
-              
+
               <div className="relative">
                 <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <select
@@ -269,8 +284,8 @@ export default function MobileTransactions() {
                 </thead>
                 <tbody>
                   {paginatedTransactions.map((txn) => (
-                    <tr 
-                      key={txn.id} 
+                    <tr
+                      key={txn.id}
                       className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                       data-testid={`row-transaction-${txn.id}`}
                     >

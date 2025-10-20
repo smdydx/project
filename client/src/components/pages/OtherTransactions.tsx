@@ -29,8 +29,24 @@ const fetchOtherTransactions = async (filterServiceType: string, filterStatus: s
       params.append('status', filterStatus);
     }
 
-    const response = await fetch(`${API_URL}/api/v1/transactions/other?${params.toString()}`);
+    // --- Token key fix applied here in the fetch logic ---
+    const token = localStorage.getItem('access_token');
+    const headers: HeadersInit = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      console.log('🔑 Other Transactions: Authorization header added');
+    } else {
+      console.log('🔑 Other Transactions: No Authorization token found.');
+    }
+    // --- End of Token key fix ---
+
+
+    const response = await fetch(`${API_URL}/api/v1/transactions/other?${params.toString()}`, { headers });
     if (!response.ok) {
+      if (response.status === 401) {
+        console.error('Authentication error: Token may be invalid or expired.');
+        // Optionally redirect to login or show an error message to the user
+      }
       throw new Error(`Failed to fetch other transactions: ${response.status}`);
     }
 
@@ -45,8 +61,26 @@ const fetchOtherTransactions = async (filterServiceType: string, filterStatus: s
 const fetchServiceTypes = async () => {
   try {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-    const response = await fetch(`${API_URL}/api/v1/transactions/service-types`);
-    if (!response.ok) return [];
+    
+    // --- Token key fix applied here in the fetch logic ---
+    const token = localStorage.getItem('access_token');
+    const headers: HeadersInit = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      console.log('🔑 Other Transactions: Authorization header added for service types');
+    } else {
+      console.log('🔑 Other Transactions: No Authorization token found for service types.');
+    }
+    // --- End of Token key fix ---
+
+    const response = await fetch(`${API_URL}/api/v1/transactions/service-types`, { headers });
+    if (!response.ok) {
+      if (response.status === 401) {
+        console.error('Authentication error: Token may be invalid or expired.');
+        // Handle unauthorized access
+      }
+      return []; // Return empty array on error
+    }
     const data = await response.json();
     return data;
   } catch (err) {
@@ -191,7 +225,7 @@ export default function OtherTransactions() {
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 />
               </div>
-              
+
               <div className="relative">
                 <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <select
