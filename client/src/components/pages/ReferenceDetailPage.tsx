@@ -53,19 +53,27 @@ export default function ReferenceDetailPage() {
           headers['Authorization'] = `Bearer ${token}`;
           console.log('🔑 ReferenceDetailPage - Token found, length:', token.length);
           console.log('🔑 Token preview:', token.substring(0, 30) + '...');
+          console.log('🔑 Full token:', token);
         } else {
           console.error('❌ ReferenceDetailPage - No access token found in localStorage');
           console.log('📦 Available localStorage keys:', Object.keys(localStorage));
         }
 
+        const url = `${API_URL}/api/v1/transactions/payment-details/${referenceId}?lcr_money_page=${lcrMoneyPage}&lcr_rewards_page=${lcrRewardsPage}&page_size=${itemsPerPage}`;
+        console.log('📡 Fetching URL:', url);
+        console.log('📡 Request headers:', headers);
+
         // SERVER-SIDE PAGINATION - Fetch only current page
         const response = await fetch(
-          `${API_URL}/api/v1/transactions/payment-details/${referenceId}?lcr_money_page=${lcrMoneyPage}&lcr_rewards_page=${lcrRewardsPage}&page_size=${itemsPerPage}`, 
+          url, 
           { 
             headers,
             signal: AbortSignal.timeout(10000) // 10 second timeout
           }
         );
+
+        console.log('📡 Response status:', response.status);
+        console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
 
         if (!response.ok) {
           if (response.status === 401) {

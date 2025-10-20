@@ -68,15 +68,20 @@ def create_refresh_token(data: dict) -> str:
 def verify_token(token: str, expected_type: str = "access") -> Optional[TokenData]:
     """Verify JWT token and return token data"""
     try:
+        print(f"🔍 Decoding token with SECRET_KEY (length: {len(SECRET_KEY)})")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("username")
         exp: int = payload.get("exp")
         token_type: str = payload.get("token_type", "access")
 
+        print(f"📦 Token payload - username: {username}, type: {token_type}, exp: {exp}")
+
         if username is None:
+            print("❌ No username in token")
             return None
 
         if token_type != expected_type:
+            print(f"❌ Token type mismatch: expected {expected_type}, got {token_type}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=f"Invalid token type. Expected {expected_type}, got {token_type}"
@@ -87,19 +92,22 @@ def verify_token(token: str, expected_type: str = "access") -> Optional[TokenDat
             exp=datetime.fromtimestamp(exp),
             token_type=token_type
         )
-    except jwt.ExpiredSignatureError:
+    except jwt.ExpiredSignatureError as e:
+        print(f"❌ Token expired: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired",
             headers={"WWW-Authenticate": "Bearer"}
         )
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as e:
+        print(f"❌ Invalid token: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",
             headers={"WWW-Authenticate": "Bearer"}
         )
     except Exception as e:
+        print(f"❌ Token validation error: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
@@ -116,28 +124,38 @@ async def get_current_user(
     # Try to get token from Authorization header
     if credentials:
         token = credentials.credentials
+        print(f"🔑 Token from credentials: {token[:30]}...")
     elif authorization:
         # Handle "Bearer <token>" format
         parts = authorization.split()
         if len(parts) == 2 and parts[0].lower() == "bearer":
             token = parts[1]
+            print(f"🔑 Token from authorization header: {token[:30]}...")
+        else:
+            print(f"❌ Invalid authorization header format: {authorization}")
+    else:
+        print("❌ No credentials or authorization header found")
 
     if not token:
+        print("❌ Authentication failed: No token")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing or invalid authorization header",
             headers={"WWW-Authenticate": "Bearer"}
         )
 
+    print(f"🔍 Verifying token...")
     token_data = verify_token(token, "access")
 
     if token_data is None:
+        print("❌ Token verification failed: Invalid token")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"}
         )
 
+    print(f"✅ Token verified for user: {token_data.username}")
     return token_data
 
 async def require_admin(current_user: TokenData = Depends(get_current_user)) -> TokenData:

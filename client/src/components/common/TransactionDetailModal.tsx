@@ -42,14 +42,18 @@ export default function TransactionDetailModal({ referenceId, onClose }: Transac
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
         console.log('🔑 TransactionDetailModal - Token found, length:', token.length);
+        console.log('🔑 Full token:', token);
       } else {
         console.error('❌ TransactionDetailModal - No access token found');
       }
 
-      const response = await fetch(
-        `${API_URL}/api/v1/transactions/payment-details/${referenceId}?lcr_money_page=${lcrMoneyPage}&lcr_rewards_page=${lcrRewardsPage}`,
-        { headers }
-      );
+      const url = `${API_URL}/api/v1/transactions/payment-details/${referenceId}?lcr_money_page=${lcrMoneyPage}&lcr_rewards_page=${lcrRewardsPage}`;
+      console.log('📡 Fetching URL:', url);
+      console.log('📡 Request headers:', headers);
+
+      const response = await fetch(url, { headers });
+
+      console.log('📡 Response status:', response.status);
 
       if (!response.ok) throw new Error('Failed to fetch payment details');
       const data = await response.json();
