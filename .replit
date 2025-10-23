@@ -1,4 +1,4 @@
-modules = ["python-3.12", "nodejs-20", "cpp-clang14", "c-clang14", "python3"]
+modules = ["python-3.12", "nodejs-20", "cpp-clang14", "c-clang14"]
 
 [agent]
 expertMode = true
@@ -48,6 +48,10 @@ externalPort = 3000
 [[ports]]
 localPort = 36399
 externalPort = 3003
+
+[[ports]]
+localPort = 37109
+externalPort = 4200
 
 [[ports]]
 localPort = 37663
