@@ -1,0 +1,93 @@
+Bilkul 👍 — main tumhare likhe hue concept ko samajh ke apni language mein clearly summarise karta hoon — tum kya banana chah rahe ho, kaise flow chalega, aur kis jagah pe problem aa rahi thi.
+
+
+---
+
+🔹 Jo maine samjha hai:
+
+Tum ek User Management + Transaction Management system design kar rahe ho, jahan admin ek hi jagah se sab users, unke KYC/KFC verification, aur unke transactions (mobile, D2H, prime, others) sab dekh aur manage kar sake.
+
+
+---
+
+🔹 Flow jaisa tum chahtay ho:
+
+1. Main menu → “User Management” click karo.
+
+Yahan All Users ka table khulta hai.
+
+Table mein filters hain:
+
+User Type: Prime / Normal
+
+Verification: Verified / Partially Verified / Not Verified
+
+
+Search bar se name ya mobile number se user find kar sakte ho.
+
+Export ka option bhi hai.
+
+
+
+2. KFC Verification ko alag page banane ke bajaye, tum usse same table ke andar hi merge karna chahte ho —
+Matlab verification filter aur status column yahi pe ho.
+
+
+3. Jab user search karta hai (name ya number se):
+
+Table filter hota hai aur matching user milta hai.
+
+Us row pe click karte hi ek details view khul jata hai (ya navigate karta hai)
+jahan us user ka Transaction History dikhta hai.
+
+
+
+4. Us detail view me:
+
+Transactions divided hain:
+
+Mobile Transaction
+
+Prime Transaction
+
+D2H Transaction
+
+Other Transaction
+
+
+Ye sab ek hi panel/tab me dekh sakte ho.
+
+Har transaction ke andar “View Details” button hai.
+
+
+
+5. Jab koi transaction open hoti hai → ek modal (popup) open hota hai,
+jahan LCR Money aur LCR Reward ka detail milta hai.
+
+
+6. Tum chahtay ho ki system automatically name ya number match kare
+aur user ke service_request ko uske transaction ke sath link kare.
+(Jaise hi name/number match hota hai, wo directly us user ke transaction page pe navigate kar jaye.)
+
+
+
+
+---
+
+🔹 Tumhari Problem / Concern:
+
+Abhi structure thoda bikhra hua hai — har cheez alag page pe ja rahi hai.
+
+Navigation lamba aur complex lag raha hai.
+
+Tum ek clean aur connected navigation chahte ho —
+jahan ek hi screen se user search, verify aur transaction view sab ho jaye.
+
+
+
+---
+
+Yahi sahi samjha maine?
+Agar haan, to main next step me iska final structured flow + layout suggestion (with short prompt) likh deta hoon jo developer ya designer ko directly diya ja sakta hai.
+Batao confirm hai?
+
