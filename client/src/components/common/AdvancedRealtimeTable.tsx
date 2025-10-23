@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from 'react';
-import { ChevronUp, ChevronDown, Search, Filter } from 'lucide-react';
+import { ChevronUp, ChevronDown, Search, Filter, X } from 'lucide-react';
 
 interface Column {
   key: string;
@@ -90,12 +91,35 @@ export default function AdvancedRealtimeTable({
     }
   };
 
-  const filteredData = data.filter((item) =>
-    searchTerm === '' ||
-    Object.values(item).some((value) =>
-      String(value).toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  // DataTables.net style advanced search - searches across ALL fields
+  const advancedSearch = (item: any, search: string): boolean => {
+    if (!search || search.trim() === '') return true;
+    
+    const searchLower = search.toLowerCase().trim();
+    
+    // Search in ALL object values (including nested objects)
+    const searchInValue = (value: any): boolean => {
+      if (value === null || value === undefined) return false;
+      
+      // Handle objects recursively
+      if (typeof value === 'object') {
+        return Object.values(value).some(v => searchInValue(v));
+      }
+      
+      // Convert to string and search
+      const stringValue = String(value).toLowerCase();
+      return stringValue.includes(searchLower);
+    };
+    
+    // Search through all keys in the item
+    return Object.keys(item).some(key => {
+      const value = item[key];
+      return searchInValue(value);
+    });
+  };
+
+  // Apply advanced filtering
+  const filteredData = data.filter((item) => advancedSearch(item, searchTerm));
 
   const sortedData = [...filteredData].sort((a, b) => {
     if (!sortColumn) return 0;
@@ -114,15 +138,33 @@ export default function AdvancedRealtimeTable({
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedData = sortedData.slice(startIndex, startIndex + itemsPerPage);
 
+  // Reset to first page when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const clearSearch = () => {
+    setSearchTerm('');
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover-lift" data-testid={dataTestId}>
       {title && (
         <div className="px-4 lg:px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
+            {showStats && (
+              <div className="flex items-center space-x-4 text-sm">
+                <span className="text-gray-600 dark:text-gray-400">
+                  Showing: <span className="font-bold text-blue-600 dark:text-blue-400">{filteredData.length}</span> / {data.length}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Search and Filters */}
+      {/* Advanced Search Box */}
       {searchable && (
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
@@ -133,14 +175,32 @@ export default function AdvancedRealtimeTable({
                 placeholder={searchPlaceholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-3 w-full border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                className="pl-10 pr-10 py-3 w-full border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
               />
+              {searchTerm && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                  title="Clear search"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
             </div>
-            <button className="flex items-center justify-center space-x-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all duration-200 hover-lift">
+            <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
               <Filter className="w-4 h-4" />
-              <span>Filter</span>
-            </button>
+              <span>
+                {filteredData.length === data.length 
+                  ? `All ${data.length} records` 
+                  : `${filteredData.length} of ${data.length} records`}
+              </span>
+            </div>
           </div>
+          {searchTerm && (
+            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              🔍 Searching across all fields for: "<span className="font-bold text-blue-600 dark:text-blue-400">{searchTerm}</span>"
+            </div>
+          )}
         </div>
       )}
 
@@ -183,20 +243,41 @@ export default function AdvancedRealtimeTable({
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            {paginatedData.map((row, index) => (
-              <tr key={row.id || index} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                {columns.map((column) => (
-                  <td key={column.key} className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 text-sm text-gray-900 dark:text-gray-100">
-                    <div className="truncate">
-                      {column.render
-                        ? column.render(row[column.key], row)
-                        : row[column.key]
-                      }
-                    </div>
-                  </td>
-                ))}
+            {paginatedData.length > 0 ? (
+              paginatedData.map((row, index) => (
+                <tr key={row.id || index} className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 ${enableAnimations ? 'animate-fade-in' : ''}`}>
+                  {columns.map((column) => (
+                    <td key={column.key} className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 text-sm text-gray-900 dark:text-gray-100">
+                      <div className="truncate">
+                        {column.render
+                          ? column.render(row[column.key], row)
+                          : row[column.key]
+                        }
+                      </div>
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={columns.length} className="px-6 py-12 text-center">
+                  <div className="flex flex-col items-center justify-center space-y-3">
+                    <Search className="w-12 h-12 text-gray-300 dark:text-gray-600" />
+                    <p className="text-gray-500 dark:text-gray-400 font-medium">
+                      {searchTerm ? `No results found for "${searchTerm}"` : 'No data available'}
+                    </p>
+                    {searchTerm && (
+                      <button
+                        onClick={clearSearch}
+                        className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                      >
+                        Clear search
+                      </button>
+                    )}
+                  </div>
+                </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
