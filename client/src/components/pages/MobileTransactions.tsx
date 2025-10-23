@@ -19,29 +19,6 @@ interface ServiceRequestTransaction {
   updated_at: string;
 }
 
-interface PaymentDetail {
-  service_request: any;
-  user: any;
-  payment_gateway_transactions: any[];
-}
-
-const fetchServiceTypes = async () => {
-    try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      const token = localStorage.getItem('access_token');
-      const headers: HeadersInit = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      const response = await fetch(`${API_URL}/api/v1/transactions/service-types`, { headers });
-      if (!response.ok) return [];
-      const data = await response.json();
-      return data;
-    } catch (err) {
-      console.error('Error fetching service types:', err);
-      return [];
-    }
-  };
 
 const fetchServiceRequests = async (filterServiceType: string, filterStatus: string) => {
     try {
@@ -75,43 +52,15 @@ const fetchServiceRequests = async (filterServiceType: string, filterStatus: str
     }
   };
 
-const fetchPaymentDetails = async (referenceId: string) => {
-    try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      const token = localStorage.getItem('access_token');
-      const headers: HeadersInit = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      const response = await fetch(`${API_URL}/api/v1/transactions/payment-details/${referenceId}`, { headers });
-      if (!response.ok) {
-        throw new Error('Failed to fetch payment details');
-      }
-      return await response.json();
-    } catch (err: any) {
-      console.error('Error fetching payment details:', err);
-      alert('Failed to load payment details');
-      return null;
-    }
-  };
 
 export default function MobileTransactions() {
   const [transactions, setTransactions] = useState<ServiceRequestTransaction[]>([]);
-  const [serviceTypes, setServiceTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [filterServiceType, setFilterServiceType] = useState('all');
+  const [filterStatus] = useState('all');
+  const [filterServiceType] = useState('all');
   const [selectedReferenceId, setSelectedReferenceId] = useState<string | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-
-  useEffect(() => {
-    const loadServiceTypes = async () => {
-      const types = await fetchServiceTypes();
-      setServiceTypes(types);
-    };
-    loadServiceTypes();
-  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -129,10 +78,6 @@ export default function MobileTransactions() {
     loadData();
   }, [filterStatus, filterServiceType]);
 
-  const handleReferenceClick = (referenceId: string) => {
-    setSelectedReferenceId(referenceId);
-    setShowDetailModal(true);
-  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -239,7 +184,7 @@ export default function MobileTransactions() {
     {
       key: 'actions',
       title: 'Actions',
-      render: (value: any, row: any) => (
+      render: (_value: any, row: any) => (
         <button
           onClick={() => {
             const token = localStorage.getItem('access_token');
