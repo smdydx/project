@@ -290,13 +290,7 @@ export default function AllUsers() {
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">View and manage all registered users</p>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <button className="btn-success text-white px-3 sm:px-4 py-2 rounded-xl font-medium flex items-center space-x-2 text-sm sm:text-base">
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Export</span>
-            <span className="sm:hidden">Export</span>
-          </button>
-        </div>
+        
       </div>
 
       <Card className="hover-lift">

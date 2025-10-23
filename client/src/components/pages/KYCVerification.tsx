@@ -232,12 +232,7 @@ export default function KYCVerification() {
           <p className="text-gray-600 dark:text-gray-400 mt-1">Verify and manage user KYC documents</p>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <button className="btn-success text-white px-4 py-2 rounded-xl font-medium flex items-center space-x-2">
-            <Download className="w-4 h-4" />
-            <span>Export</span>
-          </button>
-        </div>
+        
       </div>
 
       <Card className="hover-lift">

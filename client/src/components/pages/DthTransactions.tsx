@@ -76,13 +76,7 @@ export default function DthTransactions() {
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">View and manage all DTH recharge transactions</p>
         </div>
-        <button
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-          data-testid="button-export"
-        >
-          <Download className="w-4 h-4" />
-          Export
-        </button>
+        
       </div>
 
       <Card>

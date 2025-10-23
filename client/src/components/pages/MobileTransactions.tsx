@@ -185,13 +185,7 @@ export default function MobileTransactions() {
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">View all service request transactions</p>
         </div>
-        <button
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          data-testid="button-export"
-        >
-          <Download className="w-5 h-5" />
-          Export
-        </button>
+        
       </div>
 
       <Card>

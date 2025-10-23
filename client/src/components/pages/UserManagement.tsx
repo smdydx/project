@@ -317,10 +317,6 @@ export default function UserManagement() {
           
           {/* Action Buttons */}
           <div className="flex items-center space-x-3">
-            <button className="btn-success text-white px-4 py-2 rounded-xl font-medium flex items-center space-x-2">
-              <Download className="w-4 h-4" />
-              <span>Export</span>
-            </button>
             <button 
               onClick={() => setShowBulkActions(!showBulkActions)}
               className="btn-primary text-white px-4 py-2 rounded-xl font-medium flex items-center space-x-2"

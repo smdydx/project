@@ -179,10 +179,7 @@ export default function OtherTransactions() {
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Prime Activation & Other Services</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-          <Download className="w-5 h-5" />
-          Export
-        </button>
+        
       </div>
 
       <Card>
