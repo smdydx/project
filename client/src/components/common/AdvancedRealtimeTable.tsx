@@ -62,6 +62,7 @@ export default function AdvancedRealtimeTable({
 
   useEffect(() => {
     setData(initialData);
+    setCurrentPage(1); // Reset to first page when data changes
   }, [initialData]);
 
   // Real-time data updates

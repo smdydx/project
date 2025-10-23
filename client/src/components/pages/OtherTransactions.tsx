@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Search, Activity, Filter, Download, ChevronDown, Eye } from 'lucide-react';
+import { Activity, Eye } from 'lucide-react';
 import Card from '@/components/common/Card';
 import TransactionDetailModal from '@/components/common/TransactionDetailModal';
+import AdvancedRealtimeTable from '@/components/common/AdvancedRealtimeTable';
 
 interface OtherTransaction {
   id: number;
@@ -29,7 +30,6 @@ const fetchOtherTransactions = async (filterServiceType: string, filterStatus: s
       params.append('status', filterStatus);
     }
 
-    // --- Token key fix applied here in the fetch logic ---
     const token = localStorage.getItem('access_token');
     const headers: HeadersInit = {};
     if (token) {
@@ -38,14 +38,11 @@ const fetchOtherTransactions = async (filterServiceType: string, filterStatus: s
     } else {
       console.log('🔑 Other Transactions: No Authorization token found.');
     }
-    // --- End of Token key fix ---
-
 
     const response = await fetch(`${API_URL}/api/v1/transactions/other?${params.toString()}`, { headers });
     if (!response.ok) {
       if (response.status === 401) {
         console.error('Authentication error: Token may be invalid or expired.');
-        // Optionally redirect to login or show an error message to the user
       }
       throw new Error(`Failed to fetch other transactions: ${response.status}`);
     }
@@ -62,7 +59,6 @@ const fetchServiceTypes = async () => {
   try {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-    // --- Token key fix applied here in the fetch logic ---
     const token = localStorage.getItem('access_token');
     const headers: HeadersInit = {};
     if (token) {
@@ -71,15 +67,13 @@ const fetchServiceTypes = async () => {
     } else {
       console.log('🔑 Other Transactions: No Authorization token found for service types.');
     }
-    // --- End of Token key fix ---
 
     const response = await fetch(`${API_URL}/api/v1/transactions/service-types`, { headers });
     if (!response.ok) {
       if (response.status === 401) {
         console.error('Authentication error: Token may be invalid or expired.');
-        // Handle unauthorized access
       }
-      return []; // Return empty array on error
+      return [];
     }
     const data = await response.json();
     return data;
@@ -94,13 +88,10 @@ export default function OtherTransactions() {
   const [serviceTypes, setServiceTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterServiceType, setFilterServiceType] = useState('all');
   const [selectedReferenceId, setSelectedReferenceId] = useState<string | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     const loadServiceTypes = async () => {
@@ -117,7 +108,6 @@ export default function OtherTransactions() {
       try {
         const data = await fetchOtherTransactions(filterServiceType, filterStatus);
         setTransactions(data || []);
-        setCurrentPage(1);
       } catch (err: any) {
         setError(err.message || 'Failed to load transactions');
       }
@@ -131,22 +121,6 @@ export default function OtherTransactions() {
     setSelectedReferenceId(referenceId);
     setShowDetailModal(true);
   };
-
-  const filteredTransactions = transactions.filter(txn => {
-    const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = 
-      txn.reference_id?.toLowerCase().includes(searchLower) ||
-      txn.mobile_number?.toLowerCase().includes(searchLower) ||
-      txn.payment_txn_id?.toLowerCase().includes(searchLower) ||
-      txn.utr_no?.toLowerCase().includes(searchLower);
-
-    return matchesSearch;
-  });
-
-  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedTransactions = filteredTransactions.slice(startIndex, endIndex);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -169,6 +143,104 @@ export default function OtherTransactions() {
     });
   };
 
+  const columns = [
+    {
+      key: 'id',
+      title: 'ID',
+      sortable: true,
+      render: (value: number, row: any) => (
+        <span className="text-sm font-mono text-gray-600 dark:text-gray-300" data-testid={`text-id-${row.id}`}>
+          {value}
+        </span>
+      )
+    },
+    {
+      key: 'user_id',
+      title: 'User ID',
+      sortable: true,
+      render: (value: number, row: any) => (
+        <span className="text-sm text-gray-600 dark:text-gray-300" data-testid={`text-userid-${row.id}`}>
+          {value}
+        </span>
+      )
+    },
+    {
+      key: 'service_type',
+      title: 'Service Type',
+      sortable: true,
+      render: (value: string, row: any) => (
+        <span className="text-sm text-gray-900 dark:text-white" data-testid={`text-service-${row.id}`}>
+          {value}
+        </span>
+      )
+    },
+    {
+      key: 'amount',
+      title: 'Amount',
+      sortable: true,
+      render: (value: string, row: any) => (
+        <span className="text-sm font-semibold text-gray-900 dark:text-white" data-testid={`text-amount-${row.id}`}>
+          ₹{parseFloat(value).toLocaleString()}
+        </span>
+      )
+    },
+    {
+      key: 'reference_id',
+      title: 'Reference ID',
+      sortable: true,
+      render: (value: string, row: any) => (
+        <span className="text-sm font-mono" data-testid={`text-reference-${row.id}`}>
+          {value || 'N/A'}
+        </span>
+      )
+    },
+    {
+      key: 'status',
+      title: 'Status',
+      sortable: true,
+      render: (value: string, row: any) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(value)}`} data-testid={`text-status-${row.id}`}>
+          {value}
+        </span>
+      )
+    },
+    {
+      key: 'actions',
+      title: 'Actions',
+      render: (value: any, row: any) => (
+        <button
+          onClick={() => {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+              console.error('❌ No token found - redirecting to login');
+              localStorage.clear();
+              window.location.href = '/login';
+              return;
+            }
+            console.log('✅ Opening detail modal for:', row.reference_id);
+            setSelectedReferenceId(row.reference_id);
+            setShowDetailModal(true);
+          }}
+          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors group"
+          title="View Details"
+          data-testid={`button-view-details-${row.id}`}
+        >
+          <Eye className="w-4 h-4 text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
+        </button>
+      )
+    },
+    {
+      key: 'created_at',
+      title: 'Created At',
+      sortable: true,
+      render: (value: string, row: any) => (
+        <span className="text-sm text-gray-600 dark:text-gray-300" data-testid={`text-created-${row.id}`}>
+          {formatDate(value)}
+        </span>
+      )
+    }
+  ];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -179,17 +251,19 @@ export default function OtherTransactions() {
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Prime Activation & Other Services</p>
         </div>
-        
       </div>
 
-      <Card>
-        {loading && (
+      {loading && (
+        <Card>
           <div className="flex justify-center items-center py-12">
             <p className="text-gray-500 dark:text-gray-400">Loading transactions...</p>
           </div>
-        )}
-        {error && !loading && (
-          <div className="flex flex-col justify-center items-center py-12 space-4">
+        </Card>
+      )}
+
+      {error && !loading && (
+        <Card>
+          <div className="flex flex-col justify-center items-center py-12 space-y-4">
             <p className="text-red-500 dark:text-red-400">{error}</p>
             <button 
               onClick={async () => {
@@ -208,138 +282,26 @@ export default function OtherTransactions() {
               Retry
             </button>
           </div>
-        )}
-        {!loading && !error && (
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search by reference ID, mobile, payment txn ID, or UTR..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                />
-              </div>
+        </Card>
+      )}
 
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white appearance-none cursor-pointer"
-                >
-                  <option value="all">All Status</option>
-                  <option value="completed">Completed</option>
-                  <option value="paid">Paid</option>
-                  <option value="processing">Processing</option>
-                  <option value="failed">Failed</option>
-                </select>
-              </div>
-            </div>
+      {!loading && !error && (
+        <AdvancedRealtimeTable
+          title="Other Transactions"
+          columns={columns}
+          data={transactions}
+          onDataUpdate={async () => {
+            const data = await fetchOtherTransactions(filterServiceType, filterStatus);
+            return data || [];
+          }}
+          updateInterval={10000}
+          searchPlaceholder="Search by reference ID, mobile, payment txn ID, or UTR..."
+          showStats={true}
+          enableAnimations={true}
+          dataTestId="other-transactions-table"
+        />
+      )}
 
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">ID</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">User ID</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Service Type</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Amount</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Reference ID</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Actions</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Created At</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedTransactions.map((txn) => (
-                    <tr key={txn.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                      <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-gray-300">{txn.id}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{txn.user_id}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">{txn.service_type}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white">₹{parseFloat(txn.amount).toLocaleString()}</td>
-                      <td className="px-4 py-3 text-sm font-mono">{txn.reference_id || 'N/A'}</td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(txn.status)}`}>
-                          {txn.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => {
-                            const token = localStorage.getItem('access_token');
-                            if (!token) {
-                              console.error('❌ No token found - redirecting to login');
-                              localStorage.clear();
-                              window.location.href = '/login';
-                              return;
-                            }
-                            console.log('✅ Opening detail modal for:', txn.reference_id);
-                            setSelectedReferenceId(txn.reference_id);
-                            setShowDetailModal(true);
-                          }}
-                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors group"
-                          title="View Details"
-                        >
-                          <Eye className="w-4 h-4 text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
-                        </button>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{formatDate(txn.created_at)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {filteredTransactions.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-gray-500 dark:text-gray-400">No transactions found</p>
-              </div>
-            )}
-
-            {filteredTransactions.length > 0 && (
-              <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <div className="text-sm text-gray-700 dark:text-gray-300">
-                  Showing {startIndex + 1} to {Math.min(endIndex, filteredTransactions.length)} of {filteredTransactions.length} entries
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    Previous
-                  </button>
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-2 border rounded-lg text-sm ${
-                        currentPage === page
-                          ? 'bg-purple-600 text-white border-purple-600'
-                          : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </Card>
-
-      {/* Transaction Detail Modal */}
       {showDetailModal && selectedReferenceId && (
         <TransactionDetailModal
           referenceId={selectedReferenceId}
