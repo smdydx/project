@@ -40,9 +40,9 @@ function AppContent() {
 
   return (
     <Switch>
-      <Route path="/login" component={Login} />
+      {/* <Route path="/login" component={Login} /> */}
       <Route>
-        <ProtectedRoute>
+        {/* <ProtectedRoute> */}
           <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
             <Sidebar
               isMobileOpen={isMobileSidebarOpen}
@@ -72,7 +72,7 @@ function AppContent() {
                   <Route path="/transactions" component={Transactions} />
                   <Route path="/transactions/mobile" component={MobileTransactions} />
                   <Route path="/transactions/dth" component={DthTransactions} />
-                  <Route path="/transactions/other" component={OtherTransactions} /> {/* Added route for Other Transactions */}
+                  <Route path="/transactions/other" component={OtherTransactions} />
                   <Route path="/loans" component={LoansPage} />
                   <Route path="/payments" component={PaymentsPage} />
                   <Route path="/services" component={ServicesPage} />
@@ -90,7 +90,7 @@ function AppContent() {
               </div>
             </main>
           </div>
-        </ProtectedRoute>
+        {/* </ProtectedRoute> */}
       </Route>
     </Switch>
   );
