@@ -44,25 +44,8 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { 
-    path: '/users', 
-    label: 'User Management', 
-    icon: Users,
-    subMenu: [
-      { path: '/users/all', label: 'All Users', icon: UserCheck },
-      { path: '/users/kyc', label: 'KYC Verification', icon: Shield }
-    ]
-  },
-  { 
-    path: '/transactions', 
-    label: 'Transactions', 
-    icon: CreditCard,
-    subMenu: [
-      { path: '/transactions/mobile', label: 'Mobile Transactions', icon: Smartphone },
-      { path: '/transactions/dth', label: 'DTH Transactions', icon: Tv },
-      { path: '/transactions/other', label: 'Other Transactions', icon: Activity } // Added Other Transactions
-    ]
-  },
+  { path: '/users', label: 'User Management', icon: Users },
+  { path: '/transactions', label: 'Transactions', icon: CreditCard },
   { path: '/loans', label: 'Loan Applications', icon: Banknote },
   { path: '/services', label: 'Services', icon: Briefcase },
   { path: '/banners', label: 'App Banners', icon: Image },
