@@ -148,15 +148,26 @@ export default function AdvancedRealtimeTable({
     setSearchTerm('');
   };
 
-  // Export to CSV
+  // Export to CSV - Only visible columns
   const exportToCSV = () => {
     const headers = columns.map(col => col.title).join(',');
     const rows = filteredData.map(row => 
       columns.map(col => {
-        const value = col.render ? col.render(row[col.key], row) : row[col.key];
-        // Handle values with commas, quotes
-        const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value || '');
-        return `"${stringValue.replace(/"/g, '""')}"`;
+        // Get raw value from data, not rendered HTML
+        let value = row[col.key];
+        
+        // For simple values, use as-is
+        if (typeof value === 'string' || typeof value === 'number') {
+          return `"${String(value).replace(/"/g, '""')}"`;
+        }
+        
+        // For null/undefined
+        if (value === null || value === undefined) {
+          return '""';
+        }
+        
+        // For objects/arrays, convert to JSON
+        return `"${JSON.stringify(value).replace(/"/g, '""')}"`;
       }).join(',')
     );
     
@@ -169,7 +180,7 @@ export default function AdvancedRealtimeTable({
     setShowExportMenu(false);
   };
 
-  // Export to Excel (XLSX format using HTML table method)
+  // Export to Excel - Only visible columns
   const exportToExcel = () => {
     const table = document.createElement('table');
     
@@ -189,14 +200,23 @@ export default function AdvancedRealtimeTable({
     thead.appendChild(headerRow);
     table.appendChild(thead);
     
-    // Create body
+    // Create body - raw data values only
     const tbody = document.createElement('tbody');
     filteredData.forEach(row => {
       const tr = document.createElement('tr');
       columns.forEach(col => {
         const td = document.createElement('td');
-        const value = col.render ? col.render(row[col.key], row) : row[col.key];
-        td.textContent = typeof value === 'object' ? JSON.stringify(value) : String(value || '');
+        // Get raw value, not rendered HTML
+        let value = row[col.key];
+        
+        if (typeof value === 'string' || typeof value === 'number') {
+          td.textContent = String(value);
+        } else if (value === null || value === undefined) {
+          td.textContent = '';
+        } else {
+          td.textContent = JSON.stringify(value);
+        }
+        
         td.style.padding = '6px';
         td.style.border = '1px solid #ccc';
         tr.appendChild(td);
@@ -295,8 +315,18 @@ export default function AdvancedRealtimeTable({
               ${filteredData.map(row => `
                 <tr>
                   ${columns.map(col => {
-                    const value = col.render ? col.render(row[col.key], row) : row[col.key];
-                    const textValue = typeof value === 'object' ? JSON.stringify(value) : String(value || '');
+                    // Get raw value from data
+                    let value = row[col.key];
+                    let textValue = '';
+                    
+                    if (typeof value === 'string' || typeof value === 'number') {
+                      textValue = String(value);
+                    } else if (value === null || value === undefined) {
+                      textValue = '';
+                    } else {
+                      textValue = JSON.stringify(value);
+                    }
+                    
                     return `<td>${textValue}</td>`;
                   }).join('')}
                 </tr>
