@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { ChevronUp, ChevronDown, Search, Filter, X } from 'lucide-react';
+import { ChevronUp, ChevronDown, Search, Filter, X, Download, FileText, FileSpreadsheet, FileDown } from 'lucide-react';
 
 interface Column {
   key: string;
@@ -41,6 +41,7 @@ export default function AdvancedRealtimeTable({
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(8);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   // Adjust items per page based on screen size
   useEffect(() => {
@@ -147,19 +148,256 @@ export default function AdvancedRealtimeTable({
     setSearchTerm('');
   };
 
+  // Export to CSV
+  const exportToCSV = () => {
+    const headers = columns.map(col => col.title).join(',');
+    const rows = filteredData.map(row => 
+      columns.map(col => {
+        const value = col.render ? col.render(row[col.key], row) : row[col.key];
+        // Handle values with commas, quotes
+        const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value || '');
+        return `"${stringValue.replace(/"/g, '""')}"`;
+      }).join(',')
+    );
+    
+    const csv = [headers, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${title || 'table'}_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    setShowExportMenu(false);
+  };
+
+  // Export to Excel (XLSX format using HTML table method)
+  const exportToExcel = () => {
+    const table = document.createElement('table');
+    
+    // Create header
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    columns.forEach(col => {
+      const th = document.createElement('th');
+      th.textContent = col.title;
+      th.style.fontWeight = 'bold';
+      th.style.backgroundColor = '#4472C4';
+      th.style.color = 'white';
+      th.style.padding = '8px';
+      th.style.border = '1px solid #ccc';
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    
+    // Create body
+    const tbody = document.createElement('tbody');
+    filteredData.forEach(row => {
+      const tr = document.createElement('tr');
+      columns.forEach(col => {
+        const td = document.createElement('td');
+        const value = col.render ? col.render(row[col.key], row) : row[col.key];
+        td.textContent = typeof value === 'object' ? JSON.stringify(value) : String(value || '');
+        td.style.padding = '6px';
+        td.style.border = '1px solid #ccc';
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    
+    // Convert to Excel
+    const html = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
+        <head>
+          <meta charset="utf-8">
+          <style>
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+            th { background-color: #4472C4; color: white; font-weight: bold; }
+          </style>
+        </head>
+        <body>${table.outerHTML}</body>
+      </html>
+    `;
+    
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${title || 'table'}_${new Date().toISOString().split('T')[0]}.xls`;
+    link.click();
+    setShowExportMenu(false);
+  };
+
+  // Export to PDF (using HTML to PDF conversion)
+  const exportToPDF = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>${title || 'Table Export'}</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              margin: 20px;
+            }
+            h1 { 
+              color: #333; 
+              margin-bottom: 20px;
+              font-size: 24px;
+            }
+            table { 
+              border-collapse: collapse; 
+              width: 100%; 
+              margin-top: 10px;
+            }
+            th, td { 
+              border: 1px solid #ddd; 
+              padding: 12px; 
+              text-align: left; 
+              font-size: 12px;
+            }
+            th { 
+              background-color: #4472C4; 
+              color: white; 
+              font-weight: bold;
+            }
+            tr:nth-child(even) { 
+              background-color: #f9f9f9; 
+            }
+            .footer {
+              margin-top: 20px;
+              font-size: 10px;
+              color: #666;
+            }
+            @media print {
+              body { margin: 0; }
+              @page { margin: 1cm; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>${title || 'Table Export'}</h1>
+          <p style="color: #666; margin-bottom: 10px;">
+            Generated: ${new Date().toLocaleString()} | 
+            Total Records: ${filteredData.length}
+          </p>
+          <table>
+            <thead>
+              <tr>
+                ${columns.map(col => `<th>${col.title}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredData.map(row => `
+                <tr>
+                  ${columns.map(col => {
+                    const value = col.render ? col.render(row[col.key], row) : row[col.key];
+                    const textValue = typeof value === 'object' ? JSON.stringify(value) : String(value || '');
+                    return `<td>${textValue}</td>`;
+                  }).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} - LCR Pay Admin Dashboard</p>
+          </div>
+        </body>
+      </html>
+    `;
+    
+    printWindow.document.write(html);
+    printWindow.document.close();
+    
+    // Trigger print dialog after content loads
+    printWindow.onload = () => {
+      printWindow.print();
+      setShowExportMenu(false);
+    };
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover-lift" data-testid={dataTestId}>
       {title && (
         <div className="px-4 lg:px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
-            {showStats && (
-              <div className="flex items-center space-x-4 text-sm">
-                <span className="text-gray-600 dark:text-gray-400">
+            <div className="flex items-center space-x-4">
+              {showStats && (
+                <span className="text-sm text-gray-600 dark:text-gray-400">
                   Showing: <span className="font-bold text-blue-600 dark:text-blue-400">{filteredData.length}</span> / {data.length}
                 </span>
+              )}
+              
+              {/* Export Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg shadow-md transition-all duration-200 transform hover:scale-105"
+                >
+                  <Download className="w-4 h-4" />
+                  <span className="font-medium">Export</span>
+                </button>
+                
+                {showExportMenu && (
+                  <>
+                    {/* Backdrop */}
+                    <div 
+                      className="fixed inset-0 z-10" 
+                      onClick={() => setShowExportMenu(false)}
+                    />
+                    
+                    {/* Dropdown Menu */}
+                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-700 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-600 z-20 overflow-hidden">
+                      <div className="py-2">
+                        <button
+                          onClick={exportToCSV}
+                          className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors"
+                        >
+                          <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                          <div className="text-left">
+                            <div className="font-medium">CSV File</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">Comma-separated values</div>
+                          </div>
+                        </button>
+                        
+                        <button
+                          onClick={exportToExcel}
+                          className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-green-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors"
+                        >
+                          <FileSpreadsheet className="w-5 h-5 text-green-600 dark:text-green-400" />
+                          <div className="text-left">
+                            <div className="font-medium">Excel File</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">Microsoft Excel format</div>
+                          </div>
+                        </button>
+                        
+                        <button
+                          onClick={exportToPDF}
+                          className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-red-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors"
+                        >
+                          <FileDown className="w-5 h-5 text-red-600 dark:text-red-400" />
+                          <div className="text-left">
+                            <div className="font-medium">PDF Document</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">Portable document format</div>
+                          </div>
+                        </button>
+                      </div>
+                      
+                      <div className="border-t border-gray-200 dark:border-gray-600 px-4 py-2 bg-gray-50 dark:bg-gray-800">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          📊 {filteredData.length} records will be exported
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
       )}
