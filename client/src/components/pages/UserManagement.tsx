@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { 
-  Eye, Phone, Mail, UserCheck, Shield, Crown, Star, 
-  Filter, Download, Search, X, FileText, CreditCard, MapPin
+  Phone, Mail, UserCheck, Shield, Crown, Star, 
+  X, FileText, CreditCard, MapPin,
+  Users, TrendingUp, GitBranch, Award, Sparkles
 } from 'lucide-react';
 import AdvancedRealtimeTable from '../common/AdvancedRealtimeTable';
 import Card from '../common/Card';
@@ -10,20 +11,30 @@ import Card from '../common/Card';
 const userTypeOptions = ['All', 'Prime', 'Normal'];
 const kycStatusOptions = ['All', 'Verified', 'Partially Verified', 'Not Verified'];
 
+// Shared helper to normalize KYC field values
+const isKycFieldVerified = (fieldValue: any): boolean => {
+  if (fieldValue === null || fieldValue === undefined) return false;
+  if (typeof fieldValue === 'boolean') return fieldValue;
+  if (typeof fieldValue === 'number') return fieldValue === 1;
+  if (typeof fieldValue === 'string') {
+    const normalized = fieldValue.toLowerCase().trim();
+    return normalized === 'true' || normalized === 'verified' || normalized === '1';
+  }
+  return false;
+};
+
 export default function UserManagement() {
   const [, setLocation] = useLocation();
   const [userTypeFilter, setUserTypeFilter] = useState('All');
   const [kycFilter, setKycFilter] = useState('All');
   const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
-  const [showReferralModal, setShowReferralModal] = useState(false); // State for Referral Chain Modal
+  const [showReferralModal, setShowReferralModal] = useState(false);
 
   const fetchUsers = async () => {
     try {
-      setLoading(true);
       setHasError(false);
       const API_URL = import.meta.env.VITE_API_URL || 'http://0.0.0.0:8000';
       const token = localStorage.getItem('access_token');
@@ -43,12 +54,12 @@ export default function UserManagement() {
 
       const users = await response.json();
 
-      // Apply KYC filter on frontend - FIXED LOGIC
+      // Apply KYC filter on frontend using shared helper
       let filteredUsers = users;
       if (kycFilter !== 'All') {
         filteredUsers = users.filter((user: any) => {
-          const aadhaarVerified = Boolean(user.aadhar_verification_status);
-          const panVerified = Boolean(user.pan_verification_status);
+          const aadhaarVerified = isKycFieldVerified(user.aadhar_verification_status);
+          const panVerified = isKycFieldVerified(user.pan_verification_status);
 
           if (kycFilter === 'Verified') {
             return aadhaarVerified && panVerified;
@@ -60,15 +71,19 @@ export default function UserManagement() {
           return true;
         });
       }
+      
+      console.log('🔍 KYC Filter Applied:', { 
+        totalUsers: users.length, 
+        filteredUsers: filteredUsers.length, 
+        filter: kycFilter 
+      });
 
       setData(filteredUsers);
-      return filteredUsers; // Return data array for AdvancedRealtimeTable
+      return filteredUsers;
     } catch (error) {
       console.error('Error fetching users:', error);
       setHasError(true);
-      return []; // Return empty array on error
-    } finally {
-      setLoading(false);
+      return [];
     }
   };
 
@@ -77,8 +92,8 @@ export default function UserManagement() {
   }, [userTypeFilter, kycFilter]);
 
   const getKycStatus = (user: any): string => {
-    const aadhaarVerified = Boolean(user.aadhar_verification_status);
-    const panVerified = Boolean(user.pan_verification_status);
+    const aadhaarVerified = isKycFieldVerified(user.aadhar_verification_status);
+    const panVerified = isKycFieldVerified(user.pan_verification_status);
 
     if (aadhaarVerified && panVerified) {
       return 'Verified';
@@ -188,20 +203,14 @@ export default function UserManagement() {
       key: 'aadhar_verification_status',
       title: 'KYC Status',
       sortable: true,
-      render: (value: any, row: any) => {
-        const aadhaarVerified = Boolean(row.aadhar_verification_status);
-        const panVerified = Boolean(row.pan_verification_status);
-
-        return getKycStatusBadge({ 
-          aadhar_verification_status: aadhaarVerified, 
-          pan_verification_status: panVerified 
-        });
+      render: (_value: any, row: any) => {
+        return getKycStatusBadge(row);
       }
     },
     {
       key: 'actions',
       title: 'Actions',
-      render: (value: any, row: any) => (
+      render: (_value: any, row: any) => (
         <div className="flex gap-2">
           <button 
             className="px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md" 
@@ -521,7 +530,7 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
   );
 }
 
-// Referral Chain Modal Component
+// Referral Chain Modal Component - PROFESSIONAL REDESIGN
 function ReferralChainModal({ userId, onClose }: { userId: number; onClose: () => void }) {
   const [referralData, setReferralData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -551,44 +560,114 @@ function ReferralChainModal({ userId, onClose }: { userId: number; onClose: () =
     }
   }, [userId]);
 
-  const renderUserNode = (node: any, level: number = 0) => {
-    const bgColors = [
-      'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700',
-      'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700',
-      'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700',
-      'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-700',
-      'bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-700'
+  const getLevelIcon = (level: number) => {
+    const icons = [
+      <Crown className="w-5 h-5" />,
+      <Award className="w-5 h-5" />,
+      <Star className="w-5 h-5" />,
+      <Sparkles className="w-5 h-5" />,
+      <Users className="w-5 h-5" />
     ];
-    const bgColor = bgColors[level % bgColors.length];
+    return icons[Math.min(level, icons.length - 1)];
+  };
+
+  const getLevelGradient = (level: number) => {
+    const gradients = [
+      'from-purple-500 to-pink-600',
+      'from-blue-500 to-cyan-600',
+      'from-green-500 to-emerald-600',
+      'from-orange-500 to-amber-600',
+      'from-indigo-500 to-purple-600'
+    ];
+    return gradients[level % gradients.length];
+  };
+
+  const renderUserNode = (node: any, level: number = 0) => {
+    const gradient = getLevelGradient(level);
+    const hasChildren = node.referred_users && node.referred_users.length > 0;
 
     return (
-      <div key={`${node.UserID}-${level}`} className="mb-4">
-        <div className={`border-2 rounded-lg p-4 ${bgColor}`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-bold text-gray-900 dark:text-white">
-                Level {node.level}: {node.fullname || `User ${node.UserID}`}
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Member ID: {node.member_id || 'N/A'} | Mobile: {node.MobileNumber || 'N/A'}
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Email: {node.Email || 'N/A'}
-              </p>
-            </div>
-            <div className="text-right">
-              <span className={`px-3 py-1 rounded-full text-xs font-bold ${node.prime_status ? 'bg-purple-600 text-white' : 'bg-blue-600 text-white'}`}>
-                {node.prime_status ? 'Prime' : 'Normal'}
-              </span>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                Referrals: {node.referred_count || 0}
-              </p>
+      <div key={`${node.UserID}-${level}`} className="relative">
+        {/* Modern Card Design */}
+        <div className="mb-4">
+          <div className={`bg-gradient-to-br ${gradient} p-[2px] rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]`}>
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-5">
+              <div className="flex items-start gap-4">
+                {/* Level Icon */}
+                <div className={`bg-gradient-to-br ${gradient} p-3 rounded-lg text-white shadow-lg flex-shrink-0`}>
+                  {getLevelIcon(level)}
+                </div>
+
+                {/* User Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h4 className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                      {node.fullname || `User ${node.UserID}`}
+                    </h4>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-md ${
+                      node.prime_status 
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white' 
+                        : 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white'
+                    }`}>
+                      {node.prime_status ? '👑 Prime' : '⭐ Normal'}
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                    <div className="flex items-center gap-2 text-sm">
+                      <UserCheck className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-600 dark:text-gray-400">ID:</span>
+                      <span className="font-mono font-medium text-gray-900 dark:text-white">{node.member_id || 'N/A'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Phone className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-600 dark:text-gray-400">Mobile:</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{node.MobileNumber || 'N/A'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm md:col-span-2">
+                      <Mail className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-600 dark:text-gray-400">Email:</span>
+                      <span className="font-medium text-gray-900 dark:text-white truncate">{node.Email || 'N/A'}</span>
+                    </div>
+                  </div>
+
+                  {/* Stats Bar */}
+                  <div className="flex items-center gap-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center gap-2">
+                      <div className={`bg-gradient-to-r ${gradient} p-2 rounded-lg`}>
+                        <TrendingUp className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Level</p>
+                        <p className="text-sm font-bold text-gray-900 dark:text-white">{node.level}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className={`bg-gradient-to-r ${gradient} p-2 rounded-lg`}>
+                        <Users className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Direct Referrals</p>
+                        <p className="text-sm font-bold text-gray-900 dark:text-white">{node.referred_count || 0}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        {node.referred_users && node.referred_users.length > 0 && (
-          <div className="ml-8 mt-2 border-l-2 border-gray-300 dark:border-gray-600 pl-4">
-            {node.referred_users.map((child: any, idx: number) => renderUserNode(child, level + 1))}
+
+        {/* Children with Visual Tree Structure */}
+        {hasChildren && (
+          <div className="relative ml-8 pl-6 border-l-4 border-gray-300 dark:border-gray-600">
+            <div className="absolute -left-[2px] top-0 w-4 h-4 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full"></div>
+            {node.referred_users.map((child: any, idx: number) => (
+              <div key={`child-${child.UserID}-${idx}`} className="relative">
+                <div className="absolute -left-6 top-8 w-6 h-0.5 bg-gradient-to-r from-purple-500 to-transparent"></div>
+                {renderUserNode(child, level + 1)}
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -597,9 +676,12 @@ function ReferralChainModal({ userId, onClose }: { userId: number; onClose: () =
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-2xl">
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-500"></div>
+            <p className="text-gray-700 dark:text-gray-300 font-medium">Loading Referral Chain...</p>
+          </div>
         </div>
       </div>
     );
@@ -608,34 +690,87 @@ function ReferralChainModal({ userId, onClose }: { userId: number; onClose: () =
   if (!referralData) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-7xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between z-10">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Referral Chain - {referralData.userName}</h2>
-            <div className="flex gap-4 mt-2">
-              <p className="text-sm text-gray-600 dark:text-gray-400">Total Referrals: <span className="font-bold text-purple-600">{referralData.totalReferrals}</span></p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Max Depth: <span className="font-bold text-blue-600">{referralData.maxDepth}</span></p>
+    <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-7xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        {/* Header with Gradient */}
+        <div className="sticky top-0 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 p-6 z-10 rounded-t-2xl">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
+                  <GitBranch className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Referral Network</h2>
+                  <p className="text-purple-100">{referralData.userName}</p>
+                </div>
+              </div>
+              
+              {/* Stats Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Users className="w-4 h-4 text-white" />
+                    <span className="text-xs text-purple-100">Total Referrals</span>
+                  </div>
+                  <p className="text-2xl font-bold text-white">{referralData.totalReferrals}</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <TrendingUp className="w-4 h-4 text-white" />
+                    <span className="text-xs text-purple-100">Network Depth</span>
+                  </div>
+                  <p className="text-2xl font-bold text-white">{referralData.maxDepth}</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 col-span-2 md:col-span-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Award className="w-4 h-4 text-white" />
+                    <span className="text-xs text-purple-100">Network Status</span>
+                  </div>
+                  <p className="text-lg font-bold text-white">
+                    {referralData.totalReferrals > 50 ? '🔥 Elite' : referralData.totalReferrals > 20 ? '⭐ Advanced' : '🌱 Growing'}
+                  </p>
+                </div>
+              </div>
             </div>
+            
+            <button 
+              onClick={onClose} 
+              className="ml-4 p-2 hover:bg-white/20 rounded-lg transition-all duration-200 flex-shrink-0"
+              data-testid="button-close-referral"
+            >
+              <X className="w-6 h-6 text-white" />
+            </button>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-            <X className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-          </button>
         </div>
         
+        {/* Content */}
         <div className="p-6">
-          <Card>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Referral Tree Structure</h3>
-            <div className="space-y-2">
-              {referralData.chain && referralData.chain.length > 0 ? (
-                referralData.chain.map((node: any) => renderUserNode(node, 0))
-              ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  No referral data available for this user.
-                </div>
-              )}
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-4">
+              <GitBranch className="w-5 h-5 text-purple-600" />
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Network Tree Visualization</h3>
             </div>
-          </Card>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
+              Explore the complete referral hierarchy and network structure
+            </p>
+          </div>
+          
+          <div className="space-y-2">
+            {referralData.chain && referralData.chain.length > 0 ? (
+              referralData.chain.map((node: any) => renderUserNode(node, 0))
+            ) : (
+              <div className="text-center py-16">
+                <div className="bg-gray-100 dark:bg-gray-700 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-12 h-12 text-gray-400" />
+                </div>
+                <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">No Referrals Yet</h4>
+                <p className="text-gray-500 dark:text-gray-400">
+                  This user hasn't referred anyone to the network yet.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
