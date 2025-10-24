@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { ChevronUp, ChevronDown, Search, Filter, X, Download, FileText, FileSpreadsheet, FileDown } from 'lucide-react';
 
@@ -21,6 +20,7 @@ interface AdvancedRealtimeTableProps {
   showStats?: boolean;
   enableAnimations?: boolean;
   dataTestId?: string;
+  onRowClick?: (row: any) => void;
 }
 
 export default function AdvancedRealtimeTable({
@@ -34,6 +34,7 @@ export default function AdvancedRealtimeTable({
   showStats = false,
   enableAnimations = false,
   dataTestId = "advanced-table",
+  onRowClick
 }: AdvancedRealtimeTableProps) {
   const [data, setData] = useState(initialData);
   const [sortColumn, setSortColumn] = useState<string>('');
@@ -96,23 +97,23 @@ export default function AdvancedRealtimeTable({
   // DataTables.net style advanced search - searches across ALL fields
   const advancedSearch = (item: any, search: string): boolean => {
     if (!search || search.trim() === '') return true;
-    
+
     const searchLower = search.toLowerCase().trim();
-    
+
     // Search in ALL object values (including nested objects)
     const searchInValue = (value: any): boolean => {
       if (value === null || value === undefined) return false;
-      
+
       // Handle objects recursively
       if (typeof value === 'object') {
         return Object.values(value).some(v => searchInValue(v));
       }
-      
+
       // Convert to string and search
       const stringValue = String(value).toLowerCase();
       return stringValue.includes(searchLower);
     };
-    
+
     // Search through all keys in the item
     return Object.keys(item).some(key => {
       const value = item[key];
@@ -156,22 +157,22 @@ export default function AdvancedRealtimeTable({
       columns.map(col => {
         // Get raw value from data, not rendered HTML
         let value = row[col.key];
-        
+
         // For simple values, use as-is
         if (typeof value === 'string' || typeof value === 'number') {
           return `"${String(value).replace(/"/g, '""')}"`;
         }
-        
+
         // For null/undefined
         if (value === null || value === undefined) {
           return '""';
         }
-        
+
         // For objects/arrays, convert to JSON
         return `"${JSON.stringify(value).replace(/"/g, '""')}"`;
       }).join(',')
     );
-    
+
     const csv = [headers, ...rows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -184,7 +185,7 @@ export default function AdvancedRealtimeTable({
   // Export to Excel - Only visible columns
   const exportToExcel = () => {
     const table = document.createElement('table');
-    
+
     // Create header
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
@@ -200,7 +201,7 @@ export default function AdvancedRealtimeTable({
     });
     thead.appendChild(headerRow);
     table.appendChild(thead);
-    
+
     // Create body - raw data values only
     const tbody = document.createElement('tbody');
     filteredData.forEach(row => {
@@ -209,7 +210,7 @@ export default function AdvancedRealtimeTable({
         const td = document.createElement('td');
         // Get raw value, not rendered HTML
         let value = row[col.key];
-        
+
         if (typeof value === 'string' || typeof value === 'number') {
           td.textContent = String(value);
         } else if (value === null || value === undefined) {
@@ -217,7 +218,7 @@ export default function AdvancedRealtimeTable({
         } else {
           td.textContent = JSON.stringify(value);
         }
-        
+
         td.style.padding = '6px';
         td.style.border = '1px solid #ccc';
         tr.appendChild(td);
@@ -225,7 +226,7 @@ export default function AdvancedRealtimeTable({
       tbody.appendChild(tr);
     });
     table.appendChild(tbody);
-    
+
     // Convert to Excel
     const html = `
       <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
@@ -240,7 +241,7 @@ export default function AdvancedRealtimeTable({
         <body>${table.outerHTML}</body>
       </html>
     `;
-    
+
     const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -253,7 +254,7 @@ export default function AdvancedRealtimeTable({
   const exportToPDF = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
-    
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -319,7 +320,7 @@ export default function AdvancedRealtimeTable({
                     // Get raw value from data
                     let value = row[col.key];
                     let textValue = '';
-                    
+
                     if (typeof value === 'string' || typeof value === 'number') {
                       textValue = String(value);
                     } else if (value === null || value === undefined) {
@@ -327,7 +328,7 @@ export default function AdvancedRealtimeTable({
                     } else {
                       textValue = JSON.stringify(value);
                     }
-                    
+
                     return `<td>${textValue}</td>`;
                   }).join('')}
                 </tr>
@@ -340,10 +341,10 @@ export default function AdvancedRealtimeTable({
         </body>
       </html>
     `;
-    
+
     printWindow.document.write(html);
     printWindow.document.close();
-    
+
     // Trigger print dialog after content loads
     printWindow.onload = () => {
       printWindow.print();
@@ -363,7 +364,7 @@ export default function AdvancedRealtimeTable({
                   Showing: <span className="font-bold text-blue-600 dark:text-blue-400">{filteredData.length}</span> / {data.length}
                 </span>
               )}
-              
+
               {/* Export Dropdown */}
               <div className="relative">
                 <button
@@ -373,7 +374,7 @@ export default function AdvancedRealtimeTable({
                   <Download className="w-4 h-4" />
                   <span className="font-medium">Export</span>
                 </button>
-                
+
                 {showExportMenu && (
                   <>
                     {/* Backdrop */}
@@ -381,7 +382,7 @@ export default function AdvancedRealtimeTable({
                       className="fixed inset-0 z-10" 
                       onClick={() => setShowExportMenu(false)}
                     />
-                    
+
                     {/* Dropdown Menu */}
                     <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-700 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-600 z-20 overflow-hidden">
                       <div className="py-2">
@@ -395,7 +396,7 @@ export default function AdvancedRealtimeTable({
                             <div className="text-xs text-gray-500 dark:text-gray-400">Comma-separated values</div>
                           </div>
                         </button>
-                        
+
                         <button
                           onClick={exportToExcel}
                           className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-green-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors"
@@ -406,7 +407,7 @@ export default function AdvancedRealtimeTable({
                             <div className="text-xs text-gray-500 dark:text-gray-400">Microsoft Excel format</div>
                           </div>
                         </button>
-                        
+
                         <button
                           onClick={exportToPDF}
                           className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-red-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors"
@@ -418,7 +419,7 @@ export default function AdvancedRealtimeTable({
                           </div>
                         </button>
                       </div>
-                      
+
                       <div className="border-t border-gray-200 dark:border-gray-600 px-4 py-2 bg-gray-50 dark:bg-gray-800">
                         <p className="text-xs text-gray-500 dark:text-gray-400">
                           📊 {filteredData.length} records will be exported
@@ -514,7 +515,15 @@ export default function AdvancedRealtimeTable({
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {paginatedData.length > 0 ? (
               paginatedData.map((row, index) => (
-                <tr key={row.id || index} className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 ${enableAnimations ? 'animate-fade-in' : ''}`}>
+                <tr 
+                  key={row.id || index} 
+                  onClick={() => onRowClick && onRowClick(row)}
+                  className={`border-b border-gray-100 dark:border-gray-800 transition-all duration-200 ${
+                    onRowClick ? 'cursor-pointer' : ''
+                  } ${
+                    enableAnimations ? 'hover:bg-blue-50 dark:hover:bg-blue-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                >
                   {columns.map((column) => (
                     <td key={column.key} className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 text-sm text-gray-900 dark:text-gray-100">
                       <div className="truncate">

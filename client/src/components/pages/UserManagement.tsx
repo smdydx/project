@@ -42,12 +42,12 @@ export default function UserManagement() {
 
       const users = await response.json();
 
-      // Apply KYC filter on frontend
+      // Apply KYC filter on frontend - FIXED LOGIC
       let filteredUsers = users;
       if (kycFilter !== 'All') {
         filteredUsers = users.filter((user: any) => {
-          const aadhaarVerified = user.aadhar_verification_status || false;
-          const panVerified = user.pan_verification_status || false;
+          const aadhaarVerified = Boolean(user.aadhar_verification_status);
+          const panVerified = Boolean(user.pan_verification_status);
 
           if (kycFilter === 'Verified') {
             return aadhaarVerified && panVerified;
@@ -180,26 +180,17 @@ export default function UserManagement() {
       key: 'actions',
       title: 'Actions',
       render: (value: any, row: any) => (
-        <div className="flex items-center space-x-2">
-          <button 
-            className="px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md" 
-            title="View Details"
-            onClick={(e) => {
-              e.stopPropagation();
-              setSelectedUserId(row.UserID);
-              setShowUserModal(true);
-            }}
-          >
-            View Details
-          </button>
-          <button 
-            className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200" 
-            title="View Transactions"
-            onClick={() => setLocation(`/users/${row.UserID}/transactions`)}
-          >
-            <Eye className="w-4 h-4" />
-          </button>
-        </div>
+        <button 
+          className="px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md" 
+          title="View KYC Details"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedUserId(row.UserID);
+            setShowUserModal(true);
+          }}
+        >
+          View KYC
+        </button>
       )
     }
   ];
@@ -279,6 +270,7 @@ export default function UserManagement() {
         searchPlaceholder="Search by name, email, mobile, or member ID..."
         showStats={true}
         enableAnimations={true}
+        onRowClick={(row) => setLocation(`/users/${row.UserID}/transactions`)}
       />
 
       {showUserModal && selectedUserId !== null && (
