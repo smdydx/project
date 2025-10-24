@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { 
-  Eye, Ban, CheckCircle, MessageSquare, Phone, Mail, UserCheck, 
-  Shield, Crown, Star, Filter, Download, Search, X, FileText, CreditCard, MapPin
+  Ban, Phone, Mail, 
+  Shield, Crown, Star
 } from 'lucide-react';
 import AdvancedRealtimeTable from '../common/AdvancedRealtimeTable';
 import Card from '../common/Card';
 
 const userTypeOptionsForUsers = ['All', 'Prime', 'Normal'];
+const kycStatusOptions = ['All', 'Verified', 'Partial Verified', 'Not Verified'];
 
 export default function AllUsers() {
   const [userTypeFilter, setUserTypeFilter] = useState('All');
+  const [kycFilter, setKycFilter] = useState('All');
   const [, setLocation] = useLocation();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +30,12 @@ export default function AllUsers() {
       if (userTypeFilter !== 'All') {
         params.append('user_type', userTypeFilter);
       }
+      
+      // KYC filter logic
+      if (kycFilter !== 'All') {
+        params.append('kycverification', kycFilter);
+      }
+      
       params.append('limit', '100');
 
       // Get JWT token from localStorage
@@ -68,29 +76,7 @@ export default function AllUsers() {
 
   useEffect(() => {
     generateRealtimeUsers();
-  }, [userTypeFilter]);
-
-  const getStatusBadge = (status: string) => {
-    const baseClasses = "px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 shadow-lg";
-    switch (status) {
-      case 'Active':
-        return (
-          <span className={`${baseClasses} bg-gradient-to-r from-green-500 to-emerald-600 text-white`}>
-            <CheckCircle className="w-3 h-3" />
-            <span>Active</span>
-          </span>
-        );
-      case 'Blocked':
-        return (
-          <span className={`${baseClasses} bg-gradient-to-r from-red-500 to-pink-600 text-white`}>
-            <Ban className="w-3 h-3" />
-            <span>Blocked</span>
-          </span>
-        );
-      default:
-        return <span className={`${baseClasses} bg-gray-500 text-white`}>{status}</span>;
-    }
-  };
+  }, [userTypeFilter, kycFilter]);
 
   const getUserTypeBadge = (userType: string) => {
     const baseClasses = "px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 shadow-lg";
@@ -199,6 +185,12 @@ export default function AllUsers() {
       render: (value: string) => getUserTypeBadge(value)
     },
     {
+      key: 'kycverification',
+      title: 'KYC Status',
+      sortable: true,
+      render: (value: string) => getVerificationBadge(value)
+    },
+    {
       key: 'DeviceVerified',
       title: 'Device',
       sortable: true,
@@ -219,19 +211,25 @@ export default function AllUsers() {
     {
       key: 'actions',
       title: 'Actions',
-      render: (value: any, row: any) => (
+      render: () => (
         <div className="flex items-center space-x-2">
           <button 
             className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200" 
             title="Send SMS"
-            onClick={() => { /* SMS functionality */ }}
+            onClick={(e) => { 
+              e.stopPropagation();
+              /* SMS functionality */ 
+            }}
           >
             <Phone className="w-4 h-4" />
           </button>
           <button 
             className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-all duration-200" 
             title="Send Email"
-            onClick={() => { /* Email functionality */ }}
+            onClick={(e) => { 
+              e.stopPropagation();
+              /* Email functionality */ 
+            }}
           >
             <Mail className="w-4 h-4" />
           </button>
@@ -294,7 +292,7 @@ export default function AllUsers() {
       </div>
 
       <Card className="hover-lift">
-        <div className="grid grid-cols-1 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>
             <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">User Type Filter</label>
             <select
@@ -305,6 +303,20 @@ export default function AllUsers() {
             >
               {userTypeOptionsForUsers.map(type => (
                 <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">KYC Status Filter</label>
+            <select
+              value={kycFilter}
+              onChange={(e) => setKycFilter(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+              data-testid="filter-kyc-status"
+            >
+              {kycStatusOptions.map(status => (
+                <option key={status} value={status}>{status}</option>
               ))}
             </select>
           </div>
@@ -321,6 +333,10 @@ export default function AllUsers() {
           searchPlaceholder="Search by name, email, or mobile..."
           showStats={true}
           enableAnimations={false}
+          onRowClick={(row) => {
+            console.log('🔍 Navigating to user transactions:', row.UserID);
+            setLocation(`/transactions/user/${row.UserID}`);
+          }}
         />
       ) : (
         <Card>
