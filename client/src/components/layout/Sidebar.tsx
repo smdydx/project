@@ -29,21 +29,22 @@ interface MenuItem {
   path: string;
   label: string;
   icon: any;
+  disabled?: boolean;
 }
 
 const menuItems: MenuItem[] = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/users', label: 'User Management', icon: Users },
   { path: '/transactions', label: 'Transactions', icon: CreditCard },
-  { path: '/loans', label: 'Loan Applications', icon: Banknote },
-  { path: '/services', label: 'Services', icon: Briefcase },
-  { path: '/banners', label: 'App Banners', icon: Image },
-  { path: '/devices', label: 'User Devices', icon: Monitor },
+  { path: '/loans', label: 'Loan Applications', icon: Banknote, disabled: true },
+  { path: '/services', label: 'Services', icon: Briefcase, disabled: true },
+  { path: '/banners', label: 'App Banners', icon: Image, disabled: true },
+  { path: '/devices', label: 'User Devices', icon: Monitor, disabled: true },
   { path: '/model-browser', label: 'Model Browser', icon: Grid3X3 },
-  { path: '/complaints', label: 'Complaints', icon: MessageSquare },
-  { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
-  { path: '/categories', label: 'Service Categories', icon: Grid3X3 },
-  { path: '/reconciliation', label: 'Reconciliation', icon: GitCompare },
+  { path: '/complaints', label: 'Complaints', icon: MessageSquare, disabled: true },
+  { path: '/reports', label: 'Reports & Analytics', icon: BarChart3, disabled: true },
+  { path: '/categories', label: 'Service Categories', icon: Grid3X3, disabled: true },
+  { path: '/reconciliation', label: 'Reconciliation', icon: GitCompare, disabled: true },
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
 
@@ -123,19 +124,38 @@ export default function Sidebar({
 
             return (
               <div key={item.path} className="relative group mb-1">
-                <Link
-                  href={item.path}
-                  onClick={() => {
-                    if (onMobileClose) onMobileClose();
-                  }}
-                  className={`w-full flex items-center text-left transition-all duration-200 rounded-lg relative overflow-hidden ${
-                    isCollapsed ? 'lg:justify-center lg:px-3 lg:py-4' : 'space-x-3 px-3 py-3'
-                  } ${
-                    isActive
-                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-400 shadow-lg'
-                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                >
+                {item.disabled ? (
+                  <div
+                    className={`w-full flex items-center text-left transition-all duration-200 rounded-lg relative overflow-hidden cursor-not-allowed opacity-50 ${
+                      isCollapsed ? 'lg:justify-center lg:px-3 lg:py-4' : 'space-x-3 px-3 py-3'
+                    } text-gray-400 dark:text-gray-600`}
+                  >
+                    <Icon className="flex-shrink-0 w-5 h-5" />
+                    <span className={`font-medium truncate transition-all duration-300 ${
+                      isCollapsed ? 'lg:hidden' : 'block'
+                    }`}>
+                      {item.label}
+                    </span>
+                    {!isCollapsed && (
+                      <span className="ml-auto text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                        Coming Soon
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    href={item.path}
+                    onClick={() => {
+                      if (onMobileClose) onMobileClose();
+                    }}
+                    className={`w-full flex items-center text-left transition-all duration-200 rounded-lg relative overflow-hidden ${
+                      isCollapsed ? 'lg:justify-center lg:px-3 lg:py-4' : 'space-x-3 px-3 py-3'
+                    } ${
+                      isActive
+                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-400 shadow-lg'
+                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
                   {isActive && (
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-r-full"></div>
                   )}
@@ -145,14 +165,15 @@ export default function Sidebar({
                   }`} />
 
                   <span className={`font-medium truncate transition-all duration-300 ${
-                    isCollapsed ? 'lg:hidden' : 'block'
-                  }`}>
-                    {item.label}
-                  </span>
-                </Link>
+                      isCollapsed ? 'lg:hidden' : 'block'
+                    }`}>
+                      {item.label}
+                    </span>
+                  </Link>
+                )}
 
                 {/* Tooltip for collapsed state */}
-                {isCollapsed && (
+                {isCollapsed && !item.disabled && (
                   <div className="hidden lg:group-hover:block absolute left-full top-1/2 transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg shadow-lg whitespace-nowrap z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     {item.label}
                     <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45"></div>

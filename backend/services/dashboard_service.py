@@ -263,6 +263,8 @@ class DashboardService:
 
     @staticmethod
     def get_chart_data(db: Session):
+        from models.service_request import Service_Request
+        
         last_7_days = [
             datetime.now().date() - timedelta(days=i)
             for i in range(6, -1, -1)
@@ -270,33 +272,35 @@ class DashboardService:
 
         daily_volume = []
         for day in last_7_days:
-            # Use Payment_Gateway for transaction counts
+            # Get from Service_Request table (main source)
+            sr_count = db.query(Service_Request).filter(
+                func.date(Service_Request.created_at) == day,
+                Service_Request.status.in_(['completed', 'paid', 'success'])
+            ).count()
+            
+            sr_amount = db.query(
+                func.coalesce(func.sum(Service_Request.amount), 0)
+            ).filter(
+                func.date(Service_Request.created_at) == day,
+                Service_Request.status.in_(['completed', 'paid', 'success'])
+            ).scalar() or 0
+            
+            # Also check Payment_Gateway
             pg_count = db.query(Payment_Gateway).filter(
-                func.date(Payment_Gateway.created_at) == day
+                func.date(Payment_Gateway.created_at) == day,
+                Payment_Gateway.status == 'SUCCESS'
             ).count()
             
             pg_amount = db.query(
                 func.coalesce(func.sum(cast(Payment_Gateway.amount, Numeric)), 0)
             ).filter(
-                func.date(Payment_Gateway.created_at) == day
+                func.date(Payment_Gateway.created_at) == day,
+                Payment_Gateway.status == 'SUCCESS'
             ).scalar() or 0
             
-            # Also check Transactions table
-            txn_count = db.query(Transactions).filter(
-                func.date(Transactions.CreatedAt) == day,
-                or_(Transactions.IsDeleted == False, Transactions.IsDeleted == None)
-            ).count()
-            
-            txn_amount = db.query(
-                func.coalesce(func.sum(Transactions.Amount), 0)
-            ).filter(
-                func.date(Transactions.CreatedAt) == day,
-                or_(Transactions.IsDeleted == False, Transactions.IsDeleted == None)
-            ).scalar() or 0
-            
-            # Combine both sources
-            total_count = pg_count + txn_count
-            total_amount = float(pg_amount) + float(txn_amount)
+            # Use whichever has more data
+            total_count = max(sr_count, pg_count)
+            total_amount = max(float(sr_amount), float(pg_amount))
             
             daily_volume.append({
                 "name": day.strftime("%b %d"),
@@ -304,53 +308,67 @@ class DashboardService:
                 "amount": round(total_amount, 2)
             })
         
-        # Service distribution from Payment_Gateway
-        pg_services = db.query(
-            Payment_Gateway.purpose,
-            func.count(Payment_Gateway.id).label('count')
+        # Service distribution from Service_Request (PRIMARY SOURCE)
+        service_data = db.query(
+            Service_Request.service_type,
+            func.count(Service_Request.id).label('count')
         ).filter(
-            Payment_Gateway.purpose.isnot(None)
-        ).group_by(Payment_Gateway.purpose).all()
+            Service_Request.service_type.isnot(None),
+            Service_Request.status.in_(['completed', 'paid', 'success'])
+        ).group_by(Service_Request.service_type).all()
         
-        # Also get from Transactions
-        txn_services = db.query(
-            Transactions.TransactionType,
-            func.count(Transactions.TransactionID).label('count')
-        ).filter(
-            or_(Transactions.IsDeleted == False, Transactions.IsDeleted == None),
-            Transactions.TransactionType.isnot(None)
-        ).group_by(Transactions.TransactionType).all()
+        # Categorize services properly
+        service_categories = {
+            'Mobile Recharge': 0,
+            'Prime Activation': 0,
+            'DTH Service': 0,
+            'BBPS Bill Payment': 0,
+            'Other Services': 0
+        }
         
-        # Merge service data
-        service_map = {}
-        for service, count in pg_services:
-            service_name = service if service else "Other"
-            service_map[service_name] = service_map.get(service_name, 0) + count
+        for service_type, count in service_data:
+            service_lower = service_type.lower() if service_type else ""
             
-        for service, count in txn_services:
-            service_name = service if service else "Other"
-            service_map[service_name] = service_map.get(service_name, 0) + count
+            if 'mobile' in service_lower and 'recharge' in service_lower:
+                service_categories['Mobile Recharge'] += count
+            elif 'prime' in service_lower:
+                service_categories['Prime Activation'] += count
+            elif 'dth' in service_lower:
+                service_categories['DTH Service'] += count
+            elif 'bbps' in service_lower or 'bill' in service_lower:
+                service_categories['BBPS Bill Payment'] += count
+            else:
+                service_categories['Other Services'] += count
         
         # Calculate total for percentage
-        total_services = sum(service_map.values())
+        total_services = sum(service_categories.values())
         
-        colors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"]
+        colors = {
+            'Mobile Recharge': '#3b82f6',      # Blue
+            'Prime Activation': '#10b981',     # Green
+            'DTH Service': '#f59e0b',          # Orange
+            'BBPS Bill Payment': '#ef4444',    # Red
+            'Other Services': '#8b5cf6'        # Purple
+        }
+        
         service_distribution = []
         
         if total_services > 0:
-            for i, (service_name, count) in enumerate(service_map.items()):
-                percentage = (count / total_services) * 100
-                service_distribution.append({
-                    "name": service_name,
-                    "value": round(percentage, 1),
-                    "color": colors[i % len(colors)]
-                })
+            for service_name, count in service_categories.items():
+                if count > 0:  # Only show services with transactions
+                    percentage = (count / total_services) * 100
+                    service_distribution.append({
+                        "name": service_name,
+                        "value": round(percentage, 1),
+                        "color": colors[service_name]
+                    })
         else:
             service_distribution = [{"name": "No Data", "value": 0, "color": "#9ca3af"}]
 
         print(f"📈 Chart Data Debug:")
         print(f"   Daily Volume Days: {len(daily_volume)}")
         print(f"   Daily Volume Data: {daily_volume}")
+        print(f"   Service Categories: {service_categories}")
         print(f"   Service Distribution: {len(service_distribution)} services")
         print(f"   Service Distribution Data: {service_distribution}")
 
