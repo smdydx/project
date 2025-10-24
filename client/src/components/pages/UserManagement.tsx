@@ -184,10 +184,18 @@ export default function UserManagement() {
       render: (value: string) => getUserTypeBadge(value)
     },
     {
-      key: 'kycStatus',
+      key: 'aadhar_verification_status',
       title: 'KYC Status',
       sortable: true,
-      render: (value: any, row: any) => getKycStatusBadge(row)
+      render: (value: any, row: any) => {
+        const aadhaarVerified = Boolean(row.aadhar_verification_status);
+        const panVerified = Boolean(row.pan_verification_status);
+        
+        return getKycStatusBadge({ 
+          aadhar_verification_status: aadhaarVerified, 
+          pan_verification_status: panVerified 
+        });
+      }
     }
   ];
 
