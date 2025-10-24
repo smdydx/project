@@ -15,10 +15,11 @@ router = APIRouter(tags=["users"])
 async def get_all_users(
     current_user: TokenData = Depends(get_current_user),
     user_type: Optional[str] = Query(None, description="Filter by Prime or Normal"),
+    kyc_status: Optional[str] = Query(None, description="Filter by KYC status"),
     limit: int = Query(100, le=500),
     db: Session = Depends(get_db)
 ):
-    """Get all users with Prime/Normal filter only (NO KYC status column)"""
+    """Get all users with Prime/Normal and KYC status filters"""
     try:
         query = db.query(User).filter(User.IsDeleted == False)
 
@@ -28,6 +29,27 @@ async def get_all_users(
                 query = query.filter(User.prime_status == True)
             elif user_type == 'Normal' or user_type == 'Normal User':
                 query = query.filter(User.prime_status == False)
+
+        # KYC Status Filter
+        if kyc_status and kyc_status.lower() not in ['all', 'none', '']:
+            if kyc_status.lower() == 'verified':
+                query = query.filter(
+                    User.aadhar_verification_status == True,
+                    User.pan_verification_status == True
+                )
+            elif kyc_status.lower() == 'partially verified' or kyc_status.lower() == 'partial verified':
+                from sqlalchemy import or_, and_
+                query = query.filter(
+                    or_(
+                        and_(User.aadhar_verification_status == True, User.pan_verification_status == False),
+                        and_(User.aadhar_verification_status == False, User.pan_verification_status == True)
+                    )
+                )
+            elif kyc_status.lower() == 'not verified':
+                query = query.filter(
+                    User.aadhar_verification_status == False,
+                    User.pan_verification_status == False
+                )
 
         users = query.order_by(desc(User.CreatedAt)).limit(limit).all()
 
@@ -63,7 +85,9 @@ async def get_all_users(
                 "RewardWalletBalance": float(user.RewardWalletBalance) if user.RewardWalletBalance else 0,
                 "CreatedAt": user.CreatedAt.isoformat() if user.CreatedAt else None,
                 "UpdatedAt": user.UpdatedAt.isoformat() if user.UpdatedAt else None,
-                "prime_activation_date": user.prime_activation_date.isoformat() if user.prime_activation_date else None
+                "prime_activation_date": user.prime_activation_date.isoformat() if user.prime_activation_date else None,
+                "aadhar_verification_status": bool(user.aadhar_verification_status) if user.aadhar_verification_status is not None else False,
+                "pan_verification_status": bool(user.pan_verification_status) if user.pan_verification_status is not None else False
             })
 
         return result

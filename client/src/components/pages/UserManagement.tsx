@@ -67,6 +67,12 @@ export default function UserManagement() {
       if (userTypeFilter !== 'All') {
         params.append('user_type', userTypeFilter);
       }
+      
+      // Add KYC filter to API call
+      if (kycFilter !== 'All') {
+        params.append('kyc_status', kycFilter);
+      }
+      
       params.append('limit', '500');
 
       const response = await fetch(`${API_URL}/api/v1/users/all?${params}`, { headers });
@@ -75,50 +81,14 @@ export default function UserManagement() {
       const users = await response.json();
       
       console.log('📊 Users received from API:', users.length);
-      if (users.length > 0) {
-        console.log('🔍 Sample user data:', {
-          aadhar_status: users[0].aadhar_verification_status,
-          pan_status: users[0].pan_verification_status,
-          aadhar_type: typeof users[0].aadhar_verification_status,
-          pan_type: typeof users[0].pan_verification_status
-        });
-      }
-
-      // Apply KYC filter on frontend using shared helper
-      let filteredUsers = users;
-      if (kycFilter !== 'All') {
-        filteredUsers = users.filter((user: any) => {
-          // More robust checking with explicit null/undefined handling
-          const aadhaarVerified = isKycFieldVerified(user.aadhar_verification_status);
-          const panVerified = isKycFieldVerified(user.pan_verification_status);
-
-          console.log(`User ${user.UserID}:`, {
-            aadhar_raw: user.aadhar_verification_status,
-            pan_raw: user.pan_verification_status,
-            aadhar_verified: aadhaarVerified,
-            pan_verified: panVerified
-          });
-
-          if (kycFilter === 'Verified') {
-            return aadhaarVerified && panVerified;
-          } else if (kycFilter === 'Partially Verified') {
-            return (aadhaarVerified && !panVerified) || (!aadhaarVerified && panVerified);
-          } else if (kycFilter === 'Not Verified') {
-            return !aadhaarVerified && !panVerified;
-          }
-          return true;
-        });
-      }
-      
-      console.log('✅ KYC Filter Applied:', { 
+      console.log('✅ Backend KYC Filter Applied:', { 
         totalUsers: users.length, 
-        filteredUsers: filteredUsers.length, 
         filter: kycFilter,
         filterActive: kycFilter !== 'All'
       });
 
-      setData(filteredUsers);
-      return filteredUsers;
+      setData(users);
+      return users;
     } catch (error) {
       console.error('Error fetching users:', error);
       setHasError(true);
