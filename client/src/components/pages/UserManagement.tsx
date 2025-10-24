@@ -61,9 +61,11 @@ export default function UserManagement() {
       }
 
       setData(filteredUsers);
+      return filteredUsers; // Return data array for AdvancedRealtimeTable
     } catch (error) {
       console.error('Error fetching users:', error);
       setHasError(true);
+      return []; // Return empty array on error
     } finally {
       setLoading(false);
     }
