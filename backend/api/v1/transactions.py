@@ -12,6 +12,47 @@ from models.service_request import Service_Request
 
 router = APIRouter(tags=["transactions"])
 
+@router.get("/detail/{reference_id}")
+async def get_transaction_detail(
+    reference_id: str,
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get detailed transaction info including LCR money and rewards"""
+    try:
+        from models.service_request import ServiceRequest
+        
+        # Try to find in service_request table
+        service_req = db.query(ServiceRequest).filter(
+            ServiceRequest.reference_id == reference_id
+        ).first()
+        
+        if service_req:
+            return {
+                "reference_id": reference_id,
+                "service_type": service_req.service_name or "N/A",
+                "amount": float(service_req.amount) if service_req.amount else 0,
+                "lcr_money": float(service_req.lcr_money) if hasattr(service_req, 'lcr_money') and service_req.lcr_money else 0,
+                "lcr_reward": float(service_req.lcr_reward) if hasattr(service_req, 'lcr_reward') and service_req.lcr_reward else 0,
+                "money_status": "Credited" if service_req.status in ['Completed', 'Paid'] else "Pending",
+                "reward_status": "Credited" if service_req.status in ['Completed', 'Paid'] else "Pending",
+                "status": service_req.status
+            }
+        
+        # If not found, return basic info
+        return {
+            "reference_id": reference_id,
+            "service_type": "N/A",
+            "amount": 0,
+            "lcr_money": 0,
+            "lcr_reward": 0,
+            "money_status": "N/A",
+            "reward_status": "N/A"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/service-types")
 async def get_service_types(

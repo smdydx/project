@@ -562,15 +562,15 @@ function ReferralChainModal({ userId, onClose }: { userId: number; onClose: () =
     const bgColor = bgColors[level % bgColors.length];
 
     return (
-      <div key={node.UserID} className="mb-4">
+      <div key={`${node.UserID}-${level}`} className="mb-4">
         <div className={`border-2 rounded-lg p-4 ${bgColor}`}>
           <div className="flex items-center justify-between">
             <div>
               <p className="font-bold text-gray-900 dark:text-white">
-                Level {node.level}: {node.fullname}
+                Level {node.level}: {node.fullname || `User ${node.UserID}`}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Member ID: {node.member_id} | Mobile: {node.MobileNumber}
+                Member ID: {node.member_id || 'N/A'} | Mobile: {node.MobileNumber || 'N/A'}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Email: {node.Email || 'N/A'}
@@ -581,14 +581,14 @@ function ReferralChainModal({ userId, onClose }: { userId: number; onClose: () =
                 {node.prime_status ? 'Prime' : 'Normal'}
               </span>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                Referrals: {node.referred_count}
+                Referrals: {node.referred_count || 0}
               </p>
             </div>
           </div>
         </div>
         {node.referred_users && node.referred_users.length > 0 && (
           <div className="ml-8 mt-2 border-l-2 border-gray-300 dark:border-gray-600 pl-4">
-            {node.referred_users.map((child: any) => renderUserNode(child, level + 1))}
+            {node.referred_users.map((child: any, idx: number) => renderUserNode(child, level + 1))}
           </div>
         )}
       </div>

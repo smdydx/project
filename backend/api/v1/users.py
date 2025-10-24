@@ -174,8 +174,8 @@ async def get_user_detail(
             "IsKYCCompleted": user.IsKYCCompleted,
 
             # Verification Status
-            "aadhar_verification_status": user.aadhar_verification_status,
-            "pan_verification_status": user.pan_verification_status,
+            "aadhar_verification_status": bool(user.aadhar_verification_status),
+            "pan_verification_status": bool(user.pan_verification_status),
             "email_verification_status": user.email_verification_status,
 
             # Dates
