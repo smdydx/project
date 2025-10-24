@@ -13,13 +13,33 @@ const kycStatusOptions = ['All', 'Verified', 'Partially Verified', 'Not Verified
 
 // Shared helper to normalize KYC field values
 const isKycFieldVerified = (fieldValue: any): boolean => {
-  if (fieldValue === null || fieldValue === undefined) return false;
-  if (typeof fieldValue === 'boolean') return fieldValue;
-  if (typeof fieldValue === 'number') return fieldValue === 1;
+  // Explicit null/undefined check
+  if (fieldValue === null || fieldValue === undefined) {
+    console.log('❌ Field is null/undefined');
+    return false;
+  }
+  
+  // Boolean check
+  if (typeof fieldValue === 'boolean') {
+    console.log('✅ Boolean value:', fieldValue);
+    return fieldValue;
+  }
+  
+  // Number check (1 = verified, 0 = not verified)
+  if (typeof fieldValue === 'number') {
+    console.log('✅ Number value:', fieldValue);
+    return fieldValue === 1;
+  }
+  
+  // String check
   if (typeof fieldValue === 'string') {
     const normalized = fieldValue.toLowerCase().trim();
-    return normalized === 'true' || normalized === 'verified' || normalized === '1';
+    const isVerified = normalized === 'true' || normalized === 'verified' || normalized === '1';
+    console.log('✅ String value:', fieldValue, '-> verified:', isVerified);
+    return isVerified;
   }
+  
+  console.log('❌ Unknown type:', typeof fieldValue, fieldValue);
   return false;
 };
 
@@ -53,13 +73,31 @@ export default function UserManagement() {
       if (!response.ok) throw new Error('Failed to fetch users');
 
       const users = await response.json();
+      
+      console.log('📊 Users received from API:', users.length);
+      if (users.length > 0) {
+        console.log('🔍 Sample user data:', {
+          aadhar_status: users[0].aadhar_verification_status,
+          pan_status: users[0].pan_verification_status,
+          aadhar_type: typeof users[0].aadhar_verification_status,
+          pan_type: typeof users[0].pan_verification_status
+        });
+      }
 
       // Apply KYC filter on frontend using shared helper
       let filteredUsers = users;
       if (kycFilter !== 'All') {
         filteredUsers = users.filter((user: any) => {
+          // More robust checking with explicit null/undefined handling
           const aadhaarVerified = isKycFieldVerified(user.aadhar_verification_status);
           const panVerified = isKycFieldVerified(user.pan_verification_status);
+
+          console.log(`User ${user.UserID}:`, {
+            aadhar_raw: user.aadhar_verification_status,
+            pan_raw: user.pan_verification_status,
+            aadhar_verified: aadhaarVerified,
+            pan_verified: panVerified
+          });
 
           if (kycFilter === 'Verified') {
             return aadhaarVerified && panVerified;
@@ -72,10 +110,11 @@ export default function UserManagement() {
         });
       }
       
-      console.log('🔍 KYC Filter Applied:', { 
+      console.log('✅ KYC Filter Applied:', { 
         totalUsers: users.length, 
         filteredUsers: filteredUsers.length, 
-        filter: kycFilter 
+        filter: kycFilter,
+        filterActive: kycFilter !== 'All'
       });
 
       setData(filteredUsers);
