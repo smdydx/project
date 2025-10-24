@@ -1,0 +1,79 @@
+TransactionDetailModal.tsx:26  GET http://0.0.0.0:8000/api/v1/transactions/detail/20251016150731667195 500 (Internal Server Error)
+fetchDetails @ TransactionDetailModal.tsx:26
+(anonymous) @ TransactionDetailModal.tsx:48
+commitHookEffectListMount @ react-dom_client.js?v=45b67be5:16915
+commitPassiveMountOnFiber @ react-dom_client.js?v=45b67be5:18161
+commitPassiveMountEffects_complete @ react-dom_client.js?v=45b67be5:18129
+commitPassiveMountEffects_begin @ react-dom_client.js?v=45b67be5:18119
+commitPassiveMountEffects @ react-dom_client.js?v=45b67be5:18109
+flushPassiveEffectsImpl @ react-dom_client.js?v=45b67be5:19490
+flushPassiveEffects @ react-dom_client.js?v=45b67be5:19447
+commitRootImpl @ react-dom_client.js?v=45b67be5:19416
+commitRoot @ react-dom_client.js?v=45b67be5:19277
+performSyncWorkOnRoot @ react-dom_client.js?v=45b67be5:18895
+flushSyncCallbacks @ react-dom_client.js?v=45b67be5:9119
+(anonymous) @ react-dom_client.js?v=45b67be5:18627Understand this error
+TransactionDetailModal.tsx:32 ❌ API Error: 500 Internal Server Error
+fetchDetails @ TransactionDetailModal.tsx:32
+await in fetchDetails
+(anonymous) @ TransactionDetailModal.tsx:48
+commitHookEffectListMount @ react-dom_client.js?v=45b67be5:16915
+commitPassiveMountOnFiber @ react-dom_client.js?v=45b67be5:18161
+commitPassiveMountEffects_complete @ react-dom_client.js?v=45b67be5:18129
+commitPassiveMountEffects_begin @ react-dom_client.js?v=45b67be5:18119
+commitPassiveMountEffects @ react-dom_client.js?v=45b67be5:18109
+flushPassiveEffectsImpl @ react-dom_client.js?v=45b67be5:19490
+flushPassiveEffects @ react-dom_client.js?v=45b67be5:19447
+commitRootImpl @ react-dom_client.js?v=45b67be5:19416
+commitRoot @ react-dom_client.js?v=45b67be5:19277
+performSyncWorkOnRoot @ react-dom_client.js?v=45b67be5:18895
+flushSyncCallbacks @ react-dom_client.js?v=45b67be5:9119
+(anonymous) @ react-dom_client.js?v=45b67be5:18627Understand this error
+TransactionDetailModal.tsx:40 ❌ Error fetching transaction details: Error: Failed to fetch transaction details
+    at fetchDetails (TransactionDetailModal.tsx:33:17)
+fetchDetails @ TransactionDetailModal.tsx:40
+await in fetchDetails
+(anonymous) @ TransactionDetailModal.tsx:48
+commitHookEffectListMount @ react-dom_client.js?v=45b67be5:16915
+commitPassiveMountOnFiber @ react-dom_client.js?v=45b67be5:18161
+commitPassiveMountEffects_complete @ react-dom_client.js?v=45b67be5:18129
+commitPassiveMountEffects_begin @ react-dom_client.js?v=45b67be5:18119
+commitPassiveMountEffects @ react-dom_client.js?v=45b67be5:18109
+flushPassiveEffectsImpl @ react-dom_client.js?v=45b67be5:19490
+flushPassiveEffects @ react-dom_client.js?v=45b67be5:19447
+commitRootImpl @ react-dom_client.js?v=45b67be5:19416
+commitRoot @ react-dom_client.js?v=45b67be5:19277
+performSyncWorkOnRoot @ react-dom_client.js?v=45b67be5:18895
+flushSyncCallbacks @ react-dom_client.js?v=45b67be5:9119
+(anonymous) @ react-dom_client.js?v=45b67be5:18627Understand this error
+TransactionDetailModal.tsx:26  GET http://0.0.0.0:8000/api/v1/transactions/detail/20251016150731667195 500 (Internal Server Error)
+fetchDetails @ TransactionDetailModal.tsx:26
+(anonymous) @ TransactionDetailModal.tsx:48
+commitHookEffectListMount @ react-dom_client.js?v=45b67be5:16915
+invokePassiveEffectMountInDEV @ react-dom_client.js?v=45b67be5:18324
+invokeEffectsInDev @ react-dom_client.js?v=45b67be5:19701
+commitDoubleInvokeEffectsInDEV @ react-dom_client.js?v=45b67be5:19686
+flushPassiveEffectsImpl @ react-dom_client.js?v=45b67be5:19503
+flushPassiveEffects @ react-dom_client.js?v=45b67be5:19447
+commitRootImpl @ react-dom_client.js?v=45b67be5:19416
+commitRoot @ react-dom_client.js?v=45b67be5:19277
+performSyncWorkOnRoot @ react-dom_client.js?v=45b67be5:18895
+flushSyncCallbacks @ react-dom_client.js?v=45b67be5:9119
+(anonymous) @ react-dom_client.js?v=45b67be5:18627Understand this error
+TransactionDetailModal.tsx:32 ❌ API Error: 500 Internal Server Error
+fetchDetails @ TransactionDetailModal.tsx:32
+await in fetchDetails
+(anonymous) @ TransactionDetailModal.tsx:48
+commitHookEffectListMount @ react-dom_client.js?v=45b67be5:16915
+invokePassiveEffectMountInDEV @ react-dom_client.js?v=45b67be5:18324
+invokeEffectsInDev @ react-dom_client.js?v=45b67be5:19701
+commitDoubleInvokeEffectsInDEV @ react-dom_client.js?v=45b67be5:19686
+flushPassiveEffectsImpl @ react-dom_client.js?v=45b67be5:19503
+flushPassiveEffects @ react-dom_client.js?v=45b67be5:19447
+commitRootImpl @ react-dom_client.js?v=45b67be5:19416
+commitRoot @ react-dom_client.js?v=45b67be5:19277
+performSyncWorkOnRoot @ react-dom_client.js?v=45b67be5:18895
+flushSyncCallbacks @ react-dom_client.js?v=45b67be5:9119
+(anonymous) @ react-dom_client.js?v=45b67be5:18627Understand this error
+TransactionDetailModal.tsx:40 ❌ Error fetching transaction details: Error: Failed to fetch transaction details
+    at fetchDetails (TransactionDetailModal.tsx:33:17)
