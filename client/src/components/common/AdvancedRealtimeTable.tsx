@@ -516,12 +516,17 @@ export default function AdvancedRealtimeTable({
             {paginatedData.length > 0 ? (
               paginatedData.map((row, index) => (
                 <tr 
-                  key={row.id || index} 
-                  onClick={() => onRowClick && onRowClick(row)}
+                  key={row.id || row.UserID || index} 
+                  onClick={(e) => {
+                    if (onRowClick) {
+                      e.stopPropagation();
+                      onRowClick(row);
+                    }
+                  }}
                   className={`border-b border-gray-100 dark:border-gray-800 transition-all duration-200 ${
-                    onRowClick ? 'cursor-pointer' : ''
+                    onRowClick ? 'cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:shadow-md' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                   } ${
-                    enableAnimations ? 'hover:bg-blue-50 dark:hover:bg-blue-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                    enableAnimations ? 'transform hover:scale-[1.01]' : ''
                   }`}
                 >
                   {columns.map((column) => (

@@ -73,20 +73,31 @@ export default function UserManagement() {
     fetchUsers();
   }, [userTypeFilter, kycFilter]);
 
-  const getKycStatusBadge = (user: any) => {
-    const aadhaarVerified = user.aadhar_verification_status || false;
-    const panVerified = user.pan_verification_status || false;
-
-    const baseClasses = "px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 shadow-lg";
+  const getKycStatus = (user: any): string => {
+    const aadhaarVerified = Boolean(user.aadhar_verification_status);
+    const panVerified = Boolean(user.pan_verification_status);
 
     if (aadhaarVerified && panVerified) {
+      return 'Verified';
+    } else if (aadhaarVerified || panVerified) {
+      return 'Partially Verified';
+    } else {
+      return 'Not Verified';
+    }
+  };
+
+  const getKycStatusBadge = (user: any) => {
+    const status = getKycStatus(user);
+    const baseClasses = "px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 shadow-lg";
+
+    if (status === 'Verified') {
       return (
         <span className={`${baseClasses} bg-gradient-to-r from-green-500 to-emerald-600 text-white`}>
           <Shield className="w-3 h-3" />
           <span>Verified</span>
         </span>
       );
-    } else if (aadhaarVerified || panVerified) {
+    } else if (status === 'Partially Verified') {
       return (
         <span className={`${baseClasses} bg-gradient-to-r from-yellow-500 to-orange-600 text-white`}>
           <Shield className="w-3 h-3" />
@@ -175,23 +186,6 @@ export default function UserManagement() {
       title: 'KYC Status',
       sortable: true,
       render: (value: any, row: any) => getKycStatusBadge(row)
-    },
-    {
-      key: 'actions',
-      title: 'Actions',
-      render: (value: any, row: any) => (
-        <button 
-          className="px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md" 
-          title="View KYC Details"
-          onClick={(e) => {
-            e.stopPropagation();
-            setSelectedUserId(row.UserID);
-            setShowUserModal(true);
-          }}
-        >
-          View KYC
-        </button>
-      )
     }
   ];
 
@@ -270,7 +264,10 @@ export default function UserManagement() {
         searchPlaceholder="Search by name, email, mobile, or member ID..."
         showStats={true}
         enableAnimations={true}
-        onRowClick={(row) => setLocation(`/users/${row.UserID}/transactions`)}
+        onRowClick={(row) => {
+          console.log('Row clicked:', row);
+          setLocation(`/transactions?userId=${row.UserID}&name=${encodeURIComponent(row.fullname)}&mobile=${row.MobileNumber}`);
+        }}
       />
 
       {showUserModal && selectedUserId !== null && (

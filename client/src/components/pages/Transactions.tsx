@@ -15,6 +15,12 @@ export default function Transactions() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedReferenceId, setSelectedReferenceId] = useState<string | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  
+  // Get URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const userIdParam = urlParams.get('userId');
+  const userName = urlParams.get('name');
+  const userMobile = urlParams.get('mobile');
 
   const fetchTransactions = async () => {
     try {
@@ -48,7 +54,17 @@ export default function Transactions() {
       const response = await fetch(`${API_URL}${endpoint}?${params.toString()}`, { headers });
       if (!response.ok) throw new Error('Failed to fetch transactions');
 
-      const data = await response.json();
+      let data = await response.json();
+      
+      // Filter by user name or mobile if URL params exist
+      if (userName || userMobile) {
+        data = data.filter((txn: any) => {
+          const matchesName = userName ? (txn.name && txn.name.toLowerCase().includes(userName.toLowerCase())) : true;
+          const matchesMobile = userMobile ? (txn.mobile_number && txn.mobile_number.includes(userMobile)) : true;
+          return matchesName && matchesMobile;
+        });
+      }
+      
       setTransactions(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load transactions');
@@ -178,9 +194,14 @@ export default function Transactions() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
             <Activity className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-            All Transactions
+            {userName ? `Transactions - ${userName}` : 'All Transactions'}
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Unified view of all service transactions</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
+            {userName || userMobile 
+              ? `Showing transactions for ${userName || 'user'} ${userMobile ? `(${userMobile})` : ''}`
+              : 'Unified view of all service transactions'
+            }
+          </p>
         </div>
       </div>
 
