@@ -301,7 +301,7 @@ class DashboardService:
             daily_volume.append({
                 "name": day.strftime("%b %d"),
                 "transactions": total_count,
-                "amount": total_amount
+                "amount": round(total_amount, 2)
             })
         
         # Service distribution from Payment_Gateway
@@ -331,23 +331,30 @@ class DashboardService:
             service_name = service if service else "Other"
             service_map[service_name] = service_map.get(service_name, 0) + count
         
-        colors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"]
-        service_distribution = [
-            {
-                "name": service_name,
-                "value": float(count),
-                "color": colors[i % len(colors)]
-            }
-            for i, (service_name, count) in enumerate(service_map.items())
-        ]
+        # Calculate total for percentage
+        total_services = sum(service_map.values())
+        
+        colors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"]
+        service_distribution = []
+        
+        if total_services > 0:
+            for i, (service_name, count) in enumerate(service_map.items()):
+                percentage = (count / total_services) * 100
+                service_distribution.append({
+                    "name": service_name,
+                    "value": round(percentage, 1),
+                    "color": colors[i % len(colors)]
+                })
+        else:
+            service_distribution = [{"name": "No Data", "value": 0, "color": "#9ca3af"}]
 
         print(f"📈 Chart Data Debug:")
         print(f"   Daily Volume Days: {len(daily_volume)}")
+        print(f"   Daily Volume Data: {daily_volume}")
         print(f"   Service Distribution: {len(service_distribution)} services")
+        print(f"   Service Distribution Data: {service_distribution}")
 
         return {
             "daily_volume": daily_volume,
-            "service_distribution": service_distribution if service_distribution else [
-                {"name": "No Data", "value": 0, "color": "#9ca3af"}
-            ]
+            "service_distribution": service_distribution
         }

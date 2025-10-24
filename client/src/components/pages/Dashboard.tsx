@@ -370,40 +370,53 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Daily Transaction Volume Chart */}
         <Card
-          title="📊 Daily Transaction Volume & Service Distribution"
+          title="📊 Daily Transaction Volume"
           data-testid="chart-daily-volume"
         >
           <div className="space-y-6">
             <div>
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
-                Daily Transaction Volume
+                Last 7 Days Transaction Activity
               </h4>
-              <div className="space-y-3">
-                {charts?.dailyVolume?.map((day: any, index: number) => (
-                  <div
-                    key={index}
-                    className="flex items-center space-x-3 p-2"
-                    data-testid={`chart-day-${day.name}`}
-                  >
-                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400 w-12">
-                      {day.name}
-                    </span>
-                    <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 overflow-hidden">
+              {charts?.daily_volume && charts.daily_volume.length > 0 ? (
+                <div className="space-y-3">
+                  {charts.daily_volume.map((day: any, index: number) => {
+                    const maxTransactions = Math.max(...charts.daily_volume.map((d: any) => d.transactions), 1);
+                    const widthPercent = (day.transactions / maxTransactions) * 100;
+                    
+                    return (
                       <div
-                        className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-end pr-2"
-                        style={{ width: `${(day.transactions / 3100) * 100}%` }}
+                        key={index}
+                        className="flex items-center space-x-3 p-2"
+                        data-testid={`chart-day-${day.name}`}
                       >
-                        <span className="text-xs font-bold text-white">
-                          {day.transactions}
+                        <span className="text-xs font-medium text-gray-600 dark:text-gray-400 w-16">
+                          {day.name}
+                        </span>
+                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-8 overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-end pr-2 transition-all duration-500"
+                            style={{ width: `${widthPercent}%` }}
+                          >
+                            {day.transactions > 0 && (
+                              <span className="text-xs font-bold text-white">
+                                {day.transactions}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <span className="text-xs font-semibold text-green-600 dark:text-green-400 w-24 text-right">
+                          ₹{day.amount >= 1000 ? `${(day.amount / 1000).toFixed(1)}k` : day.amount.toFixed(0)}
                         </span>
                       </div>
-                    </div>
-                    <span className="text-xs font-semibold text-green-600 dark:text-green-400 w-24 text-right">
-                      ₹{(day.amount / 1000).toFixed(0)}k
-                    </span>
-                  </div>
-                ))}
-              </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <p>No transaction data available</p>
+                </div>
+              )}
             </div>
           </div>
         </Card>
@@ -413,31 +426,42 @@ export default function Dashboard() {
           title="🎯 Service Distribution"
           data-testid="chart-service-distribution"
         >
-          <div className="space-y-3">
-            {charts?.serviceDistribution?.map((service: any, index: number) => (
-              <div
-                key={index}
-                className="flex items-center space-x-3 p-2"
-                data-testid={`service-${service.name}`}
-              >
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 w-24">
-                  {service.name}
-                </span>
-                <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 overflow-hidden">
+          <div className="space-y-4">
+            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              Transaction Distribution by Service Type
+            </h4>
+            {charts?.service_distribution && charts.service_distribution.length > 0 && charts.service_distribution[0].name !== "No Data" ? (
+              <div className="space-y-3">
+                {charts.service_distribution.map((service: any, index: number) => (
                   <div
-                    className="h-full rounded-full flex items-center justify-end pr-2"
-                    style={{
-                      width: `${(service.value / 35) * 100}%`,
-                      background: service.color,
-                    }}
+                    key={index}
+                    className="flex items-center space-x-3 p-2"
+                    data-testid={`service-${service.name}`}
                   >
-                    <span className="text-xs font-bold text-white">
-                      {service.value}%
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 w-32 truncate" title={service.name}>
+                      {service.name}
                     </span>
+                    <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-8 overflow-hidden">
+                      <div
+                        className="h-full rounded-full flex items-center justify-end pr-2 transition-all duration-500"
+                        style={{
+                          width: `${service.value}%`,
+                          background: service.color,
+                        }}
+                      >
+                        <span className="text-xs font-bold text-white">
+                          {service.value}%
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <p>No service distribution data available</p>
+              </div>
+            )}
           </div>
         </Card>
       </div>

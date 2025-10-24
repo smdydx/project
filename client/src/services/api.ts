@@ -39,14 +39,14 @@ class ApiService {
     try {
       // Get token from localStorage
       const token = localStorage.getItem('access_token');
-      
+
       const headers: Record<string, string> = {
         'Accept': 'application/json',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0'
       };
-      
+
       // Add Authorization header if token exists
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -54,7 +54,7 @@ class ApiService {
       } else {
         console.warn('⚠️ No token found in localStorage');
       }
-      
+
       const response = await fetch(url, {
         signal: controller.signal,
         headers
@@ -70,10 +70,10 @@ class ApiService {
         window.location.href = '/login';
         throw new Error('Authentication failed - Please login again');
       }
-      
+
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
-      
+
       console.log(`✅ Fresh data fetched from: ${url}`, data);
       return data;
     } catch (error) {
@@ -88,8 +88,20 @@ class ApiService {
     return this.fetchFreshData(`${this.baseUrl}/api/v1/dashboard/stats`);
   }
 
-  async getChartData() {
-    return this.fetchFreshData(`${this.baseUrl}/api/v1/dashboard/charts`);
+  async getChartData(): Promise<any> {
+    try {
+      const response = await this.fetchFreshData(`${this.baseUrl}/api/v1/dashboard/charts`);
+      console.log('📊 Charts API response:', response);
+
+      // Backend returns daily_volume and service_distribution
+      return {
+        daily_volume: response?.daily_volume || [],
+        service_distribution: response?.service_distribution || []
+      };
+    } catch (error) {
+      console.error('Error fetching chart data:', error);
+      return { daily_volume: [], service_distribution: [] };
+    }
   }
 
   // Transactions - NO CACHE
