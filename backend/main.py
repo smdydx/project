@@ -10,8 +10,9 @@ from core.base import Base
 # Import all models to register them with Base
 import models
 
-# Import referral router
+# Import all routers
 from api.v1 import auth, users, transactions, kyc, dashboard, payment_gateway, auto_crud, websocket, referral
+from api.v1.auto_crud import create_auto_crud_routers, get_models_list
 
 # Create all database tables with proper error handling
 try:
