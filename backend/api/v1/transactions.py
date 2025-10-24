@@ -18,40 +18,65 @@ async def get_transaction_detail(
     current_user: TokenData = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Get detailed transaction info including LCR money and rewards"""
+    """Get detailed transaction info including LCR money and rewards by reference_id"""
     try:
+        # Import models
         from models.service_request import ServiceRequest
+        from models.models import LcrMoney, LcrRewards
         
-        # Try to find in service_request table
-        service_req = db.query(ServiceRequest).filter(
-            ServiceRequest.reference_id == reference_id
+        print(f"🔍 Searching for reference_id: {reference_id}")
+        
+        # Find service request by reference_id
+        service_req = db.query(Service_Request).filter(
+            Service_Request.reference_id == reference_id
         ).first()
         
-        if service_req:
+        if not service_req:
+            print(f"⚠️ No service request found for reference_id: {reference_id}")
             return {
                 "reference_id": reference_id,
-                "service_type": service_req.service_name or "N/A",
-                "amount": float(service_req.amount) if service_req.amount else 0,
-                "lcr_money": float(service_req.lcr_money) if hasattr(service_req, 'lcr_money') and service_req.lcr_money else 0,
-                "lcr_reward": float(service_req.lcr_reward) if hasattr(service_req, 'lcr_reward') and service_req.lcr_reward else 0,
-                "money_status": "Credited" if service_req.status in ['Completed', 'Paid'] else "Pending",
-                "reward_status": "Credited" if service_req.status in ['Completed', 'Paid'] else "Pending",
-                "status": service_req.status
+                "service_type": "N/A",
+                "amount": 0,
+                "lcr_money": 0,
+                "lcr_reward": 0,
+                "money_status": "Not Found",
+                "reward_status": "Not Found",
+                "status": "Not Found"
             }
         
-        # If not found, return basic info
+        print(f"✅ Found service request: ID={service_req.id}, Status={service_req.status}")
+        
+        # Get LCR Money total for this reference_id
+        lcr_money_total = db.query(func.sum(LcrMoney.amount)).filter(
+            LcrMoney.reference_id == reference_id
+        ).scalar() or Decimal('0.00')
+        
+        # Get LCR Rewards total for this reference_id
+        lcr_reward_total = db.query(func.sum(LcrRewards.amount)).filter(
+            LcrRewards.reference_id == reference_id
+        ).scalar() or Decimal('0.00')
+        
+        print(f"💰 LCR Money Total: {lcr_money_total}, LCR Reward Total: {lcr_reward_total}")
+        
+        # Determine status based on service request status
+        is_completed = service_req.status.lower() in ['completed', 'paid', 'success']
+        
         return {
             "reference_id": reference_id,
-            "service_type": "N/A",
-            "amount": 0,
-            "lcr_money": 0,
-            "lcr_reward": 0,
-            "money_status": "N/A",
-            "reward_status": "N/A"
+            "service_type": service_req.service_type or "N/A",
+            "amount": float(service_req.amount) if service_req.amount else 0,
+            "lcr_money": float(lcr_money_total),
+            "lcr_reward": float(lcr_reward_total),
+            "money_status": "Credited" if is_completed else "Pending",
+            "reward_status": "Credited" if is_completed else "Pending",
+            "status": service_req.status
         }
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"❌ Error in get_transaction_detail: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 @router.get("/service-types")
