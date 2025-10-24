@@ -51,10 +51,13 @@ export default function Transactions() {
         params.append('status', statusFilter.toLowerCase());
       }
 
+      console.log('📡 Fetching from endpoint:', `${API_URL}${endpoint}?${params.toString()}`);
       const response = await fetch(`${API_URL}${endpoint}?${params.toString()}`, { headers });
       if (!response.ok) throw new Error('Failed to fetch transactions');
 
       let data = await response.json();
+      console.log('✅ Transactions received:', data.length, 'records');
+      console.log('📋 First transaction sample:', data[0]);
       
       // Filter by user name or mobile if URL params exist
       if (userName || userMobile) {
@@ -159,12 +162,24 @@ export default function Transactions() {
       render: (value: any, row: any) => (
         <button
           onClick={() => {
-            console.log('🔍 View More clicked for reference_id:', row.reference_id);
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+              console.error('❌ No token found - redirecting to login');
+              localStorage.clear();
+              window.location.href = '/login';
+              return;
+            }
+            
+            console.log('🔍 View More clicked. Full row data:', row);
+            console.log('🔍 Reference ID check:', row.reference_id);
+            
             if (!row.reference_id) {
               console.error('❌ No reference_id found in row:', row);
               alert('Reference ID not available for this transaction');
               return;
             }
+            
+            console.log('✅ Opening detail modal for:', row.reference_id);
             setSelectedReferenceId(row.reference_id);
             setShowDetailModal(true);
           }}
@@ -269,10 +284,25 @@ export default function Transactions() {
         <TransactionDetailModal
           referenceId={selectedReferenceId}
           onClose={() => {
+            console.log('🔒 Closing detail modal');
             setShowDetailModal(false);
             setSelectedReferenceId(null);
           }}
         />
+      )}
+      
+      {showDetailModal && !selectedReferenceId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
+            <p className="text-red-500">Error: No reference ID selected</p>
+            <button
+              onClick={() => setShowDetailModal(false)}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg"
+            >
+              Close
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
