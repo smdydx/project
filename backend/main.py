@@ -57,10 +57,9 @@ app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboar
 app.include_router(kyc.router, prefix="/api/v1/kyc", tags=["kyc"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
 app.include_router(transactions.router, prefix="/api/v1/transactions", tags=["transactions"])
-# Removed test router - not used in production
-# app.include_router(test.router, prefix="/api/v1/test", tags=["test"])
 app.include_router(websocket.router, prefix="/api/v1/ws")
-app.include_router(referral.router, prefix="/api/v1/users")
+# Referral routes are included under users prefix
+app.include_router(referral.router, prefix="/api/v1/users", tags=["referral"])
 
 
 # Auto-generate CRUD endpoints for all models

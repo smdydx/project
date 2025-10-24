@@ -521,7 +521,7 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
   );
 }
 
-// Referral Chain Modal Component (Placeholder)
+// Referral Chain Modal Component
 function ReferralChainModal({ userId, onClose }: { userId: number; onClose: () => void }) {
   const [referralData, setReferralData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -551,6 +551,50 @@ function ReferralChainModal({ userId, onClose }: { userId: number; onClose: () =
     }
   }, [userId]);
 
+  const renderUserNode = (node: any, level: number = 0) => {
+    const bgColors = [
+      'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700',
+      'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700',
+      'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700',
+      'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-700',
+      'bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-700'
+    ];
+    const bgColor = bgColors[level % bgColors.length];
+
+    return (
+      <div key={node.UserID} className="mb-4">
+        <div className={`border-2 rounded-lg p-4 ${bgColor}`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-bold text-gray-900 dark:text-white">
+                Level {node.level}: {node.fullname}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Member ID: {node.member_id} | Mobile: {node.MobileNumber}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Email: {node.Email || 'N/A'}
+              </p>
+            </div>
+            <div className="text-right">
+              <span className={`px-3 py-1 rounded-full text-xs font-bold ${node.prime_status ? 'bg-purple-600 text-white' : 'bg-blue-600 text-white'}`}>
+                {node.prime_status ? 'Prime' : 'Normal'}
+              </span>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                Referrals: {node.referred_count}
+              </p>
+            </div>
+          </div>
+        </div>
+        {node.referred_users && node.referred_users.length > 0 && (
+          <div className="ml-8 mt-2 border-l-2 border-gray-300 dark:border-gray-600 pl-4">
+            {node.referred_users.map((child: any) => renderUserNode(child, level + 1))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -568,8 +612,11 @@ function ReferralChainModal({ userId, onClose }: { userId: number; onClose: () =
       <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-7xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between z-10">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Referral Chain for {referralData.userName}</h2>
-            <p className="text-gray-600 dark:text-gray-400">Total Referrals: {referralData.totalReferrals}</p>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Referral Chain - {referralData.userName}</h2>
+            <div className="flex gap-4 mt-2">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total Referrals: <span className="font-bold text-purple-600">{referralData.totalReferrals}</span></p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Max Depth: <span className="font-bold text-blue-600">{referralData.maxDepth}</span></p>
+            </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
             <X className="w-6 h-6 text-gray-600 dark:text-gray-400" />
@@ -577,18 +624,15 @@ function ReferralChainModal({ userId, onClose }: { userId: number; onClose: () =
         </div>
         
         <div className="p-6">
-          {/* Placeholder for Referral Chain visualization. 
-              This could be a tree structure, a list, or a graph.
-              For now, displaying raw data for demonstration. */}
           <Card>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Referral Tree</h3>
-            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg overflow-x-auto">
-              {referralData.chain.length > 0 ? (
-                <pre className="text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
-                  {JSON.stringify(referralData.chain, null, 2)}
-                </pre>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Referral Tree Structure</h3>
+            <div className="space-y-2">
+              {referralData.chain && referralData.chain.length > 0 ? (
+                referralData.chain.map((node: any) => renderUserNode(node, 0))
               ) : (
-                <p className="text-gray-500 dark:text-gray-400">No referral data available.</p>
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  No referral data available for this user.
+                </div>
               )}
             </div>
           </Card>

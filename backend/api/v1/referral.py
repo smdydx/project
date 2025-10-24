@@ -40,7 +40,7 @@ def build_referral_tree(user: User, db: Session, current_level: int = 0, max_dep
     
     return user_data
 
-@router.get("/referral-chain/{user_id}")
+@router.get("/{user_id}/referral-chain")
 async def get_referral_chain(
     user_id: int,
     current_user: TokenData = Depends(get_current_user),
@@ -76,9 +76,10 @@ async def get_referral_chain(
         max_depth = get_max_depth(referral_tree)
         
         return {
-            "parent": referral_tree,
-            "total_referrals": total_referrals,
-            "max_depth": max_depth
+            "userName": user.fullname or f"User {user.UserID}",
+            "totalReferrals": total_referrals,
+            "maxDepth": max_depth,
+            "chain": [referral_tree]
         }
     
     except HTTPException:
