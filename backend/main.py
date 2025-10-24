@@ -10,6 +10,9 @@ from core.base import Base
 # Import all models to register them with Base
 import models
 
+# Import referral router
+from api.v1 import auth, users, transactions, kyc, dashboard, payment_gateway, auto_crud, websocket, referral
+
 # Create all database tables with proper error handling
 try:
     Base.metadata.create_all(bind=engine)
@@ -49,9 +52,6 @@ os.makedirs(settings.UPLOAD_FOLDER, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_FOLDER), name="uploads")
 
 # Include API routes
-from api.v1 import auth, users, dashboard, transactions, websocket, kyc, auto_crud, payment_gateway
-from api.v1.auto_crud import create_auto_crud_routers, get_models_list
-
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["authentication"])
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
 app.include_router(kyc.router, prefix="/api/v1/kyc", tags=["kyc"])
@@ -59,7 +59,9 @@ app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
 app.include_router(transactions.router, prefix="/api/v1/transactions", tags=["transactions"])
 # Removed test router - not used in production
 # app.include_router(test.router, prefix="/api/v1/test", tags=["test"])
-app.include_router(websocket.router, tags=["websocket"])
+app.include_router(websocket.router, prefix="/api/v1/ws")
+app.include_router(referral.router, prefix="/api/v1/users")
+
 
 # Auto-generate CRUD endpoints for all models
 crud_routers = create_auto_crud_routers()

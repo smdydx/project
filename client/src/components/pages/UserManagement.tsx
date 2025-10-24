@@ -19,6 +19,7 @@ export default function UserManagement() {
   const [hasError, setHasError] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [showReferralModal, setShowReferralModal] = useState(false); // State for Referral Chain Modal
 
   const fetchUsers = async () => {
     try {
@@ -190,12 +191,42 @@ export default function UserManagement() {
       render: (value: any, row: any) => {
         const aadhaarVerified = Boolean(row.aadhar_verification_status);
         const panVerified = Boolean(row.pan_verification_status);
-        
+
         return getKycStatusBadge({ 
           aadhar_verification_status: aadhaarVerified, 
           pan_verification_status: panVerified 
         });
       }
+    },
+    {
+      key: 'actions',
+      title: 'Actions',
+      render: (value: any, row: any) => (
+        <div className="flex gap-2">
+          <button 
+            className="px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md" 
+            title="View User Details"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedUserId(row.UserID);
+              setShowUserModal(true);
+            }}
+          >
+            View More
+          </button>
+          <button 
+            className="px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md" 
+            title="View Referral Chain"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedUserId(row.UserID);
+              setShowReferralModal(true);
+            }}
+          >
+            Referral Chain
+          </button>
+        </div>
+      )
     }
   ];
 
@@ -287,6 +318,16 @@ export default function UserManagement() {
             setShowUserModal(false);
             setSelectedUserId(null);
           }} 
+        />
+      )}
+
+      {showReferralModal && selectedUserId !== null && (
+        <ReferralChainModal 
+          userId={selectedUserId}
+          onClose={() => {
+            setShowReferralModal(false);
+            setSelectedUserId(null);
+          }}
         />
       )}
     </div>
@@ -474,6 +515,83 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
               </div>
             </Card>
           )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Referral Chain Modal Component (Placeholder)
+function ReferralChainModal({ userId, onClose }: { userId: number; onClose: () => void }) {
+  const [referralData, setReferralData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReferralChain = async () => {
+      try {
+        setLoading(true);
+        const API_URL = import.meta.env.VITE_API_URL || 'http://0.0.0.0:8000';
+        const token = localStorage.getItem('access_token');
+        const headers: HeadersInit = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        const response = await fetch(`${API_URL}/api/v1/users/${userId}/referral-chain`, { headers });
+        if (!response.ok) throw new Error('Failed to fetch referral chain');
+        const data = await response.json();
+        setReferralData(data);
+      } catch (error) {
+        console.error('Error fetching referral chain:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (userId) {
+      fetchReferralChain();
+    }
+  }, [userId]);
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!referralData) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-7xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between z-10">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Referral Chain for {referralData.userName}</h2>
+            <p className="text-gray-600 dark:text-gray-400">Total Referrals: {referralData.totalReferrals}</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+            <X className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+          </button>
+        </div>
+        
+        <div className="p-6">
+          {/* Placeholder for Referral Chain visualization. 
+              This could be a tree structure, a list, or a graph.
+              For now, displaying raw data for demonstration. */}
+          <Card>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Referral Tree</h3>
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg overflow-x-auto">
+              {referralData.chain.length > 0 ? (
+                <pre className="text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+                  {JSON.stringify(referralData.chain, null, 2)}
+                </pre>
+              ) : (
+                <p className="text-gray-500 dark:text-gray-400">No referral data available.</p>
+              )}
+            </div>
+          </Card>
         </div>
       </div>
     </div>

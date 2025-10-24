@@ -160,10 +160,10 @@ export default function Transactions() {
             setSelectedReferenceId(row.reference_id);
             setShowDetailModal(true);
           }}
-          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors group"
-          title="View Details"
+          className="px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+          title="View LCR Money & Rewards"
         >
-          <Eye className="w-4 h-4 text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
+          View More
         </button>
       )
     },
