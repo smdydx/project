@@ -66,8 +66,10 @@ export default function Transactions() {
       }
       
       setTransactions(data);
+      return data;
     } catch (err: any) {
       setError(err.message || 'Failed to load transactions');
+      return [];
     } finally {
       setLoading(false);
     }
@@ -157,6 +159,12 @@ export default function Transactions() {
       render: (value: any, row: any) => (
         <button
           onClick={() => {
+            console.log('🔍 View More clicked for reference_id:', row.reference_id);
+            if (!row.reference_id) {
+              console.error('❌ No reference_id found in row:', row);
+              alert('Reference ID not available for this transaction');
+              return;
+            }
             setSelectedReferenceId(row.reference_id);
             setShowDetailModal(true);
           }}
@@ -246,7 +254,10 @@ export default function Transactions() {
           title="Transaction History"
           columns={columns}
           data={transactions}
-          onDataUpdate={fetchTransactions}
+          onDataUpdate={async () => {
+            const data = await fetchTransactions();
+            return data || [];
+          }}
           updateInterval={10000}
           searchPlaceholder="Search by reference ID, mobile, or service type..."
           showStats={true}

@@ -22,16 +22,23 @@ export default function TransactionDetailModal({ referenceId, onClose }: Transac
           headers['Authorization'] = `Bearer ${token}`;
         }
 
+        console.log('🔍 Fetching transaction details for reference_id:', referenceId);
         const response = await fetch(
           `${API_URL}/api/v1/transactions/detail/${referenceId}`,
           { headers }
         );
 
-        if (!response.ok) throw new Error('Failed to fetch transaction details');
+        if (!response.ok) {
+          console.error('❌ API Error:', response.status, response.statusText);
+          throw new Error('Failed to fetch transaction details');
+        }
+        
         const data = await response.json();
+        console.log('✅ Transaction details received:', data);
         setDetails(data);
       } catch (error) {
-        console.error('Error fetching transaction details:', error);
+        console.error('❌ Error fetching transaction details:', error);
+        setDetails(null);
       } finally {
         setLoading(false);
       }
