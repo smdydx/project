@@ -20,10 +20,6 @@ async def get_transaction_detail(
 ):
     """Get detailed transaction info including LCR money and rewards by reference_id"""
     try:
-        # Import models
-        from models.service_request import ServiceRequest
-        from models.models import LcrMoney, LcrRewards
-        
         print(f"🔍 Searching for reference_id: {reference_id}")
         
         # Find service request by reference_id
