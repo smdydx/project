@@ -11,22 +11,12 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
-  ChevronUp,
-  Smartphone,
-  Tv,
-  UserCheck,
-  UserPlus,
-  Shield,
   Banknote,
-  Wallet,
   Briefcase,
   Image,
-  Monitor,
-  Activity
+  Monitor
 } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
-import { useState } from 'react';
 
 interface SidebarProps {
   isMobileOpen?: boolean;
@@ -39,7 +29,6 @@ interface MenuItem {
   path: string;
   label: string;
   icon: any;
-  subMenu?: { path: string; label: string; icon: any }[];
 }
 
 const menuItems: MenuItem[] = [
@@ -65,33 +54,6 @@ export default function Sidebar({
   onToggleCollapse
 }: SidebarProps) {
   const [location] = useLocation();
-  const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
-  const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null); // State to manage active submenu
-
-  const toggleSubMenu = (path: string) => {
-    setExpandedMenus(prev => 
-      prev.includes(path) 
-        ? prev.filter(p => p !== path)
-        : [...prev, path]
-    );
-  };
-
-  // Helper function to determine navigation item class
-  const getNavItemClass = (path: string) => {
-    const isActive = location === path;
-    return `flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
-      isActive
-        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
-        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-    }`;
-  };
-
-  // Helper function for navigation
-  const handleNavigation = (path: string) => {
-    if (onMobileClose) onMobileClose();
-    // Use Link from wouter, which handles navigation
-    // This function is called from onClick handlers within Link components or buttons acting as links
-  };
 
   return (
     <>
@@ -157,112 +119,37 @@ export default function Sidebar({
         }`}>
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location === item.path || (item.subMenu && item.subMenu.some(sub => location === sub.path));
-            const isExpanded = expandedMenus.includes(item.path);
-            const hasSubMenu = item.subMenu && item.subMenu.length > 0;
+            const isActive = location === item.path;
 
             return (
               <div key={item.path} className="relative group mb-1">
-                {hasSubMenu ? (
-                  <>
-                    <button
-                      onClick={() => {
-                        toggleSubMenu(item.path);
-                        setActiveSubmenu(activeSubmenu === item.path ? null : item.path);
-                      }}
-                      className={`w-full flex items-center justify-between text-left transition-all duration-200 rounded-lg relative overflow-hidden ${
-                        isCollapsed ? 'lg:justify-center lg:px-3 lg:py-4' : 'px-3 py-3'
-                      } ${
-                        isActive
-                          ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-400 shadow-lg'
-                          : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
-                      }`}
-                    >
-                      {isActive && (
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-r-full"></div>
-                      )}
+                <Link
+                  href={item.path}
+                  onClick={() => {
+                    if (onMobileClose) onMobileClose();
+                  }}
+                  className={`w-full flex items-center text-left transition-all duration-200 rounded-lg relative overflow-hidden ${
+                    isCollapsed ? 'lg:justify-center lg:px-3 lg:py-4' : 'space-x-3 px-3 py-3'
+                  } ${
+                    isActive
+                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-400 shadow-lg'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  {isActive && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-r-full"></div>
+                  )}
 
-                      <div className={`flex items-center ${isCollapsed ? 'lg:justify-center' : 'space-x-3'}`}>
-                        <Icon className={`flex-shrink-0 transition-all duration-200 ${
-                          isActive ? 'w-6 h-6' : 'w-5 h-5'
-                        }`} />
+                  <Icon className={`flex-shrink-0 transition-all duration-200 ${
+                    isActive ? 'w-6 h-6' : 'w-5 h-5'
+                  }`} />
 
-                        <span className={`font-medium truncate transition-all duration-300 ${
-                          isCollapsed ? 'lg:hidden' : 'block'
-                        }`}>
-                          {item.label}
-                        </span>
-                      </div>
-
-                      {!isCollapsed && (
-                        <div className="ml-2">
-                          {isExpanded ? (
-                            <ChevronUp className="w-4 h-4" />
-                          ) : (
-                            <ChevronDown className="w-4 h-4" />
-                          )}
-                        </div>
-                      )}
-                    </button>
-
-                    {/* Sub Menu */}
-                    {isExpanded && !isCollapsed && (
-                      <div className="ml-8 mt-1 space-y-1">
-                        {item.subMenu.map((subItem) => {
-                          const SubIcon = subItem.icon;
-                          const isSubActive = location === subItem.path;
-                          return (
-                            <Link
-                              key={subItem.path}
-                              href={subItem.path}
-                              onClick={() => {
-                                handleNavigation(subItem.path);
-                                if (onMobileClose) onMobileClose();
-                              }}
-                              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
-                                isSubActive
-                                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium'
-                                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                              }`}
-                            >
-                              <SubIcon className="w-4 h-4 flex-shrink-0" />
-                              <span>{subItem.label}</span>
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <Link
-                    href={item.path}
-                    onClick={() => {
-                      handleNavigation(item.path);
-                      if (onMobileClose) onMobileClose();
-                    }}
-                    className={`w-full flex items-center text-left transition-all duration-200 rounded-lg relative overflow-hidden ${
-                      isCollapsed ? 'lg:justify-center lg:px-3 lg:py-4' : 'space-x-3 px-3 py-3'
-                    } ${
-                      isActive
-                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-400 shadow-lg'
-                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
-                    }`}
-                  >
-                    {isActive && (
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-r-full"></div>
-                    )}
-
-                    <Icon className={`flex-shrink-0 transition-all duration-200 ${
-                      isActive ? 'w-6 h-6' : 'w-5 h-5'
-                    }`} />
-
-                    <span className={`font-medium truncate transition-all duration-300 ${
-                      isCollapsed ? 'lg:hidden' : 'block'
-                    }`}>
-                      {item.label}
-                    </span>
-                  </Link>
-                )}
+                  <span className={`font-medium truncate transition-all duration-300 ${
+                    isCollapsed ? 'lg:hidden' : 'block'
+                  }`}>
+                    {item.label}
+                  </span>
+                </Link>
 
                 {/* Tooltip for collapsed state */}
                 {isCollapsed && (
